@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<module xmlns="urn:jboss:module:1.1" name="com.amadeus.${project.artifactId}">
+	<resources>
+		<resource-root path="${project.build.finalName}-shaded.jar"/>
+	</resources>
+    <dependencies>
+        <module name="javax.api"/>
+        <module name="javax.servlet.api"/>
+        <module name="sun.jdk"/>
+        <module name="org.apache.log4j"/>
+    </dependencies>
+</module>

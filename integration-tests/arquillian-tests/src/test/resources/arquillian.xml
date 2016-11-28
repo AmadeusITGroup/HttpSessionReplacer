@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<arquillian xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://jboss.org/schema/arquillian"
+	xsi:schemaLocation="http://jboss.org/schema/arquillian http://www.jboss.org/schema/arquillian/arquillian_1_0.xsd">
+
+	<container qualifier="tomcat-6-managed-arquillian">
+		<configuration>
+			<property name="user">arquillian</property>
+			<property name="pass">arquillian</property>
+			<property name="javaVmArguments">-Xmx512m -XX:MaxPermSize=128m -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false</property>
+		</configuration>
+	</container>
+	<container qualifier="tomcat-6-managed-arquillian-with-agent">
+		<configuration>
+			<property name="user">arquillian</property>
+			<property name="pass">arquillian</property>
+			<property name="javaVmArguments">-Xmx512m -XX:MaxPermSize=128m -javaagent:${agent.location}=interceptListeners=true -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false</property>
+		</configuration>
+	</container>
+	<container qualifier="tomcat-7-managed-arquillian-with-agent">
+		<configuration>
+			<property name="user">arquillian</property>
+			<property name="pass">arquillian</property>
+			<property name="javaVmArguments">-Xmx512m -XX:MaxPermSize=128m -javaagent:${agent.location}=interceptListeners=true -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false</property>
+		</configuration>
+	</container>
+	<container qualifier="wildfly-10-managed-arquillian-with-agent">
+		<configuration>
+			<property name="javaVmArguments">-Xmx512m -XX:MaxPermSize=128m -javaagent:${agent.location}=interceptListeners=true</property>
+		</configuration>
+	</container>
+</arquillian>
