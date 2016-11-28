@@ -1,3 +1,5 @@
+[![Travis](https://secure.travis-ci.org/AmadeusITGroup/HttpSessionReplacer.png)](http://travis-ci.org/AmadeusITGroup/HttpSessionReplacer)
+
 # HTTP Session Replacement
 
 This project provides session management including, possibly, distributed
