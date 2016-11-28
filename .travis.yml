@@ -3,13 +3,8 @@ language: java
 jdk:
   - oraclejdk8
 
-sudo: required
-
-services:
-  - docker
-
-script:
-  - mvn -B install 
+script: mvn verify
+#  - mvn -B install 
 #  - mvn -B verify -Pjetty-9-embedded-arquillian,arquillian-tests --projects session-replacement
 #  - mvn -B verify -Pwildfly-10-managed-arquillian,arquillian-tests --projects session-replacement
 # Disable tomcat 7
@@ -19,7 +14,7 @@ script:
 #  - mvn -B verify -Ptest-intercept-listeners --projects integration-tests/agent-tests
 
     # Run redis tests 
-  - mvn -B verify -Predis-single,coverage-per-test --projects session-replacement
-  - mvn -B verify -Predis-sentinel,coverage-per-test -Duse_docker_host=true --projects session-replacement
+#  - mvn -B verify -Predis-single,coverage-per-test --projects session-replacement
+#  - mvn -B verify -Predis-sentinel,coverage-per-test -Duse_docker_host=true --projects session-replacement
 
 #  - mvn -B verify -Pwildfly-10-managed-arquillian-with-agent,external-arquillian-tests --projects integration-tests/arquillian-tests
