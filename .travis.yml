@@ -4,6 +4,9 @@ jdk:
   - oraclejdk8
 
 script: mvn verify
+
+after_success:
+  - mvn sonar:sonar -Dsonar.host.url=https://sonarqube.com -Dsonar.login=c4413d4d747e1ed14436cf66d18eaf101f175efe  
 #  - mvn -B install 
 #  - mvn -B verify -Pjetty-9-embedded-arquillian,arquillian-tests --projects session-replacement
 #  - mvn -B verify -Pwildfly-10-managed-arquillian,arquillian-tests --projects session-replacement

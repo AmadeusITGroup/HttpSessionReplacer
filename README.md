@@ -1,4 +1,5 @@
 [![Travis](https://secure.travis-ci.org/AmadeusITGroup/HttpSessionReplacer.png)](http://travis-ci.org/AmadeusITGroup/HttpSessionReplacer)
+[![license](https://img.shields.io/github/license/AmadeusITGroup/HttpSessionReplacer.svg)]()
 
 # HTTP Session Replacement
 
