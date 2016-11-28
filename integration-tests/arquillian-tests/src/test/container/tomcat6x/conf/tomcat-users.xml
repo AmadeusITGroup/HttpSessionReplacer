@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<tomcat-users>
+	<role rolename="manager" />
+	<role rolename="manager-gui" />
+	<role rolename="manager-script" />
+	<role rolename="manager-jmx" />
+	<role rolename="manager-status" />
+	<role rolename="admin-gui" />
+	<role rolename="admin-script" />
+
+	<user username="admin" password="admin"
+		roles="manager, manager-gui, manager-script, manager-jmx, manager-status, admin-gui, admin-script" />
+	<user username="arquillian" password="arquillian"
+		roles="manager, manager-gui, manager-script, manager-jmx, manager-status, admin-gui, admin-script" />
+	<user username="null" password="null"
+		roles="manager-gui, manager-script, manager-jmx, manager-status, admin-gui, admin-script" />
+</tomcat-users>

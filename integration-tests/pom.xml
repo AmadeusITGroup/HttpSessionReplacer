@@ -1,0 +1,26 @@
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.amadeus.session</groupId>
+	<artifactId>integration-tests</artifactId>
+	<parent>
+		<groupId>com.amadeus</groupId>
+		<artifactId>session</artifactId>
+		<version>0.2-SNAPSHOT</version>
+	</parent>
+	<packaging>pom</packaging>
+	<name>integration-tests</name>
+	<description>Various integration tests.</description>
+	<modules>
+		<module>agent-tests</module>
+	</modules>
+	<profiles>
+		<profile>
+			<id>external-arquillian-tests</id>
+			<modules>
+				<module>arquillian-tests</module>
+			</modules>
+		</profile>
+	</profiles>
+</project>
