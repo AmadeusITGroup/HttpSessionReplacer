@@ -10,16 +10,16 @@ services:
 
 script:
   - mvn -B install 
-  - mvn -B verify -Pjetty-9-embedded-arquillian,arquillian-tests --projects session-replacement
-  - mvn -B verify -Pwildfly-10-managed-arquillian,arquillian-tests --projects session-replacement
+#  - mvn -B verify -Pjetty-9-embedded-arquillian,arquillian-tests --projects session-replacement
+#  - mvn -B verify -Pwildfly-10-managed-arquillian,arquillian-tests --projects session-replacement
 # Disable tomcat 7
 # - mvn -B verify -Ptomcat-7-embedded-arquillian,coverage-per-test,arquillian-tests --projects session-replacement
 
-  - mvn -B verify -Ptest-instrumentation --projects integration-tests/agent-tests
-  - mvn -B verify -Ptest-intercept-listeners --projects integration-tests/agent-tests
+#  - mvn -B verify -Ptest-instrumentation --projects integration-tests/agent-tests
+#  - mvn -B verify -Ptest-intercept-listeners --projects integration-tests/agent-tests
 
     # Run redis tests 
-  - mvn -B -U -X verify -Predis-single,coverage-per-test --projects session-replacement
+  - mvn -B verify -Predis-single,coverage-per-test --projects session-replacement
   - mvn -B verify -Predis-sentinel,coverage-per-test -Duse_docker_host=true --projects session-replacement
 
-  - mvn -B verify -Pwildfly-10-managed-arquillian-with-agent,external-arquillian-tests --projects integration-tests/arquillian-tests
+#  - mvn -B verify -Pwildfly-10-managed-arquillian-with-agent,external-arquillian-tests --projects integration-tests/arquillian-tests
