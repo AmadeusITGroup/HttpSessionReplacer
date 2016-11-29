@@ -1,0 +1,10 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    - mvn --fail-never dependency:go-offline || true
+test:
+  override:
+    - mvn -B verify -Predis-single,coverage-per-test --projects session-replacement
