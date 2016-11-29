@@ -17,7 +17,7 @@
     <version.arquillian>1.1.11.Final</version.arquillian>
     <version.arquillian_jacoco>1.0.0.Alpha8</version.arquillian_jacoco>
     <version.jetty9>9.3.14.v20161028</version.jetty9>
-    <version.tomcat7>7.0.69</version.tomcat7>
+    <version.tomcat7>7.0.73</version.tomcat7>
     <version.wildfly>10.0.0.Final</version.wildfly>
     <sonar.exclusions>**/org/slf4j/impl/*.java</sonar.exclusions>
   </properties>
@@ -74,7 +74,7 @@
       <dependency>
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
-        <version>1.1.1</version>
+        <version>1.2</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -378,7 +378,7 @@
           <plugin>
             <!-- Prepare sentinel.conf for docker image -->
             <artifactId>maven-resources-plugin</artifactId>
-            <version>3.0.0</version>
+            <version>3.0.1</version>
             <executions>
               <execution>
                 <id>copy-resources</id>
