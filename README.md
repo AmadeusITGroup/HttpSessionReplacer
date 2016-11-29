@@ -1,8 +1,11 @@
 # HTTP Session Replacement
 
-[![Travis](https://secure.travis-ci.org/AmadeusITGroup/HttpSessionReplacer.png)](http://travis-ci.org/AmadeusITGroup/HttpSessionReplacer)
-[![license](https://img.shields.io/github/license/AmadeusITGroup/HttpSessionReplacer.svg)]()
-[![Dependency Status](https://www.versioneye.com/user/projects/583d2f19d2fd57003fdfbe76/badge.svg?style=flat)](https://www.versioneye.com/user/projects/583d2f19d2fd57003fdfbe76/)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amadeus/session/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/com.amadeus/session)
+[![Travis](https://img.shields.io/travis/AmadeusITGroup/HttpSessionReplacer.svg?style=flat-square)](http://travis-ci.org/AmadeusITGroup/HttpSessionReplacer)
+[![license](https://img.shields.io/github/license/AmadeusITGroup/HttpSessionReplacer.svg?style=flat-square)]()
+[![Dependency Status](https://www.versioneye.com/user/projects/583d2f19d2fd57003fdfbe76/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/583d2f19d2fd57003fdfbe76/)
+[![SonarQube Coverage](https://img.shields.io/sonar/http/sonarqube.com/com.amadeus:session/coverage.svg?style=flat-square)](https://sonarqube.com/dashboard?id=com.amadeus%3Asession)
+[![SonarQube Tech Debt](https://img.shields.io/sonar/http/sonarqube.com/com.amadeus:session/tech_debt.svg?style=flat-square)](https://sonarqube.com/dashboard?id=com.amadeus%3Asession)
 
 This project provides session management including, possibly, distributed
 session repository for JEE and other java containers. Default implementation

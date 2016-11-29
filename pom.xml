@@ -11,6 +11,25 @@
   <organization>
     <name>Amadeus s.a.s.</name>
   </organization>
+  <developers>
+    <developer>
+      <name>Nenad Bogojevic</name>
+      <email>nbogojevic@amadeus.com</email>
+      <organization>Amadeus s.a.s.</organization>
+      <organizationUrl>http://www.amadeus.com</organizationUrl>
+    </developer>
+  </developers>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:git://github.com/AmadeusITGroup/HttpSessionReplacer.git</connection>
+    <developerConnection>scm:git:ssh://github.com:AmadeusITGroup/HttpSessionReplacer.git</developerConnection>
+    <url>http://github.com/AmadeusITGroup/HttpSessionReplacer/tree/master</url>
+  </scm>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -77,6 +96,16 @@
       </dependency>      
     </dependencies>
   </dependencyManagement>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
   <build>
     <pluginManagement>
       <plugins>
@@ -115,6 +144,17 @@
           </executions>
           <configuration>
             <trimStackTrace>false</trimStackTrace>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>1.6.7</version>
+          <extensions>true</extensions>
+          <configuration>
+            <serverId>ossrh</serverId>
+            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+            <autoReleaseAfterClose>true</autoReleaseAfterClose>
           </configuration>
         </plugin>
       </plugins>
