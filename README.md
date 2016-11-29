@@ -1,7 +1,8 @@
+# HTTP Session Replacement
+
 [![Travis](https://secure.travis-ci.org/AmadeusITGroup/HttpSessionReplacer.png)](http://travis-ci.org/AmadeusITGroup/HttpSessionReplacer)
 [![license](https://img.shields.io/github/license/AmadeusITGroup/HttpSessionReplacer.svg)]()
-
-# HTTP Session Replacement
+[![Dependency Status](https://www.versioneye.com/user/projects/583d2f19d2fd57003fdfbe76/badge.svg?style=flat)](https://www.versioneye.com/user/projects/583d2f19d2fd57003fdfbe76/)
 
 This project provides session management including, possibly, distributed
 session repository for JEE and other java containers. Default implementation

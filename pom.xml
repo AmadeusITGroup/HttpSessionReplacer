@@ -6,7 +6,7 @@
 	<artifactId>session</artifactId>
 	<version>0.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>session</name>
+	<name>HttpSessionReplacer</name>
 	<description>Provides management of application sessions via a session repository (e.g. Redis). General JEE container use case with HttpSession is supported.</description>
   	<organization>
   		<name>Amadeus s.a.s.</name>
