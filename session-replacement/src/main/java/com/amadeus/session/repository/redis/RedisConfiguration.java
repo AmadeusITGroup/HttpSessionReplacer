@@ -21,6 +21,10 @@ import redis.clients.jedis.JedisPoolConfig;
  * and configure JedisPool.
  */
 class RedisConfiguration {
+  /**
+   * Standard prefix for metrics.
+   */
+  public static final String METRIC_PREFIX = "com.amadeus.session";
 
   /**
    * System or configuration property that specifies that redis server(s) are
@@ -163,7 +167,7 @@ class RedisConfiguration {
       }
     }
   }
-  
+
   private void parseArgFromConfiguration(String arg) {
     if (arg.startsWith(POOL_SIZE_PROPERTY)) {
       poolSize = arg.substring(POOL_SIZE_PROPERTY.length());

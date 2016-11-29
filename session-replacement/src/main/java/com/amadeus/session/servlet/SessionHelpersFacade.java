@@ -26,15 +26,6 @@ public final class SessionHelpersFacade {
 
   static boolean disabled = Boolean.parseBoolean(getPropertySecured(DISABLED_SESSION));
 
-  private static String getPropertySecured(String key) {
-    try {
-      return System.getProperty(key, null);
-    } catch (SecurityException e) {
-      logger.info("Security exception when trying to get system property", e);
-      return null;
-    }
-  }
-
   private SessionHelpersFacade() {
   }
 
@@ -173,4 +164,14 @@ public final class SessionHelpersFacade {
     }
     return helpers;
   }
+
+  private static String getPropertySecured(String key) {
+    try {
+      return System.getProperty(key, null);
+    } catch (SecurityException e) {
+      logger.info("Security exception when trying to get system property", e);
+      return null;
+    }
+  }
+
 }

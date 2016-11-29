@@ -1,25 +1,37 @@
 language: java
 
+sudo: false
+install: true
+
+addons:
+  sonarqube:
+    token:
+      secure: "ZRRg/k78smxwB41VD34t8cfe3pZgbsdiDhiRmPCCZQls+LrJS1yw12SUtInz+SxSN+CCBtkj2RlK15GKp/NrwGpsL3ogJrsgaOicJVItvL4ijh0O0XE1ZB37uQFoQK1mf7Stp/P+NGWy2uyYYMsPGQcl5Lvqfn77hRyTNlbFLoqo/Ra2PVrIA7jqP2yEZczzmaL24m/LNAfc6oHMME0DNRO2fY33xgV6ftzQpeSdEvKda+oS6YflGxx1l5cJOVEU/b1dFnivPZzgs9sp5BdzS33fezOg4YSpaT85hU+y/yKS1Be+/jiWoE/U9aR9IeZDxwZjFchU/IWqqm/Pt4WBVZHzUohsqnnyoz9RukPeriu0W8JEX3XCIbmKdxfN9dEfZH4kQNy+jEB/IEQeMPBJ7NObZKGrP1zNx++Pnskw7D+rdK+rRNBfKvbQ+RKiHDdQCCFjE+b7HnbqjxQHWDAbXSGWPzIp8ARL2caREsNQ9ldtPOpVZPw+jDTLKeQI3jIhwWXQcwxZjvWLgmSezsjDzrR8TQgICzK/Z9KrCAR6GZuUpJXg9zuRM0nxVerB/EMV9JI6aP2vaStc92nt2iNAb3f2sgkTfi6k5A54lDM9ttxsigZLtChfqpi0LB+ipqZvcLBiPZzo3NttxeJZ5ewxsh140DXWxdASIAvzTGV1AfU="
+
+# nbogojevic
+#      secure: "mPuvMnT7XwuYeXTo4bc5KqZFNBzRcCmxSOtVn56KNb2GM76o8uoMEkX2TgdQCVfbWO5FuAH2/WvQlUDso620XwqjdpeTxESkWEF5QbiJ5muzWgIgjY2ryPdBGr32lwNoJ3mLGJRixWEoEaBfRF+2Jooz4M9gTmwNbPPwsVkAwmD006arsEMFDAwrosiUySc22Eh1q+XV5avKtbHxVWi56CnsbfhgKRrQRpZaiGdf1fnyCDJh0KFPO0VYKtPYxkYkglYSXw1j7lE2GlGN1cTfPBICXhQtBmDeoIoiA3QfbRx+SgrUrDzyfSPxvCLboU8hHjSm+n0k3d1CdqeGG1XT2Zu7dSuAJMg2duwowigpU2whHw3Q3XW+SfPqniW9LvqjLZwejeCQri+pxM4w3saAMNgazNq/uUpHJwth9CdS1ZSjcqdxNrJaXSjK5HcZI1q7cS9c/5nP9h2a5dQqliBVKzL8MAf1W+w5KzCrqB3NUkMZqlys1jfNr6AGJU3z5zsbZQLlTBsWzHLPEVQu6syIXXN/KvNVuwlzB1NSQdnAICuIML5EZt2hxPSquNVxoSR9WDbftgmlArP6672X7avSh8JeRe/C2PDBSleUJ2p2o6sRMUs+WZk1HlD6CzI9WYxHHTS9rjXpjamGdCk+LxYoX/dz9s7G/TSO/PkoZ5UrUfk="
+# AmadeusITGroup
+# "ZRRg/k78smxwB41VD34t8cfe3pZgbsdiDhiRmPCCZQls+LrJS1yw12SUtInz+SxSN+CCBtkj2RlK15GKp/NrwGpsL3ogJrsgaOicJVItvL4ijh0O0XE1ZB37uQFoQK1mf7Stp/P+NGWy2uyYYMsPGQcl5Lvqfn77hRyTNlbFLoqo/Ra2PVrIA7jqP2yEZczzmaL24m/LNAfc6oHMME0DNRO2fY33xgV6ftzQpeSdEvKda+oS6YflGxx1l5cJOVEU/b1dFnivPZzgs9sp5BdzS33fezOg4YSpaT85hU+y/yKS1Be+/jiWoE/U9aR9IeZDxwZjFchU/IWqqm/Pt4WBVZHzUohsqnnyoz9RukPeriu0W8JEX3XCIbmKdxfN9dEfZH4kQNy+jEB/IEQeMPBJ7NObZKGrP1zNx++Pnskw7D+rdK+rRNBfKvbQ+RKiHDdQCCFjE+b7HnbqjxQHWDAbXSGWPzIp8ARL2caREsNQ9ldtPOpVZPw+jDTLKeQI3jIhwWXQcwxZjvWLgmSezsjDzrR8TQgICzK/Z9KrCAR6GZuUpJXg9zuRM0nxVerB/EMV9JI6aP2vaStc92nt2iNAb3f2sgkTfi6k5A54lDM9ttxsigZLtChfqpi0LB+ipqZvcLBiPZzo3NttxeJZ5ewxsh140DXWxdASIAvzTGV1AfU="
+
 jdk:
   - oraclejdk8
 
-sudo: required
-
-services:
-  - docker
-
 script:
-  - mvn -B install 
+  # the following command line builds the project, runs the tests with coverage and then execute the SonarQube analysis
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent-integration org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
+  - mvn -B verify -Pjetty-9-embedded-arquillian,arquillian-tests --projects session-replacement
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'    
+#  - mvn -B install 
 #  - mvn -B verify -Pjetty-9-embedded-arquillian,arquillian-tests --projects session-replacement
 #  - mvn -B verify -Pwildfly-10-managed-arquillian,arquillian-tests --projects session-replacement
 # Disable tomcat 7
 # - mvn -B verify -Ptomcat-7-embedded-arquillian,coverage-per-test,arquillian-tests --projects session-replacement
-
-#  - mvn -B verify -Ptest-instrumentation --projects integration-tests/agent-tests
-#  - mvn -B verify -Ptest-intercept-listeners --projects integration-tests/agent-tests
-
     # Run redis tests 
-  - mvn -B verify -Predis-single,coverage-per-test --projects session-replacement
-  - mvn -B verify -Predis-sentinel,coverage-per-test -Duse_docker_host=true --projects session-replacement
+#  - mvn -B verify -Predis-single,coverage-per-test --projects session-replacement
+#  - mvn -B verify -Predis-sentinel,coverage-per-test -Duse_docker_host=true --projects session-replacement
 
 #  - mvn -B verify -Pwildfly-10-managed-arquillian-with-agent,external-arquillian-tests --projects integration-tests/arquillian-tests

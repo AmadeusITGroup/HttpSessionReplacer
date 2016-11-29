@@ -302,23 +302,38 @@ public class RepositoryBackedSession {
     boolean canRemove = false;
     try {
       if (!invalid) {
-        canRemove = manager.getRepository().prepareRemove(getSessionData());
-        if (canRemove) {
-          if (expired && isUsed()) {
-            invalidateOnCommit = true;
-          } else {
-            invalidateOnCommit = false;
-            wipeInvalidSession();
-          }
-        } else {
-          manager.invalidationConflict(this, expired);
-        }
+        canRemove = invalidateOrNotify(expired);
       }
     } finally {
       if (!invalidateOnCommit) {
         finishInvalidation(canRemove);
       }
     }
+  }
+
+  /**
+   * Prepares session for removal, invalidate it or notifies 
+   * manager if there was conflict (e.g. concurrent access)
+   * during invalidation.
+   * 
+   * @param expired 
+   *          <code>true</code> if session has expired
+   * @return <code>true</code> if session can be removed as there was no conflict
+   */
+  private boolean invalidateOrNotify(boolean expired) {
+    boolean canRemove;
+    canRemove = manager.getRepository().prepareRemove(getSessionData());
+    if (canRemove) {
+      if (expired && isUsed()) {
+        invalidateOnCommit = true;
+      } else {
+        invalidateOnCommit = false;
+        wipeInvalidSession();
+      }
+    } else {
+      manager.invalidationConflict(this, expired);
+    }
+    return canRemove;
   }
 
   /**
@@ -577,19 +592,6 @@ public class RepositoryBackedSession {
   }
 
   /**
-   * Unlocks the session and returns <code>true</code> if it was last active
-   * session.
-   *
-   * @return <code>true</code> if it was last active session
-   */
-  private boolean unlockSession() {
-    if (lockedForUse.compareAndSet(true, false)) {
-      return concurrentUses.decrementAndGet() == 0;
-    }
-    return false;
-  }
-
-  /**
    * This class implements logic that commits session to
    * {@link SessionRepository}. The logic allows atomic commit if repository
    * supports it. The algorithm is as follows:
@@ -628,6 +630,19 @@ public class RepositoryBackedSession {
     }
 
     /**
+     * Unlocks the session and returns <code>true</code> if it was last active
+     * session.
+     *
+     * @return <code>true</code> if it was last active session
+     */
+    private boolean unlockSession() {
+      if (lockedForUse.compareAndSet(true, false)) {
+        return concurrentUses.decrementAndGet() == 0;
+      }
+      return false;
+    }
+
+    /**
      * Called when session become invalid before committing. I.e. if expiration
      * event was received.
      */
@@ -653,28 +668,44 @@ public class RepositoryBackedSession {
       logger.debug("Committing session: {}", sessionData);
 
       if (commitAttributes) {
-        for (Map.Entry<String, Attribute> entry : attrs.entrySet()) {
-          if (sessionData.isNonCacheable(entry.getKey())) {
-            // Skip attributes that are always repository backed
-            continue;
-          }
-          Attribute attr = entry.getValue();
-          if (attr.changed || transaction.isSetAllAttributes()) {
-            if (attr.deleted) {
-              transaction.removeAttribute(entry.getKey());
-            } else {
-              transaction.addAttribute(entry.getKey(), attr.value);
-              if (transaction.isDistributing()) {
-                manager.getNotifier().attributeBeingStored(RepositoryBackedSession.this, entry.getKey(), attr.value);
-              }
-            }
-            if (!keepChangedFlag) {
-              attr.changed = false;
-            }
+        commitAttributes(transaction, keepChangedFlag);
+      }
+      transaction.commit();
+    }
+
+    /*
+     * Commit attributes into repository
+     */
+    private void commitAttributes(SessionRepository.CommitTransaction transaction, boolean keepChangedFlag) {
+      for (Map.Entry<String, Attribute> entry : attrs.entrySet()) {
+        if (sessionData.isNonCacheable(entry.getKey())) {
+          // Skip attributes that are always repository backed
+          continue;
+        }
+        Attribute attr = entry.getValue();
+        if (attr.changed || transaction.isSetAllAttributes()) {
+          removeOrAddAttribute(transaction, entry.getKey(), attr);
+          if (!keepChangedFlag) {
+            attr.changed = false;
           }
         }
       }
-      transaction.commit();
+    }
+
+    /*
+     * Removes delete attributes or adds changed/added attribute to session
+     * update transaction.
+     */
+    private void removeOrAddAttribute(SessionRepository.CommitTransaction transaction,
+        String key, Attribute attr) {
+      if (attr.deleted) {
+        transaction.removeAttribute(key);
+      } else {
+        transaction.addAttribute(key, attr.value);
+        if (transaction.isDistributing()) {
+          manager.getNotifier().attributeBeingStored(RepositoryBackedSession.this, key, attr.value);
+        }
+      }
     }
   }
 
