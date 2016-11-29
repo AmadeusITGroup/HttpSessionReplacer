@@ -244,7 +244,9 @@
 							<goal>single</goal>
 						</goals>
 						<configuration>
-							<descriptor>src/assembly/jboss-module.xml</descriptor>
+							<descriptors>
+								<descriptor>src/assembly/jboss-module.xml</descriptor>
+							</descriptors>
 						</configuration>
 					</execution>
 				</executions>

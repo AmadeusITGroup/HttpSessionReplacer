@@ -489,7 +489,7 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
     void doWait() {
       try {
         Thread.sleep(getDelay());
-      } catch (InterruptedException e) {
+      } catch (InterruptedException e) { // NOSONAR sleep was interrupted,
         throw new WrappedException(e);
       }
     }

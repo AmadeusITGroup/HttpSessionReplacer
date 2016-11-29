@@ -235,8 +235,8 @@ public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
     try {
       executor.awaitTermination(WAIT_FOR_SHUTDOWN, SECONDS);
       scheduledExecutor.awaitTermination(WAIT_FOR_SHUTDOWN, SECONDS);
-    } catch (InterruptedException e) {
-      logger.error("Termination of tasks interrupted.", e);
+    } catch (InterruptedException e) { // NOSONAR Termination was interrupted  
+      logger.error("Task termination thread was interrupted.", e);
     }
   }
 }
