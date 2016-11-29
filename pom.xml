@@ -6,7 +6,7 @@
 	<artifactId>session</artifactId>
 	<version>0.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>session</name>
+	<name>Http Session Replacer</name>
 	<description>Provides management of application sessions via a session repository (e.g. Redis). General JEE container use case with HttpSession is supported.</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
