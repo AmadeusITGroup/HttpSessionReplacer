@@ -64,7 +64,7 @@ public class ArqITSessionExpire extends AbstractITSession {
   public void testDefaultSessionDoesNotExpireIn2Seconds(@ArquillianResource URL baseURL) throws IOException, InterruptedException {
     URL urlTest = url(baseURL, "TestServlet", "testDefaultSessionDoesNotExpireIn2Seconds");
     String originalCookie = callWebapp(urlTest);
-    Thread.sleep(1000);
+    await(1000);
     HttpURLConnection connection = (HttpURLConnection) urlTest.openConnection();
     setSessionCookie(connection, originalCookie);
     connection.connect();
@@ -72,7 +72,7 @@ public class ArqITSessionExpire extends AbstractITSession {
 
     assertFirstLineEquals(connection, "Previous value of attribute: B");
     assertThat(cookies, hasItem(originalCookie));
-    Thread.sleep(2100);
+    await(2100);
     connection = (HttpURLConnection) urlTest.openConnection();
     setSessionCookie(connection, originalCookie);
     connection.connect();
@@ -87,7 +87,7 @@ public class ArqITSessionExpire extends AbstractITSession {
   public void testWhenSessionNeverExpires(@ArquillianResource URL baseURL) throws IOException, InterruptedException {
     URL urlTest = url(baseURL, "TestServlet", "testWhenSessionNeverExpires");
     String originalCookie = callWebapp(urlTest);
-    Thread.sleep(1000);
+    await(1000);
     HttpURLConnection connection = (HttpURLConnection) urlTest.openConnection();
     setSessionCookie(connection, originalCookie);
     connection.connect();
@@ -95,7 +95,7 @@ public class ArqITSessionExpire extends AbstractITSession {
 
     assertFirstLineEquals(connection, "Previous value of attribute: B");
     assertThat(cookies, hasItem(originalCookie));
-    Thread.sleep(2100);
+    await(2100);
     connection = (HttpURLConnection) urlTest.openConnection();
     setSessionCookie(connection, originalCookie);
     connection.connect();
@@ -110,7 +110,7 @@ public class ArqITSessionExpire extends AbstractITSession {
   public void testSessionDoesNotExpire(@ArquillianResource URL baseURL) throws IOException, InterruptedException {
     URL urlTest = url(baseURL, "TestServlet", "testSessionDoesNotExpire");
     String originalCookie = callWebapp(urlTest);
-    Thread.sleep(1000);
+    await(1000);
     HttpURLConnection connection = (HttpURLConnection) urlTest.openConnection();
     setSessionCookie(connection, originalCookie);
     connection.connect();
@@ -126,7 +126,7 @@ public class ArqITSessionExpire extends AbstractITSession {
   public void testSessionExpires(@ArquillianResource URL baseURL) throws IOException, InterruptedException {
     URL urlTest = url(baseURL, "TestServlet", "testSessionExpires");
     String originalCookie = callWebapp(urlTest);
-    Thread.sleep(2100);
+    await(2100);
     HttpURLConnection connection = (HttpURLConnection) urlTest.openConnection();
     setSessionCookie(connection, originalCookie);
     connection.connect();
@@ -141,7 +141,7 @@ public class ArqITSessionExpire extends AbstractITSession {
   public void testSessionDoesNotExpireWebXml(@ArquillianResource URL baseURL) throws IOException, InterruptedException {
     URL urlTest = url(baseURL, "TestServlet", "testSessionDoesNotExpireWebXml");
     String originalCookie = callWebapp(urlTest);
-    Thread.sleep(1000);
+    await(1000);
     HttpURLConnection connection = (HttpURLConnection) urlTest.openConnection();
     setSessionCookie(connection, originalCookie);
     connection.connect();
@@ -157,12 +157,17 @@ public class ArqITSessionExpire extends AbstractITSession {
   public void testSessionExpiresWebXml(@ArquillianResource URL baseURL) throws IOException, InterruptedException {
     URL urlTest = url(baseURL, "TestServlet", "testSessionExpiresWebXml");
     String originalCookie = callWebapp(urlTest);
-    Thread.sleep(2100);
+    await(2100);
     HttpURLConnection connection = (HttpURLConnection) urlTest.openConnection();
     setSessionCookie(connection, originalCookie);
     connection.connect();
     List<String> cookies = connection.getHeaderFields().get("Set-Cookie");
     assertFirstLineEquals(connection, "Previous value of attribute: null");
     Assert.assertFalse(originalCookie.equals(cookies.get(0)));
+  }
+
+  // Wait for specified amount of milliseconds
+  private static void await(int millis) throws InterruptedException {
+    Thread.sleep(millis);
   }
 }
