@@ -16,10 +16,6 @@ import redis.clients.jedis.Transaction;
  * offers commands used by redis session repository implementation.
  */
 interface RedisFacade {
-  /**
-   * Standard prefix for metrics.
-   */
-  String METRIC_PREFIX = "com.amadeus.session";
 
   /**
    * See {@link MultiKeyBinaryCommands#psubscribe(BinaryJedisPubSub, byte[]...)}

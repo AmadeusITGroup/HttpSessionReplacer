@@ -1,6 +1,5 @@
 package com.amadeus.session.repository.redis;
 
-import static com.amadeus.session.repository.redis.RedisFacade.METRIC_PREFIX;
 import static com.codahale.metrics.MetricRegistry.name;
 import static redis.clients.util.SafeEncoder.encode;
 
@@ -81,6 +80,14 @@ class RedisSessionRepository implements SessionRepository {
    */
   private static final int BITS_IN_BYTE = 8;
 
+  // Builds OK jedis response
+  static final Builder<String> OK_BUILDER = new Builder<String>() {
+    @Override
+    public String build(Object data) {
+      return "OK";
+    }
+  };
+
   private final String owner;
   private final byte[] ownerByteArray;
   private final String keyPrefix;
@@ -130,11 +137,11 @@ class RedisSessionRepository implements SessionRepository {
       metrics.removeMatching(new MetricFilter() {
         @Override
         public boolean matches(String name, Metric metric) {
-          return name.startsWith(name(METRIC_PREFIX, "redis"));
+          return name.startsWith(name(RedisConfiguration.METRIC_PREFIX, "redis"));
         }
       });
       if (sticky) {
-        failoverMetrics = metrics.meter(name(METRIC_PREFIX, namespace, "redis", "failover"));
+        failoverMetrics = metrics.meter(name(RedisConfiguration.METRIC_PREFIX, namespace, "redis", "failover"));
       }
 
       redis.startMonitoring(metrics);
@@ -258,13 +265,6 @@ class RedisSessionRepository implements SessionRepository {
     b.putInt(value);
     attributes.put(attr, b.array());
   }
-
-  static final Builder<String> OK_BUILDER = new Builder<String>() {
-    @Override
-    public String build(Object data) {
-      return "OK";
-    }
-  };
 
   /**
    * This class implements transaction that is executed at session commit time.

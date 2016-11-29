@@ -16,7 +16,8 @@ jdk:
 
 script:
   # the following command line builds the project, runs the tests with coverage and then execute the SonarQube analysis
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent verify sonar:sonar
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent-integration org.jacoco:jacoco-maven-plugin:prepare-agent verify sonar:sonar
+  - mvn -B org.jacoco:jacoco-maven-plugin:prepare-agent-integration verify -Pjetty-9-embedded-arquillian,arquillian-tests --projects session-replacement sonar:sonar
 
 cache:
   directories:

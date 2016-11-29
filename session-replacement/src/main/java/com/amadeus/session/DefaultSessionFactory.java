@@ -22,7 +22,7 @@ public class DefaultSessionFactory implements SessionFactory {
     this.sessionManager = sessionManager;
     useCached = sessionManager.getConfiguration().isAllowedCachedSessionReuse();
     if (useCached) {
-      cachedSessions = new ConcurrentHashMap<String, RepositoryBackedSession>();
+      cachedSessions = new ConcurrentHashMap<>();
     }
   }
 

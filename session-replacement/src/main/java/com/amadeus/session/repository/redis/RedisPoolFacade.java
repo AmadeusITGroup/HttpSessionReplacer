@@ -351,7 +351,7 @@ class RedisPoolFacade extends AbstractRedisFacade implements RedisFacade {
    */
   static void addMetrics(final Pool<Jedis> jedisPool, MetricRegistry metrics) {
     final String host = jedisPool.getResource().getClient().getHost();
-    String prefix = name(METRIC_PREFIX, "redis", host);
+    String prefix = name(RedisConfiguration.METRIC_PREFIX, "redis", host);
     metrics.register(name(prefix, "active"), new Gauge<Integer>() {
       @Override
       public Integer getValue() {
