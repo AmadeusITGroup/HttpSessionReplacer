@@ -168,13 +168,18 @@ public abstract class AbstractITRedis {
     trans.addAttribute("attrToChange", "initialValue");
     trans.commit();
     assertNotNull(repo.getSessionAttribute(sessionData("expire"), "attrStr"));
-    Thread.sleep(1000);
+    await(1000);
     assertNotNull(repo.getSessionAttribute(sessionData("expire"), "attrStr"));
-    Thread.sleep(700);
+    await(700);
     // Time sensitive (if two line above and the next take more than 1000ms,
     // this may fail, but normally, operation repo.getSessionAttribute ~ 1ms.
     assertNotNull(repo.getSessionAttribute(sessionData("expire"), "attrStr"));
-    Thread.sleep(3000);
+    await(3000);
     assertNull(repo.getSessionAttribute(sessionData("expire"), "attrStr"));
+  }
+
+  // Wait for specified amount of milliseconds
+  private static void await(int millis) throws InterruptedException {
+    Thread.sleep(millis);
   }
 }

@@ -20,6 +20,7 @@ import com.amadeus.session.servlet.TestHttpSessionNotifier;
 import com.amadeus.session.servlet.TestInitializeSessionManagement;
 import com.amadeus.session.servlet.TestRepositoryBackendHttpSessionWrapper;
 import com.amadeus.session.servlet.TestSessionHelpers;
+import com.amadeus.session.servlet.TestShutdownListener;
 import com.amadeus.session.servlet.TestUrlSessionTracking;
 import com.amadeus.session.servlet.TestWebXmlParser;
 
@@ -28,9 +29,11 @@ import com.amadeus.session.servlet.TestWebXmlParser;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+  TestJdkSerializerDeserializer.class,
   TestRepositoryBackedSession.class,
   TestRandomIdProvider.class,
   TestSessionConfiguration.class,
+  TestSessionData.class,
   TestSessionManager.class,
   TestUuidProvider.class,
 
@@ -39,6 +42,7 @@ import com.amadeus.session.servlet.TestWebXmlParser;
   TestHttpSessionNotifier.class,
   TestHttpSessionFactory.class,
   TestSessionHelpers.class,
+  TestShutdownListener.class,
   TestRedisClusterFacade.class,
   TestWebXmlParser.class,
   TestCookieSessionTracking.class,

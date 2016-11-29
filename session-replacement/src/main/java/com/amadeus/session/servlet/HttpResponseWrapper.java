@@ -20,7 +20,7 @@ import com.amadeus.session.ResponseWithSessionId;
  * propagated.
  */
 class HttpResponseWrapper extends HttpServletResponseWrapper implements ResponseWithSessionId {
-  private static int LN_LENGTH = System.getProperty("line.separator").length();
+  private static final int LN_LENGTH = System.getProperty("line.separator").length();
 
   private final HttpRequestWrapper request;
   private ServletPrintWriter writer;
