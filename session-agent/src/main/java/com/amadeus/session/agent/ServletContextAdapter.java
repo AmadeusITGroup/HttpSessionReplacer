@@ -50,7 +50,8 @@ public class ServletContextAdapter extends ClassVisitor {
 
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-    if ((access & (ACC_STATIC | ACC_PUBLIC)) != 0 && "addListener".equals(name)
+    if ((access & (ACC_STATIC | ACC_PUBLIC)) == ACC_PUBLIC
+        && "addListener".equals(name)
         && ("(Ljava/lang/Object;)V".equals(desc) || "(Ljava/util/EventListener;)V".equals(desc))) {
       debug("modifying addListener(...) method for %s", className);
       MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
