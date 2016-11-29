@@ -17,7 +17,7 @@
     <version.arquillian>1.1.11.Final</version.arquillian>
     <version.arquillian_jacoco>1.0.0.Alpha8</version.arquillian_jacoco>
     <version.jetty9>9.3.14.v20161028</version.jetty9>
-    <version.tomcat7>7.0.52</version.tomcat7>
+    <version.tomcat7>7.0.69</version.tomcat7>
     <version.wildfly>10.0.0.Final</version.wildfly>
     <sonar.exclusions>**/org/slf4j/impl/*.java</sonar.exclusions>
   </properties>
@@ -575,7 +575,7 @@
         <dependency>
           <groupId>org.wildfly.arquillian</groupId>
           <artifactId>wildfly-arquillian-container-managed</artifactId>
-          <version>1.1.0.Beta2</version>
+          <version>2.0.0.Final</version>
           <scope>test</scope>
         </dependency>
       </dependencies>
@@ -704,7 +704,7 @@
         <dependency>
           <groupId>org.wildfly.arquillian</groupId>
           <artifactId>wildfly-arquillian-container-managed</artifactId>
-          <version>1.1.0.Beta2</version>
+          <version>2.0.0.Final</version>
           <scope>test</scope>
         </dependency>
       </dependencies>
