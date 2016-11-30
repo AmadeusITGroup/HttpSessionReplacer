@@ -14,13 +14,6 @@
   <description>Various integration tests.</description>
   <modules>
     <module>agent-tests</module>
+    <module>arquillian-tests</module>
   </modules>
-  <profiles>
-    <profile>
-      <id>external-arquillian-tests</id>
-      <modules>
-        <module>arquillian-tests</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>
