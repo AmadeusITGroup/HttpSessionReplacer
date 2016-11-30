@@ -14,11 +14,10 @@ jdk:
 script:
   # the following command line builds the project, runs the tests with coverage and then execute the SonarQube analysis
   - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent-integration org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
-  - mvn -B verify -Pjetty-9-embedded-arquillian,arquillian-tests --projects session-replacement
-  - mvn -B verify -Pwildfly-10-managed-arquillian,arquillian-tests --projects session-replacement
-  - mvn -B verify -Pwildfly-10-managed-arquillian-with-agent,external-arquillian-tests --projects integration-tests/arquillian-tests
-# Disable tomcat 7
-# - mvn -B verify -Ptomcat-7-embedded-arquillian,coverage-per-test,arquillian-tests --projects session-replacement
+#  - mvn -B verify -Pjetty-9-embedded-arquillian,arquillian-tests --projects session-replacement
+#  - mvn -B verify -Pwildfly-10-managed-arquillian,arquillian-tests --projects session-replacement
+#  - mvn -B verify -Pwildfly-10-managed-arquillian-with-agent,external-arquillian-tests --projects integration-tests/arquillian-tests
+  - mvn -B verify -Ptomcat-7-embedded-arquillian,arquillian-tests --projects session-replacement
 # Run redis tests 
 #  - mvn -B verify -Predis-single,coverage-per-test --projects session-replacement
 #  - mvn -B verify -Predis-sentinel,coverage-per-test -Duse_docker_host=true --projects session-replacement
