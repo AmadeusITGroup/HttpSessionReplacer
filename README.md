@@ -13,18 +13,19 @@ session repository for JEE and other java containers. Default implementation
 comes with in-memory and Redis based implementation.
 
 The project is inspired by Spring Session project, but it has additional motivation to
-avoid dependency on Spring libraries, and for applications that don't
-use Spring, or that use an old version. 
-Much of the redis logic is inspired by Spring Session.
-The implementation however uses the Jedis library directly.
-This also makes the algorithm easier to port to other languages.
+avoid any dependency on Spring libraries, and, so, make it usable in applications that
+don't use Spring, or that use an older version. 
+Much of the redis logic is inspired and builds on work done in Spring Session.
+The implementation, however, uses the Jedis library directly.
+This makes the algorithm easier to port to other languages.
 
 The project aims to make session management transparent for existing webapps (zero code
 change) and as compatible as possible with wide variety of the JEE containers, all the while
 offering full support for session API including different session listeners.
 
-Redis support includes both single instance, sentinel based and Redis cluster.
-one based on sorted sets (`ZRANGE`).
+Redis support includes both single instance, sentinel based and cluster modes.
+Two session expiration strategies are available when using Redis. One is based 
+on Redis notifications, and antoher on sorted sets (ZRANGE).
 
 Useful links:
 
@@ -752,7 +753,7 @@ ZRANGEBYSCORE com.amadeus.session:all-sessions-set 0 1439246090000
 
 ## Session Encryption
 
-See [doc/ENCRYPTION.md](doc/ENCRYPTION.md).
+See [docs/ENCRYPTION.md](docs/ENCRYPTION.md).
 
 ## Thread pools
 

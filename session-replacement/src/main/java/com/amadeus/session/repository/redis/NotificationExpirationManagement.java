@@ -334,7 +334,7 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
   Set<byte[]> getKeysToExpire(byte[] key) {
     // In Redis 3.2 we use SPOP to get bulk of keys to expire
     if (!redis.supportsMultiSpop()) {
-      return redis.transaction(key, smembersAndDel(redis, key)).get();
+      return redis.transaction(key, smembersAndDel(key)).get();
     } else {
       Set<byte[]> res = redis.spop(key, SPOP_BULK_SIZE);
       if (res == null || res.isEmpty() || res.size() < SPOP_BULK_SIZE) {
@@ -352,7 +352,7 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
    *          the key for Redis set
    * @return result of SMEMBERS call
    */
-  static TransactionRunner<Set<byte[]>> smembersAndDel(RedisFacade redis, final byte[] key) {
+  static TransactionRunner<Set<byte[]>> smembersAndDel(final byte[] key) {
     return new RedisFacade.TransactionRunner<Set<byte[]>>() {
       @Override
       public RedisFacade.ResponseFacade<Set<byte[]>> run(RedisFacade.TransactionFacade transaction) {

@@ -5,12 +5,12 @@ import org.junit.runners.Suite;
 
 import com.amadeus.session.repository.inmemory.TestInMemoryRepository;
 import com.amadeus.session.repository.redis.TestExpirationListener;
-import com.amadeus.session.repository.redis.TestNotificationExpirationManagement;
 import com.amadeus.session.repository.redis.TestJedisClusterFacade;
-import com.amadeus.session.repository.redis.TestRedisConfiguration;
 import com.amadeus.session.repository.redis.TestJedisPoolFacade;
+import com.amadeus.session.repository.redis.TestJedisSessionRepositoryFactory;
+import com.amadeus.session.repository.redis.TestNotificationExpirationManagement;
+import com.amadeus.session.repository.redis.TestRedisConfiguration;
 import com.amadeus.session.repository.redis.TestRedisSessionRepository;
-import com.amadeus.session.repository.redis.TestRedisSessionRepositoryFactory;
 import com.amadeus.session.repository.redis.TestSortedSetExpiration;
 import com.amadeus.session.servlet.TestCookieSessionTracking;
 import com.amadeus.session.servlet.TestHttpRequestWrapper;
@@ -29,6 +29,7 @@ import com.amadeus.session.servlet.TestWebXmlParser;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+  TestEncryptingSerializerDeserializer.class,
   TestJdkSerializerDeserializer.class,
   TestRepositoryBackedSession.class,
   TestRandomIdProvider.class,
@@ -59,9 +60,9 @@ import com.amadeus.session.servlet.TestWebXmlParser;
   TestSortedSetExpiration.class,
   TestNotificationExpirationManagement.class,
   TestRedisConfiguration.class,
-  TestRedisSessionRepositoryFactory.class,
+  TestJedisSessionRepositoryFactory.class,
   TestSortedSetExpiration.class
 })
-public class OffloadingCoverageSuite {
+public class CoverageSuite {
 
 }
