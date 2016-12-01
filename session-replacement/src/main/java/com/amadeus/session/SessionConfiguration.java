@@ -929,17 +929,7 @@ public class SessionConfiguration implements Serializable {
     try {
       URL url = new URL(encryptionKey);
       if (allowedProtocol(url.getProtocol())) {
-        try (InputStream is = url.openStream(); Scanner s = new Scanner(is)) {
-          s.useDelimiter("\\A");
-          if (s.hasNext()) {
-            encryptionKey = s.next();
-            logger.info("Loaded ecnryption key from url `{}`", url);
-            return encryptionKey;
-          }
-          throw new IllegalStateException("Unable to load key from url `" + url + "`. Destination was empty.");
-        } catch (IOException e) {
-          throw new IllegalStateException("Unable to load key from url `" + url + "`.", e);
-        }
+        return loadKeyFromUrl(url);
       }
       throw new IllegalStateException(
           "Unknown protocol in url `" + url + "`. Supported protocols are file, http and https. ");
@@ -948,6 +938,27 @@ public class SessionConfiguration implements Serializable {
       logger.info("Key was not provided via url.");
     }
     return encryptionKey;
+  }
+
+  /**
+   * Loads encryption key from specified URL.
+   *
+   * @param url
+   *          from which to load the key
+   * @return the loaded encyption key
+   */
+  private String loadKeyFromUrl(URL url) {
+    try (InputStream is = url.openStream(); Scanner s = new Scanner(is)) {
+      s.useDelimiter("\\A");
+      if (s.hasNext()) {
+        encryptionKey = s.next();
+        logger.info("Loaded ecnryption key from url `{}`", url);
+        return encryptionKey;
+      }
+      throw new IllegalStateException("Unable to load key from url `" + url + "`. Destination was empty.");
+    } catch (IOException e) {
+      throw new IllegalStateException("Unable to load key from url `" + url + "`.", e);
+    }
   }
 
   /*

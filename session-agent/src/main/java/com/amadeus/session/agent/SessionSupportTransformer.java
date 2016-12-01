@@ -5,7 +5,6 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.HashSet;
 
@@ -34,40 +33,32 @@ class SessionSupportTransformer implements ClassFileTransformer {
 
   @Override
   public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
-      ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-    try {
-      ClassReader cr = new ClassReader(classfileBuffer);
-      // We assume that class can only one of servlet context, filter or listener
-      ServletContextCandidateFinder sh = new ServletContextCandidateFinder();
-      cr.accept(sh, 0);
-      if (sh.candidate) {
-        debug("Transforming ServletContext implementation %s", className);
-        ClassWriter cw = new ClassWriter(cr, COMPUTE_FRAMES);
-        ClassVisitor cv = new ServletContextAdapter(cw);
-        cr.accept(cv, 0);
+      ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+    ClassReader cr = new ClassReader(classfileBuffer);
+    // We assume that class can only one of servlet context, filter or listener
+    ServletContextCandidateFinder sh = new ServletContextCandidateFinder();
+    cr.accept(sh, 0);
+    if (sh.candidate) {
+      debug("Transforming ServletContext implementation %s", className);
+      ClassWriter cw = new ClassWriter(cr, COMPUTE_FRAMES);
+      ClassVisitor cv = new ServletContextAdapter(cw);
+      cr.accept(cv, 0);
 
-        return cw.toByteArray();
-      }
-      FilterCandidateFinder filterFinder = new FilterCandidateFinder();
-      cr.accept(filterFinder, 0);
-      if (filterFinder.candidate) {
-        debug("Transforming Filter implementation %s", className);
-        ClassWriter cw = new ClassWriter(cr, COMPUTE_FRAMES);
-        ClassVisitor cv = new FilterAdapter(cw);
-        cr.accept(cv, 0);
-        return cw.toByteArray();
-      }
-      return interceptListenersIdNeeded(className, cr);
-    } catch (RuntimeException e) { // NOSONAR, let's log exception we have
-      SessionAgent.debug("A runtimeexception occured while instrumenting code.", e);
-      throw e;
-    } catch (Exception e) { // NOSONAR, let's log exception we have
-      SessionAgent.debug("An exception occured while instrumenting code.", e);
+      return cw.toByteArray();
     }
-    return null; // NOSONAR by contract, return null if bytecode not modified
+    FilterCandidateFinder filterFinder = new FilterCandidateFinder();
+    cr.accept(filterFinder, 0);
+    if (filterFinder.candidate) {
+      debug("Transforming Filter implementation %s", className);
+      ClassWriter cw = new ClassWriter(cr, COMPUTE_FRAMES);
+      ClassVisitor cv = new FilterAdapter(cw);
+      cr.accept(cv, 0);
+      return cw.toByteArray();
+    }
+    return interceptListenersIfNeeded(className, cr);
   }
 
-  byte[] interceptListenersIdNeeded(String className, ClassReader cr) {
+  byte[] interceptListenersIfNeeded(String className, ClassReader cr) {
     if (interceptListeners) {
       ListenerCandidateFinder listenerFinder = new ListenerCandidateFinder();
       cr.accept(listenerFinder, 0);

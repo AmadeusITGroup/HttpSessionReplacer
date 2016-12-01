@@ -30,7 +30,7 @@ Useful links:
 
 * For details about installing the library see [docs/Usage.md](docs/Usage.md)
 * For information about building this project see [docs/BUILD.md](docs/BUILD.md).
-* For information about using session encryption see [doc/ENCRYPTION.md](doc/ENCRYPTION.md).
+* For information about using session encryption see [docs/ENCRYPTION.md](docs/ENCRYPTION.md).
 
 ## HTTP Servlet support
 
