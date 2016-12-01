@@ -1,12 +1,17 @@
 package com.amadeus.session;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -275,6 +280,12 @@ public class SessionConfiguration implements Serializable {
    * Specifies if commit should be done on all concurrent requests to session.
    */
   public static final String COMMIT_ON_ALL_CONCURRENT = "com.amadeus.session.commit.concurrent";
+  /**
+   * Specifies key to be used for encryption. When present activates encryption
+   * automatically. If key specifies a URL, key will be loaded from specified
+   * address. Otherwise it is treated literally.
+   */
+  public static final String SESSION_ENCRYPTION_KEY = "com.amadeus.session.encryption.key";
 
   private int maxInactiveInterval;
   private boolean distributable;
@@ -283,6 +294,7 @@ public class SessionConfiguration implements Serializable {
   private boolean interceptListeners;
   private boolean forceDistributable;
   private boolean loggingMdcActive;
+  private boolean usingEncryption;
   private String loggingMdcKey;
   private String node;
   private String namespace;
@@ -290,6 +302,8 @@ public class SessionConfiguration implements Serializable {
   private String repositoryFactory;
   private String sessionTracking;
   private String sessionIdName;
+  private String encryptionKey;
+
   private Set<String> nonCacheable;
   private ReplicationTrigger replicationTrigger;
   private Properties attributes;
@@ -329,6 +343,23 @@ public class SessionConfiguration implements Serializable {
           inactiveValue, maxInactiveInterval);
     }
     node = initNode();
+    setEncryptionKey(getPropertySecured(SESSION_ENCRYPTION_KEY, null));
+  }
+
+  /**
+   * Sets encryption key to use. If key is <code>null</code>, encryption is
+   * deactivated.
+   *
+   * @param key
+   *          encryption key to use or <code>null</code>
+   */
+  public void setEncryptionKey(String key) {
+    encryptionKey = key;
+    usingEncryption = key != null;
+  }
+
+  static boolean allowedProtocol(String protocol) {
+    return "http".equals(protocol) || "https".equals(protocol) || "file".equals(protocol);
   }
 
   /**
@@ -354,8 +385,13 @@ public class SessionConfiguration implements Serializable {
     loggingMdcActive = read(LOG_MDC_SESSION_ENABLED, loggingMdcActive);
     loggingMdcKey = read(LOG_MDC_SESSION_NAME, loggingMdcKey);
     forceDistributable = read(FORCE_DISTRIBUTABLE, forceDistributable);
+    setEncryptionKey(provider.getAttribute(SESSION_ENCRYPTION_KEY));
 
-    String value = provider.getAttribute(SESSION_REPLICATION_TRIGGER);
+    String value = provider.getAttribute(SESSION_ENCRYPTION_KEY);
+    if (nonEmpty(value)) {
+      setEncryptionKey(value);
+    }
+    value = provider.getAttribute(SESSION_REPLICATION_TRIGGER);
     if (nonEmpty(value)) {
       replicationTrigger = ReplicationTrigger.validate(value);
     }
@@ -363,12 +399,16 @@ public class SessionConfiguration implements Serializable {
     if (nonEmpty(value)) {
       setNonCacheable(value);
     }
-    value = provider.getAttribute(DEFAULT_SESSION_TIMEOUT);
-    if (nonEmpty(value)) {
+    initMaxInactiveInterval(provider);
+  }
+
+  private void initMaxInactiveInterval(AttributeProvider provider) {
+    String val = provider.getAttribute(DEFAULT_SESSION_TIMEOUT);
+    if (nonEmpty(val)) {
       try {
-        maxInactiveInterval = Integer.parseInt(value);
+        maxInactiveInterval = Integer.parseInt(val);
       } catch (NumberFormatException e) {
-        logger.warn("`{}` configuration attribute was not an integer: {} for source {}", DEFAULT_SESSION_TIMEOUT, value,
+        logger.warn("`{}` configuration attribute was not an integer: {} for source {}", DEFAULT_SESSION_TIMEOUT, val,
             provider.source());
       }
     }
@@ -780,16 +820,6 @@ public class SessionConfiguration implements Serializable {
     return value;
   }
 
-  @Override
-  public String toString() {
-    return "SessionConfiguration [maxInactiveInterval=" + maxInactiveInterval + ", distributable=" + distributable
-        + ", sticky=" + sticky + ", loggingMdcActive=" + loggingMdcActive + ", loggingMdcKey=" + loggingMdcKey
-        + ", nonCacheable=" + nonCacheable + ", replicationTrigger=" + replicationTrigger + ", node=" + node
-        + ", namespace=" + namespace + ", providerConfiguration=" + providerConfiguration + ", repositoryFactory="
-        + repositoryFactory + ", sessionTracking=" + sessionTracking + ", sessionIdName=" + sessionIdName
-        + ", allowedCachedSessionReuse=" + allowedCachedSessionReuse + "]";
-  }
-
   /**
    * Sets attribute value. Used to add configuration items not supported by
    * {@link SessionConfiguration}.
@@ -822,15 +852,20 @@ public class SessionConfiguration implements Serializable {
    * Returns <code>true</code> if distribution/replication should be used even
    * when web app is marked as non-distributable.
    *
-   * @return the forceDistributable
+   * @return <code>true</code> if distribution/replication should be used even
+   *         when web app is marked as non-distributable.
    */
   public boolean isForceDistributable() {
     return forceDistributable;
   }
 
   /**
+   * Sets whether distribution/replication should be used even when web app is
+   * marked as non-distributable.
+   *
    * @param forceDistributable
-   *          the forceDistributable to set
+   *          <code>true</code> if distribution/replication should be used even
+   *          when web app is marked as non-distributable.
    */
   public void setForceDistributable(boolean forceDistributable) {
     this.forceDistributable = forceDistributable;
@@ -852,9 +887,89 @@ public class SessionConfiguration implements Serializable {
    * to session.
    *
    * @param commitOnAllConcurrent
-   *          the commitOnAllConcurrent to set
+   *          <code>true</code> if commit should be done on all concurrent
+   *          requests
    */
   public void setCommitOnAllConcurrent(boolean commitOnAllConcurrent) {
     this.commitOnAllConcurrent = commitOnAllConcurrent;
+  }
+
+  /**
+   * Returns <code>true</code> if session should be encrypted before storing in
+   * repository.
+   *
+   * @return <code>true</code> if session should be encrypted before storing in
+   *         repository
+   */
+  public boolean isUsingEncryption() {
+    return usingEncryption;
+  }
+
+  /**
+   * Sets whether the session data is stored in encrypted form in repository. If
+   * set to <code>true</code>, encryption key must be set also.
+   *
+   * @param usingEncryption
+   *          <code>true</code> if session data is stored in encrypted form
+   */
+  public void setUsingEncryption(boolean usingEncryption) {
+    this.usingEncryption = usingEncryption;
+  }
+
+  /**
+   * Returns encryption key to use. If encryption is disabled, returns
+   * <code>null</code>.
+   *
+   * @return the encryption key
+   */
+  public String getEncryptionKey() {
+    if (!usingEncryption) {
+      return null;
+    }
+    try {
+      URL url = new URL(encryptionKey);
+      if (allowedProtocol(url.getProtocol())) {
+        try (InputStream is = url.openStream(); Scanner s = new Scanner(is)) {
+          s.useDelimiter("\\A");
+          if (s.hasNext()) {
+            encryptionKey = s.next();
+            logger.info("Loaded ecnryption key from url `{}`", url);
+            return encryptionKey;
+          }
+          throw new IllegalStateException("Unable to load key from url `" + url + "`. Destination was empty.");
+        } catch (IOException e) {
+          throw new IllegalStateException("Unable to load key from url `" + url + "`.", e);
+        }
+      }
+      throw new IllegalStateException(
+          "Unknown protocol in url `" + url + "`. Supported protocols are file, http and https. ");
+    } catch (MalformedURLException e) { // NOSONAR Ignore
+      // When exception occurs, key is not URL
+      logger.info("Key was not provided via url.");
+    }
+    return encryptionKey;
+  }
+
+  /*
+   * (non-Javadoc)
+   *
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("SessionConfiguration [namespace=").append(namespace).append(", node=").append(node)
+        .append(", sessionIdName=").append(sessionIdName).append(", maxInactiveInterval=").append(maxInactiveInterval)
+        .append(", distributable=").append(distributable).append(", sticky=").append(sticky)
+        .append(", allowedCachedSessionReuse=").append(allowedCachedSessionReuse).append(", interceptListeners=")
+        .append(interceptListeners).append(", forceDistributable=").append(forceDistributable)
+        .append(", loggingMdcActive=").append(loggingMdcActive).append(", usingEncryption=").append(usingEncryption)
+        .append(", loggingMdcKey=").append(loggingMdcKey).append(", providerConfiguration=")
+        .append(providerConfiguration).append(", repositoryFactory=").append(repositoryFactory)
+        .append(", sessionTracking=").append(sessionTracking).append(", encryptionKey=").append(encryptionKey)
+        .append(", nonCacheable=").append(nonCacheable).append(", replicationTrigger=").append(replicationTrigger)
+        .append(", attributes=").append(attributes).append(", commitOnAllConcurrent=").append(commitOnAllConcurrent)
+        .append("]");
+    return builder.toString();
   }
 }

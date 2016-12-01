@@ -30,7 +30,7 @@ Useful links:
 
 * For details about installing the library see [docs/Usage.md](docs/Usage.md)
 * For information about building this project see [docs/BUILD.md](docs/BUILD.md).
-
+* For information about using session encryption see [doc/ENCRYPTION.md](doc/ENCRYPTION.md).
 
 ## HTTP Servlet support
 
@@ -140,6 +140,8 @@ It has the following characteristics:
 
 * Support of non-cacheable attributes, i.e. attributes that are stored or retrieved from repository on each access to session attribute.
   For details see Non-sticky sessions and concurrent access.
+
+* Support for session encryption when storing sessions into repository.
 
 #### Optimized session updates
 
@@ -747,6 +749,10 @@ initiate deletion. For example, at the instant 1439246090000, we would use
 ```redis
 ZRANGEBYSCORE com.amadeus.session:all-sessions-set 0 1439246090000
 ```
+
+## Session Encryption
+
+See [doc/ENCRYPTION.md](doc/ENCRYPTION.md).
 
 ## Thread pools
 
