@@ -1,6 +1,7 @@
 package com.amadeus.session;
 
 import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -8,7 +9,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import com.amadeus.session.SessionConfiguration.AttributeProvider;
@@ -16,6 +21,8 @@ import com.amadeus.session.SessionConfiguration.ReplicationTrigger;
 
 @SuppressWarnings("javadoc")
 public class TestSessionConfiguration {
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
 
   @Test
   public void testSessionConfigurationDefault() {
@@ -90,12 +97,16 @@ public class TestSessionConfiguration {
     Mockito.when(provider.getAttribute(SessionConfiguration.DEFAULT_SESSION_TIMEOUT)).thenReturn("100");
     Mockito.when(provider.getAttribute(SessionConfiguration.NON_CACHEABLE_ATTRIBUTES)).thenReturn("A,B");
     Mockito.when(provider.getAttribute(SessionConfiguration.SESSION_REPLICATION_TRIGGER)).thenReturn("SET");
+    Mockito.when(provider.getAttribute(SessionConfiguration.SESSION_ID_NAME)).thenReturn("SOMEID");
+    Mockito.when(provider.getAttribute(SessionConfiguration.LOG_MDC_SESSION_NAME)).thenReturn("");
     assertTrue(sc.isDistributable());
     sc.initializeFrom(provider);
     assertFalse(sc.isDistributable());
     assertEquals(100, sc.getMaxInactiveInterval());
     assertThat(sc.getNonCacheable(), hasItems("A", "B"));
     assertEquals(ReplicationTrigger.SET, sc.getReplicationTrigger());
+    assertEquals("SOMEID", sc.getSessionIdName());
+    assertEquals(SessionConfiguration.LOGGING_MDC_DEFAULT_KEY, sc.getLoggingMdcKey());
   }
 
   @Test
@@ -119,4 +130,55 @@ public class TestSessionConfiguration {
     }
   }
 
+  @Test
+  public void testEncryptionKey() {
+    SessionConfiguration sc = new SessionConfiguration();
+    assertFalse(sc.isUsingEncryption());
+    assertNull(sc.getEncryptionKey());
+    sc.setEncryptionKey("test");
+    assertTrue(sc.isUsingEncryption());
+    assertEquals("test", sc.getEncryptionKey());
+    sc.setUsingEncryption(false);
+    assertFalse(sc.isUsingEncryption());
+    assertNull(sc.getEncryptionKey());
+    sc.setEncryptionKey(getClass().getResource("test.key").toString());
+    assertEquals("key-contents", sc.getEncryptionKey());
+  }
+
+  @Test
+  public void testEncryptionKeyFromProvider() {
+    SessionConfiguration sc = new SessionConfiguration();
+    AttributeProvider provider = Mockito.mock(AttributeProvider.class);
+    Mockito.when(provider.getAttribute(SessionConfiguration.SESSION_ENCRYPTION_KEY)).thenReturn("a-key");
+    sc.initializeFrom(provider);
+    assertTrue(sc.isUsingEncryption());
+    assertEquals("a-key", sc.getEncryptionKey());
+  }
+
+  @Test
+  public void testEncryptionKeyBadProtocol() {
+    SessionConfiguration sc = new SessionConfiguration();
+    assertFalse(sc.isUsingEncryption());
+    sc.setEncryptionKey("ftp://example.com");
+    exception.expectMessage("Unknown protocol");
+    sc.getEncryptionKey();
+  }
+
+  @Test
+  public void testEncryptionKeyBadRetrieval() {
+    SessionConfiguration sc = new SessionConfiguration();
+    assertFalse(sc.isUsingEncryption());
+    sc.setEncryptionKey(getClass().getResource("test.key").toString() + ".dummy");
+    exception.expectCause(isA(IOException.class));
+    sc.getEncryptionKey();
+  }
+
+  @Test
+  public void testEncryptionKeyEmpty() {
+    SessionConfiguration sc = new SessionConfiguration();
+    assertFalse(sc.isUsingEncryption());
+    sc.setEncryptionKey(getClass().getResource("empty.key").toString());
+    exception.expectMessage("Destination was empty.");
+    sc.getEncryptionKey();
+  }
 }

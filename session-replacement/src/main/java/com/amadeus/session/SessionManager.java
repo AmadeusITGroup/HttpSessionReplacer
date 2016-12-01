@@ -134,7 +134,9 @@ public class SessionManager implements Closeable {
     commitTimer = monitoring.timer(COMMIT_TIMER_METRIC);
     fetchTimer = monitoring.timer(FETCH_TIMER_METRIC);
 
-    serializerDeserializer = new JdkSerializerDeserializer();
+    serializerDeserializer = configuration.isUsingEncryption() ?
+        new EncryptingSerializerDeserializer() :
+        new JdkSerializerDeserializer();
     serializerDeserializer.setSessionManager(this);
 
     factory.setSessionManager(this);

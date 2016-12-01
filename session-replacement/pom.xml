@@ -240,6 +240,19 @@
   </build>
   <profiles>
     <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <excludePackageNames>org.slf4j.*</excludePackageNames>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>redis-single</id>
       <properties>
         <it.com.amadeus.session.redis.expiration>NOTIF</it.com.amadeus.session.redis.expiration>

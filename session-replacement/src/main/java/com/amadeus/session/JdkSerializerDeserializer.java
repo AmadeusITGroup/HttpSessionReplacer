@@ -12,7 +12,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 
 /**
- * Default serailization/deserialization logic uses JDK serialization to convert
+ * Default serialization/deserialization logic uses JDK serialization to convert
  * objects to/from byte arrays.
  * <p>
  * The implementation will also measure the number of bytes that were serialized
