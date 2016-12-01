@@ -9,8 +9,6 @@ import org.junit.Test;
 
 import com.amadeus.session.SessionManager;
 
-import redis.clients.util.SafeEncoder;
-
 @SuppressWarnings("javadoc")
 public class TestExpirationListener {
 

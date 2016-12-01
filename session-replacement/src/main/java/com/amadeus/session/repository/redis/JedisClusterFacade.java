@@ -1,6 +1,6 @@
 package com.amadeus.session.repository.redis;
 
-import static redis.clients.util.SafeEncoder.encode;
+import static com.amadeus.session.repository.redis.SafeEncoder.encode;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,7 +16,6 @@ import redis.clients.jedis.BinaryJedisCommands;
 import redis.clients.jedis.BinaryJedisPubSub;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.Response;
 import redis.clients.jedis.Tuple;
 import redis.clients.jedis.exceptions.JedisClusterException;
 import redis.clients.util.JedisClusterCRC16;
@@ -27,7 +26,7 @@ import redis.clients.util.JedisClusterCRC16;
  * supported in cluster (e.g. rename), it also provides semantically similar
  * implementations.
  */
-class RedisClusterFacade extends AbstractRedisFacade implements RedisFacade {
+class JedisClusterFacade extends AbstractJedisFacade implements RedisFacade {
   private final TransactionalJedisCluster jedisCluster;
 
   /**
@@ -35,48 +34,37 @@ class RedisClusterFacade extends AbstractRedisFacade implements RedisFacade {
    *
    * @param jedisCluster
    */
-  RedisClusterFacade(TransactionalJedisCluster jedisCluster) {
+  JedisClusterFacade(TransactionalJedisCluster jedisCluster) {
     this.jedisCluster = jedisCluster;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.amadeus.session.repository.redis.IRedisFacade#psubscribe(redis.clients.
-   * jedis.BinaryJedisPubSub, java.lang.String)
-   */
   @Override
-  public void psubscribe(BinaryJedisPubSub listener, String pattern) {
-    jedisCluster.psubscribe(listener, encode(pattern));
+  public void psubscribe(final RedisPubSub listener, String pattern) {
+    BinaryJedisPubSub bps = new BinaryJedisPubSub() {
+      @Override
+      public void onPMessage(byte[] pattern, byte[] channel, byte[] message) {
+        listener.onPMessage(pattern, channel, message);
+      };
+    };
+    listener.link(bps);
+    jedisCluster.psubscribe(bps, encode(pattern));
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#hdel(byte[], byte)
-   */
+  @Override
+  public void punsubscribe(final RedisPubSub listener, byte[] pattern) {
+    ((BinaryJedisPubSub) listener.getLinked()).punsubscribe(pattern);
+  }
+
   @Override
   public Long hdel(byte[] key, byte[]... fields) {
     return jedisCluster.hdel(key, fields);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#hmget(byte[], byte)
-   */
   @Override
   public List<byte[]> hmget(byte[] key, byte[]... fields) {
     return jedisCluster.hmget(key, fields);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#hmset(byte[],
-   * java.util.Map)
-   */
   @Override
   public String hmset(byte[] key, Map<byte[], byte[]> hash) {
     return jedisCluster.hmset(key, hash);
@@ -93,126 +81,63 @@ class RedisClusterFacade extends AbstractRedisFacade implements RedisFacade {
     return jedisCluster.hsetnx(key, field, value);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#hset(byte[], byte[],
-   * byte[])
-   */
   @Override
   public Long hset(final byte[] key, final byte[] field, final byte[] value) {
     return jedisCluster.hset(key, field, value);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#hkeys(byte[])
-   */
   @Override
   public Set<byte[]> hkeys(byte[] key) {
     return jedisCluster.hkeys(key);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#set(byte[], byte[])
-   */
   @Override
   public String set(byte[] key, byte[] value) {
     return jedisCluster.set(key, value);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#setex(byte[], int,
-   * byte[])
-   */
   @Override
   public String setex(byte[] key, int expiry, byte[] value) {
     return jedisCluster.setex(key, expiry, value);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#expire(byte[], int)
-   */
   @Override
   public Long expire(byte[] key, int value) {
     return jedisCluster.expire(key, value);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#srem(byte[], byte)
-   */
   @Override
   public void srem(byte[] key, byte[]... member) {
     jedisCluster.srem(key, member);
     return;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#sadd(byte[], byte)
-   */
   @Override
   public Long sadd(byte[] key, byte[]... member) {
     return jedisCluster.sadd(key, member);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#del(byte)
-   */
   @Override
   public Long del(byte[]... keys) {
     return jedisCluster.del(keys);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#exists(byte[])
-   */
   @Override
   public Boolean exists(byte[] key) {
     return jedisCluster.exists(key);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#smembers(byte[])
-   */
   @Override
   public Set<byte[]> smembers(byte[] key) {
     return jedisCluster.smembers(key);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#spop(byte[], long)
-   */
   @Override
   public Set<byte[]> spop(byte[] key, long count) {
 
     return jedisCluster.spop(key, count);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#expireAt(byte[],
-   * long)
-   */
   @Override
   public Long expireAt(byte[] key, long unixTime) {
     return jedisCluster.expireAt(key, unixTime);
@@ -283,16 +208,6 @@ class RedisClusterFacade extends AbstractRedisFacade implements RedisFacade {
     return jedisCluster.info(section);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#transaction(byte[],
-   * com.amadeus.session.repository.redis.RedisFacade.RedisTransaction)
-   */
-  @Override
-  public <T> Response<T> transaction(final byte[] key, final RedisTransaction<T> transaction) {
-    return jedisCluster.transaction(key, transaction);
-  }
 
   @Override
   public void close() {
@@ -472,7 +387,18 @@ class RedisClusterFacade extends AbstractRedisFacade implements RedisFacade {
   @Override
   public void startMonitoring(MetricRegistry metrics) {
     for (JedisPool item : jedisCluster.getClusterNodes().values()) {
-      RedisPoolFacade.addMetrics(item, metrics);
+      JedisPoolFacade.addMetrics(item, metrics);
     }
+  }
+
+  /*
+   * (non-Javadoc)
+   *
+   * @see com.amadeus.session.repository.redis.IRedisFacade#transaction(byte[],
+   * com.amadeus.session.repository.redis.RedisFacade.RedisTransaction)
+   */
+  @Override
+  public <T> RedisFacade.ResponseFacade<T> transaction(final byte[] key, final TransactionRunner<T> transaction) {
+    return jedisCluster.transaction(key, transaction);
   }
 }

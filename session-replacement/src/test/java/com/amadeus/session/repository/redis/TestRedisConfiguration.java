@@ -3,15 +3,14 @@ package com.amadeus.session.repository.redis;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.amadeus.session.SessionConfiguration;
-
-import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.JedisPoolConfig;
+import com.amadeus.session.repository.redis.RedisConfiguration.HostAndPort;
 
 /**
  * Test redis {@link RedisConfiguration} object
@@ -51,22 +50,22 @@ public class TestRedisConfiguration {
   @Test
   public void testExtractHostsAndPorts() {
     RedisConfiguration configuration = new RedisConfiguration(sc);
-    Set<HostAndPort> hostsAndPorts = configuration.hostsAndPorts();
+    List<HostAndPort> hostsAndPorts = configuration.hostsAndPorts();
     assertEquals(1, hostsAndPorts.size());
-    assertEquals("127.0.0.1", hostsAndPorts.iterator().next().getHost());
+    assertEquals("127.0.0.1", hostsAndPorts.iterator().next().host);
   }
 
   @Test
   public void testExtractManyHostsAndPorts() {
     sc.setProviderConfiguration("host=1.2.3.4:2/5.6.7.8");
     RedisConfiguration configuration = new RedisConfiguration(sc);
-    Set<HostAndPort> hostsAndPorts = configuration.hostsAndPorts();
+    List<HostAndPort> hostsAndPorts = configuration.hostsAndPorts();
     assertEquals(2, hostsAndPorts.size());
     ArrayList<HostAndPort> asList = new ArrayList<>(hostsAndPorts);
-    assertEquals("1.2.3.4", asList.get(0).getHost());
-    assertEquals(2, asList.get(0).getPort());
-    assertEquals("5.6.7.8", asList.get(1).getHost());
-    assertEquals(6379, asList.get(1).getPort());
+    assertEquals("1.2.3.4", asList.get(0).host);
+    assertEquals(2, asList.get(0).port);
+    assertEquals("5.6.7.8", asList.get(1).host);
+    assertEquals(6379, asList.get(1).port);
   }
 
   @Test
@@ -75,13 +74,5 @@ public class TestRedisConfiguration {
     Set<String> sentinels = configuration.sentinels();
     assertEquals(1, sentinels.size());
     assertEquals("localhost", sentinels.iterator().next());
-  }
-
-  @Test
-  public void testConfigurePool() {
-    RedisConfiguration configuration = new RedisConfiguration(sc);
-    configuration.poolSize = "500";
-    JedisPoolConfig pool = configuration.configurePool();
-    assertEquals(500, pool.getMaxTotal());
   }
 }

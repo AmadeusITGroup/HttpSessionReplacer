@@ -1,7 +1,7 @@
 package com.amadeus.session.repository.redis;
 
+import static com.amadeus.session.repository.redis.SafeEncoder.encode;
 import static com.codahale.metrics.MetricRegistry.name;
-import static redis.clients.util.SafeEncoder.encode;
 
 import java.util.List;
 import java.util.Map;
@@ -14,7 +14,6 @@ import redis.clients.jedis.BinaryJedisCommands;
 import redis.clients.jedis.BinaryJedisPubSub;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
 import redis.clients.util.Pool;
 
@@ -23,7 +22,7 @@ import redis.clients.util.Pool;
  * {@link JedisCluster}. The implementation offers subset of
  * {@link BinaryJedisCommands}.
  */
-class RedisPoolFacade extends AbstractRedisFacade implements RedisFacade {
+class JedisPoolFacade extends AbstractJedisFacade implements RedisFacade {
   private final Pool<Jedis> jedisPool;
   private final ThreadLocal<Jedis> currentJedis = new ThreadLocal<>();
 
@@ -33,7 +32,7 @@ class RedisPoolFacade extends AbstractRedisFacade implements RedisFacade {
    * @param jedisPool
    *          pool of jedis connections
    */
-  RedisPoolFacade(Pool<Jedis> jedisPool) {
+  JedisPoolFacade(Pool<Jedis> jedisPool) {
     this.jedisPool = jedisPool;
   }
 
@@ -60,44 +59,33 @@ class RedisPoolFacade extends AbstractRedisFacade implements RedisFacade {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.amadeus.session.repository.redis.IRedisFacade#psubscribe(redis.clients.
-   * jedis.BinaryJedisPubSub, java.lang.String)
-   */
   @Override
-  public void psubscribe(BinaryJedisPubSub listener, String pattern) {
-    jedis().psubscribe(listener, encode(pattern));
+  public void psubscribe(final RedisPubSub listener, String pattern) {
+    BinaryJedisPubSub bps = new BinaryJedisPubSub() {
+      @Override
+      public void onPMessage(byte[] pattern, byte[] channel, byte[] message) {
+        listener.onPMessage(pattern, channel, message);
+      };
+    };
+    listener.link(bps);
+    jedis().psubscribe(bps, encode(pattern));
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#hdel(byte[], byte)
-   */
+  @Override
+  public void punsubscribe(final RedisPubSub listener, byte[] pattern) {
+    ((BinaryJedisPubSub) listener.getLinked()).punsubscribe(pattern);
+  }
+
   @Override
   public Long hdel(byte[] key, byte[]... fields) {
     return jedis().hdel(key, fields);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#hmget(byte[], byte)
-   */
   @Override
   public List<byte[]> hmget(byte[] key, byte[]... fields) {
     return jedis().hmget(key, fields);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#hmset(byte[],
-   * java.util.Map)
-   */
   @Override
   public String hmset(byte[] key, Map<byte[], byte[]> hash) {
     return jedis().hmset(key, hash);
@@ -258,60 +246,30 @@ class RedisPoolFacade extends AbstractRedisFacade implements RedisFacade {
     return jedis().zrem(key, fields);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.amadeus.session.repository.redis.IRedisFacade#zrangeByScore(byte[],
-   * double, double)
-   */
   @Override
   public Set<byte[]> zrangeByScore(byte[] key, double start, double end) {
     return jedis().zrangeByScore(key, start, end);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#zrange(byte[], long,
-   * long)
-   */
   @Override
   public Set<byte[]> zrange(byte[] key, long start, long end) {
     return jedis().zrange(key, start, end);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#persist(byte[])
-   */
   @Override
   public Long persist(byte[] key) {
     return jedis().persist(key);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.amadeus.session.repository.redis.IRedisFacade#info(java.lang.String)
-   */
   @Override
   public String info(String section) {
     return jedis().info(section);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#transaction(byte[],
-   * com.amadeus.session.repository.redis.RedisFacade.RedisTransaction)
-   */
   @Override
-  public <T> Response<T> transaction(final byte[] key, final RedisTransaction<T> transaction) {
-    Transaction t = jedis().multi();
-    Response<T> response = transaction.run(t);
+  public <T> RedisFacade.ResponseFacade<T> transaction(final byte[] key, final TransactionRunner<T> transaction) {
+    final Transaction t = jedis().multi();
+    RedisFacade.ResponseFacade<T> response = transaction.run(wrapJedisTransaction(t));
     t.exec();
     return response;
   }

@@ -1,5 +1,6 @@
 package com.amadeus.session.repository.redis;
 
+import static com.amadeus.session.repository.redis.SafeEncoder.encode;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -15,7 +16,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static redis.clients.util.SafeEncoder.encode;
 
 import java.nio.BufferUnderflowException;
 import java.util.Arrays;
@@ -40,9 +40,6 @@ import com.amadeus.session.SessionData;
 import com.amadeus.session.SessionManager;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
-
-import redis.clients.jedis.Protocol;
-import redis.clients.util.SafeEncoder;
 
 @SuppressWarnings("javadoc")
 public class TestRedisSessionRepository {
@@ -187,7 +184,7 @@ public class TestRedisSessionRepository {
     RedisFacade facade = mock(RedisFacade.class);
     try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.NOTIF, false)) {
       byte[] key = new byte[] { 35, 58, 105, 110, 118, 97, 108, 105, 100, 83, 101, 115, 115, 105, 111, 110 };
-      byte[] value = Protocol.BYTES_TRUE;
+      byte[] value = RedisSessionRepository.BYTES_TRUE;
       Map<byte[], byte[]> result = new HashMap<>();
       result.put(key, value);
       rsr.prepareRemove(new SessionData("401", 100, 10));

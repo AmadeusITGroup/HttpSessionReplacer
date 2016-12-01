@@ -32,12 +32,7 @@ import org.mockito.stubbing.Answer;
 import com.amadeus.session.SessionData;
 import com.amadeus.session.SessionManager;
 import com.amadeus.session.repository.redis.NotificationExpirationManagement.SubscriptionRunner;
-import com.amadeus.session.repository.redis.RedisFacade.RedisTransaction;
-
-import redis.clients.jedis.BinaryJedisPubSub;
-import redis.clients.jedis.Response;
-import redis.clients.jedis.exceptions.JedisException;
-import redis.clients.util.SafeEncoder;
+import com.amadeus.session.repository.redis.RedisFacade.TransactionRunner;
 
 @SuppressWarnings("javadoc")
 public class TestNotificationExpirationManagement {
@@ -173,7 +168,7 @@ public class TestNotificationExpirationManagement {
     ArgumentCaptor<Runnable> cleanupCapture = ArgumentCaptor.forClass(Runnable.class);
     verify(sessionManager).submit(anyString(), cleanupCapture.capture());
     cleanupCapture.getValue().run();
-    verify(redis).psubscribe(any(BinaryJedisPubSub.class), anyString());
+    verify(redis).psubscribe(any(RedisFacade.RedisPubSub.class), anyString());
   }
 
   @Test
@@ -182,9 +177,15 @@ public class TestNotificationExpirationManagement {
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
-        throw new JedisException("Test");
+        throw new DummyException("Test");
       }
-    }).when(redis).psubscribe(any(BinaryJedisPubSub.class), anyString());
+    }).when(redis).psubscribe(any(RedisFacade.RedisPubSub.class), anyString());
+    doAnswer(new Answer<Boolean>() {
+      @Override
+      public Boolean answer(InvocationOnMock invocation) throws Throwable {
+        return true;
+      }
+    }).when(redis).isRedisException(any(DummyException.class));
     final ArrayList<Long> delays = new ArrayList<>();
     SubscriptionRunner runner = expiration.new SubscriptionRunner(sessionManager) {
       @Override
@@ -201,15 +202,21 @@ public class TestNotificationExpirationManagement {
   }
 
   @Test
-  public void testSubscriptionRunnerWithInterruptedThreadJedisException() {
+  public void testSubscriptionRunnerWithInterruptedThreadRedisException() {
     SessionManager sessionManager = mock(SessionManager.class);
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
         Thread.currentThread().interrupt();
-        throw new JedisException("Test");
+        throw new DummyException("Test");
       }
-    }).when(redis).psubscribe(any(BinaryJedisPubSub.class), anyString());
+    }).when(redis).psubscribe(any(RedisFacade.RedisPubSub.class), anyString());
+    doAnswer(new Answer<Boolean>() {
+      @Override
+      public Boolean answer(InvocationOnMock invocation) throws Throwable {
+        return true;
+      }
+    }).when(redis).isRedisException(any(DummyException.class));
     SubscriptionRunner runner = spy(expiration.new SubscriptionRunner(sessionManager));
     runner.run();
     verify(runner, never()).doWait();
@@ -221,9 +228,15 @@ public class TestNotificationExpirationManagement {
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
-        throw new JedisException("Test", new InterruptedException());
+        throw new DummyException("Test", new InterruptedException());
       }
-    }).when(redis).psubscribe(any(BinaryJedisPubSub.class), anyString());
+    }).when(redis).psubscribe(any(RedisFacade.RedisPubSub.class), anyString());
+    doAnswer(new Answer<Boolean>() {
+      @Override
+      public Boolean answer(InvocationOnMock invocation) throws Throwable {
+        return true;
+      }
+    }).when(redis).isRedisException(any(DummyException.class));
     SubscriptionRunner runner = spy(expiration.new SubscriptionRunner(sessionManager));
     runner.run();
     verify(runner, never()).doWait();
@@ -238,7 +251,7 @@ public class TestNotificationExpirationManagement {
         Thread.currentThread().interrupt();
         throw new Exception("Test");
       }
-    }).when(redis).psubscribe(any(BinaryJedisPubSub.class), anyString());
+    }).when(redis).psubscribe(any(RedisFacade.RedisPubSub.class), anyString());
     SubscriptionRunner runner = spy(expiration.new SubscriptionRunner(sessionManager));
     runner.run();
     verify(runner, never()).doWait();
@@ -252,7 +265,7 @@ public class TestNotificationExpirationManagement {
       public Void answer(InvocationOnMock invocation) throws Throwable {
         throw new Exception("Test");
       }
-    }).when(redis).psubscribe(any(BinaryJedisPubSub.class), anyString());
+    }).when(redis).psubscribe(any(RedisFacade.RedisPubSub.class), anyString());
     final ArrayList<Long> delays = new ArrayList<>();
     SubscriptionRunner runner = expiration.new SubscriptionRunner(sessionManager) {
       @Override
@@ -280,11 +293,11 @@ public class TestNotificationExpirationManagement {
   @Test
   public void testGetKeysToExpire() {
     Set<byte[]> expected = Collections.singleton(new byte[] { 1 });
-    Response<Object> value = mock(Response.class);
+    RedisFacade.ResponseFacade<Object> value = mock(RedisFacade.ResponseFacade.class);
     when(value.get()).thenReturn(expected);
-    when(redis.transaction(eq(encode("Test")), any(RedisTransaction.class))).thenReturn(value);
+    when(redis.transaction(eq(encode("Test")), any(TransactionRunner.class))).thenReturn(value);
     Set<byte[]> result = expiration.getKeysToExpire(encode("Test"));
     assertSame(expected, result);
-    verify(redis).transaction(eq(encode("Test")), any(RedisTransaction.class));
+    verify(redis).transaction(eq(encode("Test")), any(TransactionRunner.class));
   }
 }

@@ -1,8 +1,8 @@
 package com.amadeus.session.repository.redis;
 
+import static com.amadeus.session.repository.redis.SafeEncoder.encode;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static redis.clients.util.SafeEncoder.encode;
 
 import java.util.Calendar;
 import java.util.Set;
@@ -15,11 +15,8 @@ import org.slf4j.LoggerFactory;
 import com.amadeus.session.SessionData;
 import com.amadeus.session.SessionManager;
 import com.amadeus.session.WrappedException;
-import com.amadeus.session.repository.redis.RedisFacade.RedisTransaction;
-
-import redis.clients.jedis.Response;
-import redis.clients.jedis.Transaction;
-import redis.clients.jedis.exceptions.JedisException;
+import com.amadeus.session.repository.redis.RedisFacade.ResponseFacade;
+import com.amadeus.session.repository.redis.RedisFacade.TransactionRunner;
 
 /**
  * A strategy for expiring session instances. This performs several operations:
@@ -337,7 +334,7 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
   Set<byte[]> getKeysToExpire(byte[] key) {
     // In Redis 3.2 we use SPOP to get bulk of keys to expire
     if (!redis.supportsMultiSpop()) {
-      return redis.transaction(key, smembersAndDel(key)).get();
+      return redis.transaction(key, smembersAndDel(redis, key)).get();
     } else {
       Set<byte[]> res = redis.spop(key, SPOP_BULK_SIZE);
       if (res == null || res.isEmpty() || res.size() < SPOP_BULK_SIZE) {
@@ -355,11 +352,11 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
    *          the key for Redis set
    * @return result of SMEMBERS call
    */
-  static RedisTransaction<Set<byte[]>> smembersAndDel(final byte[] key) {
-    return new RedisFacade.RedisTransaction<Set<byte[]>>() {
+  static TransactionRunner<Set<byte[]>> smembersAndDel(RedisFacade redis, final byte[] key) {
+    return new RedisFacade.TransactionRunner<Set<byte[]>>() {
       @Override
-      public Response<Set<byte[]>> run(Transaction transaction) {
-        Response<Set<byte[]>> result = transaction.smembers(key);
+      public RedisFacade.ResponseFacade<Set<byte[]>> run(RedisFacade.TransactionFacade transaction) {
+        ResponseFacade<Set<byte[]>> result = transaction.smembers(key);
         transaction.del(key);
         return result;
       }
@@ -436,17 +433,17 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
           expirationListener.start(redis);
           logger.info("Stopped subscribing for expiration events.");
           break;
-        } catch (JedisException e) {
+        } catch (Exception e) { // NOSONAR
           if (Thread.interrupted()) {
             return;
           }
-          if (e.getCause() instanceof InterruptedException) {
-            logger.warn("Interrupted subscribtion for expiration events.");
-            break;
+          if (redis.isRedisException(e)) {
+            if (e.getCause() instanceof InterruptedException) {
+              logger.warn("Interrupted subscribtion for expiration events.");
+              break;
+            }
           }
           retryOnException(e);
-        } catch (Exception e) { // NOSONAR We may get some other exceptions, so
-                                // let's recover from them
           if (Thread.interrupted()) {
             return;
           }
@@ -502,7 +499,7 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
   @Override
   public void close() {
     if (expirationListener != null) {
-      expirationListener.close();
+      expirationListener.close(redis);
       expirationListener = null;
     }
     if (cleanupFuture != null) {

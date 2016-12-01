@@ -24,7 +24,7 @@ import org.mockito.ArgumentCaptor;
 
 import com.amadeus.session.SessionConfiguration;
 import com.amadeus.session.repository.inmemory.InMemoryRepositoryFactory;
-import com.amadeus.session.repository.redis.RedisSessionRepositoryFactory;
+import com.amadeus.session.repository.redis.JedisSessionRepositoryFactory;
 
 @SuppressWarnings("javadoc")
 public class TestInitializeSessionManagement {
@@ -73,7 +73,7 @@ public class TestInitializeSessionManagement {
     ArgumentCaptor<HashMap> arg = ArgumentCaptor.forClass(HashMap.class);
     verify(context).setAttribute(eq(PROVIDERS), arg.capture());
     assertTrue(arg.getValue().containsKey("redis"));
-    assertEquals(RedisSessionRepositoryFactory.class.getName(), arg.getValue().get("redis"));
+    assertEquals(JedisSessionRepositoryFactory.class.getName(), arg.getValue().get("redis"));
     assertTrue(arg.getValue().containsKey("in-memory"));
     assertEquals(InMemoryRepositoryFactory.class.getName(), arg.getValue().get("in-memory"));
   }

@@ -1,5 +1,6 @@
 package com.amadeus.session.repository.redis;
 
+import static com.amadeus.session.repository.redis.SafeEncoder.encode;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -13,7 +14,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static redis.clients.util.SafeEncoder.encode;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -26,8 +26,6 @@ import com.amadeus.session.SessionConfiguration;
 import com.amadeus.session.SessionData;
 import com.amadeus.session.SessionManager;
 import com.amadeus.session.repository.redis.SortedSetSessionExpirationManagement.CleanupTask;
-
-import redis.clients.util.SafeEncoder;
 
 @SuppressWarnings("javadoc")
 public class TestSortedSetExpiration {

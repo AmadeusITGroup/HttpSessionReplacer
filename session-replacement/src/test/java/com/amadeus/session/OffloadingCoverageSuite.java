@@ -6,9 +6,9 @@ import org.junit.runners.Suite;
 import com.amadeus.session.repository.inmemory.TestInMemoryRepository;
 import com.amadeus.session.repository.redis.TestExpirationListener;
 import com.amadeus.session.repository.redis.TestNotificationExpirationManagement;
-import com.amadeus.session.repository.redis.TestRedisClusterFacade;
+import com.amadeus.session.repository.redis.TestJedisClusterFacade;
 import com.amadeus.session.repository.redis.TestRedisConfiguration;
-import com.amadeus.session.repository.redis.TestRedisPoolFacade;
+import com.amadeus.session.repository.redis.TestJedisPoolFacade;
 import com.amadeus.session.repository.redis.TestRedisSessionRepository;
 import com.amadeus.session.repository.redis.TestRedisSessionRepositoryFactory;
 import com.amadeus.session.repository.redis.TestSortedSetExpiration;
@@ -43,7 +43,7 @@ import com.amadeus.session.servlet.TestWebXmlParser;
   TestHttpSessionFactory.class,
   TestSessionHelpers.class,
   TestShutdownListener.class,
-  TestRedisClusterFacade.class,
+  TestJedisClusterFacade.class,
   TestWebXmlParser.class,
   TestCookieSessionTracking.class,
   TestUrlSessionTracking.class,
@@ -53,8 +53,8 @@ import com.amadeus.session.servlet.TestWebXmlParser;
   TestInMemoryRepository.class,
 
   TestExpirationListener.class,
-  TestRedisClusterFacade.class,
-  TestRedisPoolFacade.class,
+  TestJedisClusterFacade.class,
+  TestJedisPoolFacade.class,
   TestRedisSessionRepository.class,
   TestSortedSetExpiration.class,
   TestNotificationExpirationManagement.class,
