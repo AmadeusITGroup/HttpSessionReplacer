@@ -1,7 +1,7 @@
 package com.amadeus.session.repository.redis;
 
 import static com.amadeus.session.repository.redis.RedisSessionRepository.extractSessionId;
-import static redis.clients.util.SafeEncoder.encode;
+import static com.amadeus.session.repository.redis.SafeEncoder.encode;
 
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;

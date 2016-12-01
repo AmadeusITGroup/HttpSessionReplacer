@@ -3,17 +3,16 @@ package com.amadeus.session.repository.redis;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amadeus.session.SessionConfiguration;
-
-import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * This class encapsulates configuration of Redis servers. It provides helper
@@ -197,8 +196,8 @@ class RedisConfiguration {
    *
    * @return set containing host ip addresses and ports.
    */
-  Set<HostAndPort> hostsAndPorts() {
-    Set<HostAndPort> hostAndPort = new HashSet<>();
+  List<HostAndPort> hostsAndPorts() {
+    List<HostAndPort> hostAndPort = new ArrayList<>();
     int defaultPort = Integer.parseInt(this.port);
     try {
       String[] servers = server.split("[/;]");
@@ -217,7 +216,7 @@ class RedisConfiguration {
     return hostAndPort;
   }
 
-  private void collectHosts(Set<HostAndPort> hostAndPort, String[] serverAndPort, int portToUse)
+  private void collectHosts(List<HostAndPort> hostAndPort, String[] serverAndPort, int portToUse)
       throws UnknownHostException {
     InetAddress[] hosts = resolveServers(serverAndPort[0]);
     for (InetAddress host : hosts) {
@@ -286,19 +285,6 @@ class RedisConfiguration {
     return new HashSet<>(Arrays.asList(server.split("[/;]")));
   }
 
-  /**
-   * Configures Jedis pool of connection.
-   *
-   * @return configured Jedis pool of connection.
-   */
-  JedisPoolConfig configurePool() {
-    JedisPoolConfig poolConfig = new JedisPoolConfig();
-    poolConfig.setMaxTotal(Integer.parseInt(this.poolSize));
-    poolConfig.setMaxIdle(Math.min(poolConfig.getMaxIdle(), poolConfig.getMaxTotal()));
-    poolConfig.setMinIdle(Math.min(poolConfig.getMinIdle(), poolConfig.getMaxIdle()));
-    return poolConfig;
-  }
-
   /*
    * (non-Javadoc)
    *
@@ -313,5 +299,15 @@ class RedisConfiguration {
         .append(supportIpV4).append(", timeout=")
         .append(timeout).append("]");
     return builder.toString();
+  }
+
+  static class HostAndPort {
+    final String host;
+    final int port;
+
+    HostAndPort(String host, int port) {
+      this.host = host;
+      this.port = port;
+    }
   }
 }

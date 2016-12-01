@@ -6,27 +6,30 @@ import java.util.Set;
 
 import com.codahale.metrics.MetricRegistry;
 
-import redis.clients.jedis.BinaryJedisCommands;
-import redis.clients.jedis.BinaryJedisPubSub;
-import redis.clients.jedis.Response;
-import redis.clients.jedis.Transaction;
-
 /**
- * This interface offers subset of {@link BinaryJedisCommands}. The subset
- * offers commands used by redis session repository implementation.
+ * This interface offers subset of redis.clients.jedis.BinaryJedisCommands. The
+ * subset offers commands used by redis session repository implementation.
  */
 interface RedisFacade {
 
   /**
-   * See {@link MultiKeyBinaryCommands#psubscribe(BinaryJedisPubSub, byte[]...)}
+   * See BinaryJedisCommands#psubscribe(BinaryJedisPubSub, byte[]...)
    *
    * @param listener
    * @param pattern
    */
-  void psubscribe(BinaryJedisPubSub listener, String pattern);
+  void psubscribe(RedisPubSub listener, String pattern);
 
   /**
-   * See {@link BinaryJedisCommands#hdel(byte[], byte[]...)}
+   * See BinaryJedisPubSub#punsubscribe(byte[]...)
+   *
+   * @param listener
+   * @param pattern
+   */
+  void punsubscribe(RedisPubSub expirationListener, byte[] pattern);
+
+  /**
+   * See redis.clients.jedis.BinaryJedisCommands#hdel(byte[], byte[]...)
    *
    * @param key
    * @param fields
@@ -35,7 +38,7 @@ interface RedisFacade {
   Long hdel(byte[] key, byte[]... fields);
 
   /**
-   * See {@link BinaryJedisCommands#hmget(byte[], byte[]...)}
+   * See redis.clients.jedis.BinaryJedisCommands#hmget(byte[], byte[]...)
    *
    * @param key
    * @param fields
@@ -45,7 +48,7 @@ interface RedisFacade {
   List<byte[]> hmget(byte[] key, byte[]... fields);
 
   /**
-   * See {@link BinaryJedisCommands#hmset(byte[], Map)}
+   * See redis.clients.jedis.BinaryJedisCommands#hmset(byte[], Map)
    *
    * @param key
    * @param hash
@@ -54,7 +57,7 @@ interface RedisFacade {
   String hmset(byte[] key, Map<byte[], byte[]> hash);
 
   /**
-   * See {@link BinaryJedisCommands#hsetnx(byte[], byte[], byte[])}
+   * See redis.clients.jedis.BinaryJedisCommands#hsetnx(byte[], byte[], byte[])
    *
    * @param key
    * @param field
@@ -64,7 +67,7 @@ interface RedisFacade {
   Long hsetnx(byte[] key, byte[] field, byte[] value);
 
   /**
-   * See {@link BinaryJedisCommands#hset(byte[], byte[], byte[])}
+   * See redis.clients.jedis.BinaryJedisCommands#hset(byte[], byte[], byte[])
    *
    * @param key
    * @param field
@@ -74,7 +77,7 @@ interface RedisFacade {
   Long hset(byte[] key, byte[] field, byte[] value);
 
   /**
-   * See {@link BinaryJedisCommands#hkeys(byte[])}
+   * See redis.clients.jedis.BinaryJedisCommands#hkeys(byte[])
    *
    * @param key
    * @return
@@ -82,7 +85,7 @@ interface RedisFacade {
   Set<byte[]> hkeys(byte[] key);
 
   /**
-   * See {@link BinaryJedisCommands#set(byte[], byte[])}
+   * See redis.clients.jedis.BinaryJedisCommands#set(byte[], byte[])
    *
    * @param key
    * @param value
@@ -91,7 +94,7 @@ interface RedisFacade {
   String set(byte[] key, byte[] value);
 
   /**
-   * See {@link BinaryJedisCommands#setx(byte[], int, byte[])}
+   * See redis.clients.jedis.BinaryJedisCommands#setx(byte[], int, byte[])
    *
    * @param key
    * @param expiry
@@ -101,7 +104,7 @@ interface RedisFacade {
   String setex(byte[] key, int expiry, byte[] value);
 
   /**
-   * See {@link BinaryJedisCommands#expire(byte[], int)}
+   * See redis.clients.jedis.BinaryJedisCommands#expire(byte[], int)
    *
    * @param key
    * @param value
@@ -110,7 +113,7 @@ interface RedisFacade {
   Long expire(byte[] key, int value);
 
   /**
-   * See {@link BinaryJedisCommands#srem(byte[], byte[]...)}
+   * See redis.clients.jedis.BinaryJedisCommands#srem(byte[], byte[]...)
    *
    * @param key
    * @param member
@@ -118,7 +121,7 @@ interface RedisFacade {
   void srem(byte[] key, byte[]... member);
 
   /**
-   * See {@link BinaryJedisCommands#sadd(byte[], byte[]...)}
+   * See redis.clients.jedis.BinaryJedisCommands#sadd(byte[], byte[]...)
    *
    * @param key
    * @param member
@@ -127,7 +130,7 @@ interface RedisFacade {
   Long sadd(byte[] key, byte[]... member);
 
   /**
-   * See {@link BinaryJedisCommands#del(byte[]...)}
+   * See redis.clients.jedis.BinaryJedisCommands#del(byte[]...)
    *
    * @param keys
    * @return
@@ -135,7 +138,7 @@ interface RedisFacade {
   Long del(byte[]... keys);
 
   /**
-   * See {@link BinaryJedisCommands#exists(byte[])}
+   * See redis.clients.jedis.BinaryJedisCommands#exists(byte[])
    *
    * @param key
    * @return
@@ -143,7 +146,7 @@ interface RedisFacade {
   Boolean exists(byte[] key);
 
   /**
-   * See {@link BinaryJedisCommands#smembers(byte[])}
+   * See redis.clients.jedis.BinaryJedisCommands#smembers(byte[])
    *
    * @param key
    * @return
@@ -151,7 +154,7 @@ interface RedisFacade {
   Set<byte[]> smembers(byte[] key);
 
   /**
-   * See {@link BinaryJedisCommands#spop(byte[], long)}
+   * See redis.clients.jedis.BinaryJedisCommands#spop(byte[], long)
    *
    * @param key
    * @param count
@@ -160,7 +163,7 @@ interface RedisFacade {
   Set<byte[]> spop(byte[] key, long count);
 
   /**
-   * See {@link BinaryJedisCommands#expireAt(byte[], long)}
+   * See redis.clients.jedis.BinaryJedisCommands#expireAt(byte[], long)
    *
    * @param key
    * @param unixTime
@@ -169,7 +172,7 @@ interface RedisFacade {
   Long expireAt(byte[] key, long unixTime);
 
   /**
-   * See {@link BinaryJedisCommands#zadd(byte[], byte[]...)}
+   * See redis.clients.jedis.BinaryJedisCommands#zadd(byte[], byte[]...)
    *
    * @param key
    * @param score
@@ -179,7 +182,7 @@ interface RedisFacade {
   Long zadd(byte[] key, double score, byte[] elem);
 
   /**
-   * See {@link BinaryJedisCommands#zrem(byte[], byte[]...)}
+   * See redis.clients.jedis.BinaryJedisCommands#zrem(byte[], byte[]...)
    *
    * @param key
    * @param fields
@@ -188,7 +191,8 @@ interface RedisFacade {
   Long zrem(byte[] key, byte[]... fields);
 
   /**
-   * See {@link BinaryJedisCommands#zrangeByScore(byte[], double, double)}
+   * See redis.clients.jedis.BinaryJedisCommands#zrangeByScore(byte[], double,
+   * double)
    *
    * @param key
    * @param start
@@ -198,7 +202,7 @@ interface RedisFacade {
   Set<byte[]> zrangeByScore(byte[] key, double start, double end);
 
   /**
-   * See {@link BinaryJedisCommands#zrange(byte[], long, long)}
+   * See redis.clients.jedis.BinaryJedisCommands#zrange(byte[], long, long)
    *
    * @param key
    * @param start
@@ -208,7 +212,7 @@ interface RedisFacade {
   Set<byte[]> zrange(byte[] key, long start, long end);
 
   /**
-   * See {@link BinaryJedisCommands#persist(byte[])}
+   * See redis.clients.jedis.BinaryJedisCommands#persist(byte[])
    *
    * @param key
    * @return
@@ -216,7 +220,7 @@ interface RedisFacade {
   Long persist(byte[] key);
 
   /**
-   * See {@link BinaryJedisCommands#rename(byte[], byte[])}
+   * See redis.clients.jedis.BinaryJedisCommands#rename(byte[], byte[])
    *
    * @param oldkey
    * @param newkey
@@ -233,19 +237,6 @@ interface RedisFacade {
   String info(String section);
 
   /**
-   * Executes redis transaction associated to a key. When using cluster, key
-   * must be provided as the transaction is linked to a single slot.
-   *
-   * @param key
-   *          used when performing transaction on cluster to fix the node where
-   *          transaction occurs.
-   * @param transaction
-   *          the implementation of transaction
-   * @return result of transaction
-   */
-  <T> Response<T> transaction(byte[] key, RedisTransaction<T> transaction);
-
-  /**
    * Returns true if redis implementation supports SPOP that returns multiple
    * elements (http://redis.io/commands/spop). This is command is supported in
    * redis v3.2 and later.
@@ -253,27 +244,6 @@ interface RedisFacade {
    * @return <code>true</code> if SPOP with multiple results is supported
    */
   boolean supportsMultiSpop();
-
-  /**
-   * Implementation of this interface can be run within a redis transaction. The
-   * transaction is sequence of redis commands executed atomically.
-   * <p>
-   * See <a href="http://redis.io/topics/transactions">http://redis.io/topics/
-   * transactions</a> for details about transactions.
-   *
-   * @param <T>
-   *          result type of the transaction
-   */
-  interface RedisTransaction<T> {
-    /**
-     * Runs transaction and returns its result.
-     *
-     * @param transaction
-     *          redis transaction to run
-     * @return result of transaction
-     */
-    Response<T> run(Transaction transaction);
-  }
 
   /**
    * Dissociates jedis connection from the current thread and returns it to the
@@ -287,7 +257,7 @@ interface RedisFacade {
   void close();
 
   /**
-   * See {@link BinaryJedisCommands#get(byte[])}
+   * See redis.clients.jedis.BinaryJedisCommands#get(byte[])
    *
    * @param key
    * @return
@@ -295,7 +265,7 @@ interface RedisFacade {
   byte[] get(byte[] key);
 
   /**
-   * See {@link BinaryJedisCommands#publish(byte[], byte[])}
+   * See redis.clients.jedis.BinaryJedisCommands#publish(byte[], byte[])
    *
    * @param channel
    * @param message
@@ -304,9 +274,125 @@ interface RedisFacade {
   Long publish(byte[] channel, byte[] message);
 
   /**
-   * Starts monitoring Redis interaction. This method
-   * can be used to add metrics to metric registry.
+   * Starts monitoring Redis interaction. This method can be used to add metrics
+   * to metric registry.
+   *
    * @param metrics
    */
   void startMonitoring(MetricRegistry metrics);
+
+  /**
+   * Returns <code>true</code> if exception was thrown by redis library
+   *
+   * @param e
+   *          the exception to check
+   * @return <code>true</code> if exception was thrown by redis library
+   */
+  boolean isRedisException(Exception e);
+
+  /**
+   * Executes redis transaction associated to a key. When using cluster, key
+   * must be provided as the transaction is linked to a single slot.
+   *
+   * @param key
+   *          used when performing transaction on cluster to fix the node where
+   *          transaction occurs.
+   * @param transaction
+   *          the implementation of transaction
+   * @return result of transaction
+   */
+  <T> ResponseFacade<T> transaction(byte[] key, TransactionRunner<T> transaction);
+
+  /**
+   * Used to wrap implementation's response for transactions.
+   *
+   * @param <T>
+   *          the result type
+   */
+  public interface ResponseFacade<T> {
+    T get();
+  }
+
+  /**
+   * Implementation of this interface can be run within a redis transaction. The
+   * transaction is sequence of redis commands executed atomically.
+   * <p>
+   * See <a href="http://redis.io/topics/transactions">http://redis.io/topics/
+   * transactions</a> for details about transactions.
+   *
+   * @param <T>
+   *          result type of the transaction
+   */
+  interface TransactionRunner<T> {
+    /**
+     * Runs transaction and returns its result.
+     *
+     * @param transactionImpl
+     *          underlying redis transaction to run
+     * @return result of transaction
+     */
+    ResponseFacade<T> run(TransactionFacade transactionImpl);
+  }
+
+  /**
+   * Used to encapsulate redis library's transaction (MULTI)
+   * processing.
+   *
+   */
+  interface TransactionFacade {
+
+    /**
+     * See redis.clients.jedis.Transaction#hdel(byte[], byte[]...)
+     *
+     * @param key
+     * @param fields
+     */
+    void hdel(byte[] key, byte[]...fields);
+
+    /**
+     * See redis.clients.jedis.Transaction#hmset(byte[], Map)
+     *
+     * @param key
+     * @param hash
+     */
+    void hmset(byte[] key, Map<byte[], byte[]> hash);
+
+    /**
+     * See redis.clients.jedis.Transaction#del(byte[]...)
+     *
+     * @param keys
+     */
+    void del(byte[]... keys);
+
+    /**
+     * See redis.clients.jedis.Transaction#smembers(byte[])
+     *
+     * @param key
+     * @return
+     */
+    RedisFacade.ResponseFacade<Set<byte[]>> smembers(byte[] key);
+  }
+
+  /**
+   * Used to implement PUBSUB mechanism.
+   */
+  interface RedisPubSub {
+
+    void onPMessage(byte[] pattern, byte[] channelBuf, byte[] message);
+
+    /**
+     * Returns linked underlying PubSub listener implementation.
+     *
+     * @return underlying PubSub listener implementation
+     */
+    Object getLinked();
+
+    /**
+     * Links with underlying PubSub listener implementation.
+     *
+     * @param linkedImplementation
+     *          underlying PubSub listener implementation
+     */
+    void link(Object linkedImplementation);
+  }
 }

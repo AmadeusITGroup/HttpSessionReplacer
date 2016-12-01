@@ -1,13 +1,11 @@
 package com.amadeus.session.repository.redis;
 
-import static redis.clients.util.SafeEncoder.encode;
+import static com.amadeus.session.repository.redis.SafeEncoder.encode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amadeus.session.SessionManager;
-
-import redis.clients.jedis.BinaryJedisPubSub;
 
 /**
  * This class listens to expiration events coming from Redis, and when the event
@@ -15,7 +13,7 @@ import redis.clients.jedis.BinaryJedisPubSub;
  * {@link RedisSessionRepository#DEFAULT_SESSION_EXPIRE_PREFIX}, it tries to
  * expire corresponding session
  */
-class ExpirationListener extends BinaryJedisPubSub {
+class ExpirationListener implements RedisFacade.RedisPubSub {
   private static Logger logger = LoggerFactory.getLogger(ExpirationListener.class);
   // We subscribe to expired events
   private static final String SUBSCRIPTION_PATTERN = "__keyevent@*__:expired";
@@ -24,6 +22,7 @@ class ExpirationListener extends BinaryJedisPubSub {
   private static final byte[] EXPIRED_SUFFIX = encode(":expired");
   private final byte[] keyPrefix;
   private boolean subsrcibed;
+  private Object linkedImplementation;
 
   /**
    * Standard constructor.
@@ -123,11 +122,24 @@ class ExpirationListener extends BinaryJedisPubSub {
   /**
    * Stops subscription to redis notifications. Call to this method will unblock
    * thread waiting on PSUBSCRIBE.
+   *
+   * @param redis
+   *          facade to redis library
    */
-  void close() {
+  void close(RedisFacade redis) {
     if (subsrcibed) {
-      punsubscribe(encode(SUBSCRIPTION_PATTERN));
+      redis.punsubscribe(this, encode(SUBSCRIPTION_PATTERN));
       subsrcibed = false;
     }
+  }
+
+  @Override
+  public Object getLinked() {
+    return linkedImplementation;
+  }
+
+  @Override
+  public void link(Object linkedImplementation) {
+    this.linkedImplementation = linkedImplementation;
   }
 }

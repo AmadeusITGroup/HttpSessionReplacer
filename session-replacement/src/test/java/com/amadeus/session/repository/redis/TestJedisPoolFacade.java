@@ -3,6 +3,7 @@ package com.amadeus.session.repository.redis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -16,7 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import com.amadeus.session.repository.redis.RedisFacade.RedisTransaction;
+import com.amadeus.session.repository.redis.RedisFacade.TransactionRunner;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 
@@ -25,12 +26,11 @@ import redis.clients.jedis.Client;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Transaction;
 import redis.clients.util.Pool;
-import redis.clients.util.SafeEncoder;
 
 @SuppressWarnings("javadoc")
-public class TestRedisPoolFacade {
+public class TestJedisPoolFacade {
   private Pool<Jedis> pool;
-  private RedisPoolFacade rf;
+  private JedisPoolFacade rf;
   private Jedis jedis;
 
   @SuppressWarnings("unchecked")
@@ -39,7 +39,7 @@ public class TestRedisPoolFacade {
     jedis = mock(Jedis.class);
     pool = mock(Pool.class);
     when(pool.getResource()).thenReturn(jedis);
-    rf = new RedisPoolFacade(pool);
+    rf = new JedisPoolFacade(pool);
   }
 
   @Test
@@ -232,10 +232,11 @@ public class TestRedisPoolFacade {
     byte[] key = new byte[]{};
     Transaction jedisTransaction = mock(Transaction.class);
     when(jedis.multi()).thenReturn(jedisTransaction);
-    RedisTransaction<?> transaction = mock(RedisTransaction.class);
+    TransactionRunner<?> transaction = mock(TransactionRunner.class);
     rf.transaction(key, transaction);
     verify(jedis).multi();
-    verify(transaction).run(jedisTransaction);
+
+    verify(transaction).run(any(RedisFacade.TransactionFacade.class));
     verify(jedisTransaction).exec();
   }
 
@@ -274,9 +275,13 @@ public class TestRedisPoolFacade {
   @Test
   public void testPsubscribe() {
     BinaryJedisPubSub listener = mock(BinaryJedisPubSub.class);
+    RedisFacade.RedisPubSub facadeListener = mock(RedisFacade.RedisPubSub.class);
+    when(facadeListener.getLinked()).thenReturn(listener);
     String pattern = "test";
-    rf.psubscribe(listener, pattern);
-    verify(jedis).psubscribe(listener, SafeEncoder.encode(pattern));
+    rf.psubscribe(facadeListener, pattern);
+    ArgumentCaptor<BinaryJedisPubSub> capture = ArgumentCaptor.forClass(BinaryJedisPubSub.class);
+    verify(facadeListener).link(capture.capture());
+    verify(jedis).psubscribe(capture.getValue(), SafeEncoder.encode(pattern));
   }
 
   @Test

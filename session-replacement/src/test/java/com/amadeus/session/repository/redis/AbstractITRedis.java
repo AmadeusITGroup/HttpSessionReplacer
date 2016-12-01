@@ -31,7 +31,7 @@ import com.amadeus.session.SessionTracking;
 @SuppressWarnings("javadoc")
 public abstract class AbstractITRedis {
 
-  protected RedisSessionRepositoryFactory rsrf;
+  protected AbstractRedisSessionRepositoryFactory rsrf;
   protected SessionConfiguration sessionConfiguration;
   protected SessionTracking tracking;
   protected SessionNotifier notifier;
@@ -58,7 +58,7 @@ public abstract class AbstractITRedis {
       }
     }
 
-    rsrf = new RedisSessionRepositoryFactory();
+    rsrf = new JedisSessionRepositoryFactory();
     sessionConfiguration = new SessionConfiguration();
     sessionConfiguration.setRepositoryFactory("redis");
     sessionConfiguration.setMaxInactiveInterval(5);

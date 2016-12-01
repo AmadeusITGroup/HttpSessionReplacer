@@ -7,7 +7,6 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisClusterCommand;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
 
 /**
@@ -15,7 +14,7 @@ import redis.clients.jedis.Transaction;
  */
 class TransactionalJedisCluster extends JedisCluster {
 
-  
+
   TransactionalJedisCluster(Set<HostAndPort> hostAndPort, int timeout, JedisPoolConfig config) {
     super(hostAndPort, timeout, config);
   }
@@ -30,12 +29,12 @@ class TransactionalJedisCluster extends JedisCluster {
    *          the sequence of redis commands to run
    * @return result of transaction
    */
-  public <T> Response<T> transaction(final byte[] key, final RedisFacade.RedisTransaction<T> transaction) {
-    return new JedisClusterCommand<Response<T>>(connectionHandler, maxAttempts) {
+  public <T> RedisFacade.ResponseFacade<T> transaction(final byte[] key, final RedisFacade.TransactionRunner<T> transaction) {
+    return new JedisClusterCommand<RedisFacade.ResponseFacade<T>>(connectionHandler, maxAttempts) {
       @Override
-      public Response<T> execute(Jedis connection) {
+      public RedisFacade.ResponseFacade<T> execute(Jedis connection) {
         Transaction t = connection.multi();
-        Response<T> response = transaction.run(t);
+        RedisFacade.ResponseFacade<T> response = transaction.run(AbstractJedisFacade.wrapJedisTransaction(t));
         t.exec();
         return response;
       }

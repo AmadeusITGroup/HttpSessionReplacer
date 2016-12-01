@@ -1,7 +1,7 @@
 package com.amadeus.session.repository.redis;
 
+import static com.amadeus.session.repository.redis.SafeEncoder.encode;
 import static com.codahale.metrics.MetricRegistry.name;
-import static redis.clients.util.SafeEncoder.encode;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -25,11 +25,6 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
-
-import redis.clients.jedis.Builder;
-import redis.clients.jedis.Protocol;
-import redis.clients.jedis.Response;
-import redis.clients.jedis.Transaction;
 
 /**
  * Main class for implementing Redis repository logic.
@@ -64,6 +59,10 @@ class RedisSessionRepository implements SessionRepository {
    * Meta attribute for the node owning the session.
    */
   static final byte[] OWNER_NODE = encode("#:owner");
+  /**
+   * Representation of true value
+   */
+  static final byte[] BYTES_TRUE = SafeEncoder.encode(String.valueOf(1));
 
   /**
    * All attributes starting with #: are internal (meta-atrributes).
@@ -73,20 +72,18 @@ class RedisSessionRepository implements SessionRepository {
   private static final int CREATION_TIME_INDEX = 2;
   private static final int INVALID_SESSION_INDEX = 3;
   private static final int OWNER_NODE_INDEX = 4;
+  private static final RedisFacade.ResponseFacade<String> OK_RESULT = new RedisFacade.ResponseFacade<String>() {
+    @Override
+    public String get() {
+      return "OK";
+    }
+  };
 
   /**
    * Number of bits in byte. Used to allocate byte buffers to store Long and
    * Integer values.
    */
   private static final int BITS_IN_BYTE = 8;
-
-  // Builds OK jedis response
-  static final Builder<String> OK_BUILDER = new Builder<String>() {
-    @Override
-    public String build(Object data) {
-      return "OK";
-    }
-  };
 
   private final String owner;
   private final byte[] ownerByteArray;
@@ -275,7 +272,7 @@ class RedisSessionRepository implements SessionRepository {
    * executes those those commands in atomic way. The meta-attribute for
    * transactions are also updated.
    */
-  class RedisSessionTransaction implements SessionRepository.CommitTransaction, RedisFacade.RedisTransaction<String> {
+  class RedisSessionTransaction implements SessionRepository.CommitTransaction, RedisFacade.TransactionRunner<String> {
     private Map<byte[], byte[]> attributes = new HashMap<>();
     private List<byte[]> toRemove = new ArrayList<>();
     private byte[] key;
@@ -317,7 +314,7 @@ class RedisSessionRepository implements SessionRepository {
     }
 
     @Override
-    public Response<String> run(Transaction transaction) {
+    public RedisFacade.ResponseFacade<String> run(RedisFacade.TransactionFacade transaction) {
       if (!toRemove.isEmpty()) {
         byte[][] arr = toRemove.toArray(new byte[0][]);
         transaction.hdel(key, arr);
@@ -325,7 +322,7 @@ class RedisSessionRepository implements SessionRepository {
       if (!attributes.isEmpty()) {
         transaction.hmset(key, attributes);
       }
-      return new Response<>(OK_BUILDER);
+      return OK_RESULT;
     }
 
     @Override
@@ -417,7 +414,7 @@ class RedisSessionRepository implements SessionRepository {
 
   @Override
   public boolean prepareRemove(SessionData session) {
-    Long result = redis.hsetnx(sessionKey(session.getId()), INVALID_SESSION, Protocol.BYTES_TRUE);
+    Long result = redis.hsetnx(sessionKey(session.getId()), INVALID_SESSION, BYTES_TRUE);
     return result.intValue() == 1;
   }
 

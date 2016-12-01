@@ -45,7 +45,7 @@ public class InitializeSessionManagement implements ServletContainerInitializer 
   static void setupProviders(ServletContext context) {
     HashMap<String, String> providerMapping = new HashMap<>();
     // Register default implementations
-    providerMapping.put("redis", "com.amadeus.session.repository.redis.RedisSessionRepositoryFactory");
+    providerMapping.put("redis", "com.amadeus.session.repository.redis.JedisSessionRepositoryFactory");
     providerMapping.put("in-memory", "com.amadeus.session.repository.inmemory.InMemoryRepositoryFactory");
     if (logger.isDebugEnabled()) {
       logger.debug("Known session repository providers: {} for servlet context {}", providerMapping.keySet(),
