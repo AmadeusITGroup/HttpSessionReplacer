@@ -12,14 +12,13 @@ supported from `file`, `http` or `https` schemas.
 
 ## Cryptography Notes
 
+The AES key is initialized as SHA-256 from the provided encryption key. 
+
 Initialization vector for AES is generated for every serialization of the 
 session data. The initialization vector is stored as 16 bytes binary prefix to
 the session data.
 
-Implementation has no specific mitigation against timing attacks. Note that 
-without access to the code, it is difficult to know plaintext format of session
-data, and it might also be difficult to force specific format.
-
-If key is specified as plaintext it will be present in the memory during whole
-lifetime of the application. Keys loaded from a URL are present in the memory 
-only during encrpytion initialization.
+If the provided key is specified as plaintext it will be present in the memory
+during whole lifetime of the application. Keys loaded from a URL are present
+in the memory only during encrpytion initialization. AES key is present in 
+memory during lifetime of the application.
