@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Similar to implmentation in jedis
  */
-final class SafeEncoder {
+public final class SafeEncoder {
 
   private SafeEncoder() {
     throw new InstantiationError("Must not instantiate this class");

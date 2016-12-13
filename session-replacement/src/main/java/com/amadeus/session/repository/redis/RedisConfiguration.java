@@ -19,7 +19,7 @@ import com.amadeus.session.SessionConfiguration;
  * methods to read configuratin, resolve server/sentinel/cluster member names,
  * and configure JedisPool.
  */
-class RedisConfiguration {
+public class RedisConfiguration {
   /**
    * Standard prefix for metrics.
    */
@@ -104,6 +104,10 @@ class RedisConfiguration {
   Boolean supportIpV6;
   Boolean supportIpV4;
   Integer timeout = null;
+
+  public Integer getTimeout() {
+    return timeout;
+  }
 
   RedisConfiguration(SessionConfiguration conf) {
     readConfigurationString(conf.getProviderConfiguration());

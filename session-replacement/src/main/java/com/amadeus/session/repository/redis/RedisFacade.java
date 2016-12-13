@@ -10,7 +10,7 @@ import com.codahale.metrics.MetricRegistry;
  * This interface offers subset of redis.clients.jedis.BinaryJedisCommands. The
  * subset offers commands used by redis session repository implementation.
  */
-interface RedisFacade {
+public interface RedisFacade {
 
   /**
    * See BinaryJedisCommands#psubscribe(BinaryJedisPubSub, byte[]...)
