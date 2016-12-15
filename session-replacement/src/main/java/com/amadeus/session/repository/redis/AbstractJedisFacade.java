@@ -1,13 +1,20 @@
 package com.amadeus.session.repository.redis;
 
+import static com.codahale.metrics.MetricRegistry.name;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
+
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Transaction;
 import redis.clients.jedis.exceptions.JedisException;
+import redis.clients.util.Pool;
 
 /**
  * Base class for jedis facades. Contains methods that are common for both
@@ -68,6 +75,37 @@ abstract class AbstractJedisFacade implements RedisFacade {
   @Override
   public boolean isRedisException(Exception e) {
     return e instanceof JedisException;
+  }
+
+  /**
+   * Helper method that registers metrics for a jedis pool.
+   *
+   * @param jedisPool
+   *          the pool which is monitored
+   * @param metrics
+   *          the registry to use for metrics
+   */
+  static void addMetrics(final Pool<Jedis> jedisPool, MetricRegistry metrics) {
+    final String host = jedisPool.getResource().getClient().getHost();
+    String prefix = name(RedisConfiguration.METRIC_PREFIX, "redis", host);
+    metrics.register(name(prefix, "active"), new Gauge<Integer>() {
+      @Override
+      public Integer getValue() {
+        return jedisPool.getNumActive();
+      }
+    });
+    metrics.register(name(prefix, "idle"), new Gauge<Integer>() {
+      @Override
+      public Integer getValue() {
+        return jedisPool.getNumIdle();
+      }
+    });
+    metrics.register(name(prefix, "waiting"), new Gauge<Integer>() {
+      @Override
+      public Integer getValue() {
+        return jedisPool.getNumWaiters();
+      }
+    });
   }
 
   /**

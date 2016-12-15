@@ -26,7 +26,7 @@ import redis.clients.util.JedisClusterCRC16;
  * supported in cluster (e.g. rename), it also provides semantically similar
  * implementations.
  */
-class JedisClusterFacade extends AbstractJedisFacade implements RedisFacade {
+class JedisClusterFacade extends AbstractJedisFacade {
   private final TransactionalJedisCluster jedisCluster;
 
   /**
@@ -387,7 +387,7 @@ class JedisClusterFacade extends AbstractJedisFacade implements RedisFacade {
   @Override
   public void startMonitoring(MetricRegistry metrics) {
     for (JedisPool item : jedisCluster.getClusterNodes().values()) {
-      JedisPoolFacade.addMetrics(item, metrics);
+      AbstractJedisFacade.addMetrics(item, metrics);
     }
   }
 
