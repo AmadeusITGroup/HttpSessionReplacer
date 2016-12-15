@@ -1,7 +1,5 @@
 package com.amadeus.session.repository.redis;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,8 +17,8 @@ import redis.clients.jedis.JedisSentinelPool;
  *
  * <ul>
  * <li><code>pool</code> maximum size of pool.
- * <li><code>mode</code> CLUSTER|SENTINEL|SINGLE|NameOfYourCustomClass. If
- * single, we are using single redis server, otherwise we use cluster mode. 
+ * <li><code>mode</code> CLUSTER|SENTINEL|SINGLE. If single, we are using single
+ * redis server, otherwise we use cluster mode.
  * <li><code>host</code> slash separated list of DNS name or IP address of
  * cluster or sentinel nodes or server address for single node.
  * <li><code>port</code> default port for Redis servers
