@@ -467,15 +467,6 @@ This, for example, allows using Kubernetes services to get all cluster nodes.
 The data for a single session is stored on a single Redis node using the hash
 tags in the key name (i.e. session is put in braces in key {33fdd1b6-b496-4b33-9f7d-df96679d32fe}).
 
-#### Custom mode
-
- You can also provide the name of your own class that implements `RedisFacade`, the class will then be called using reflection. 
- 
- The constructor must have for arguments: (`JedisPoolConfig`, `RedisConfiguration`).
-
-This mode is activated by specifying `mode=NameOfYourCustomClass` in provider
-configuration string, or by specifying the system property `com.amadeus.session.redis.mode=NameOfYourCustomClass`.
-
 #### Redis Configuration
 
 The redis repository can be configured using either a repository configuration

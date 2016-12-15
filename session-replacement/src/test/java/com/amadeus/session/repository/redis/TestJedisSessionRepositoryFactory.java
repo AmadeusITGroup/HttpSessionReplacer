@@ -71,16 +71,6 @@ public class TestJedisSessionRepositoryFactory {
     assertSame(clusterFacade, facade);
   }
   
-  @Test
-  public void testClustomRedisFacade() {
-    JedisSessionRepositoryFactory factory = new JedisSessionRepositoryFactory();
-    SessionConfiguration sessionConfig = new SessionConfiguration();
-    RedisConfiguration config = new RedisConfiguration(sessionConfig);
-    config.clusterMode = "com.amadeus.session.repository.redis.CustomRedisFacade";
-    RedisFacade facade = factory.getRedisFacade(config);
-    assertThat(facade, instanceOf(CustomRedisFacade.class));
-  }
-
   @Test(expected = IllegalArgumentException.class)
   public void testUnknwonRedisFacade() {
     JedisSessionRepositoryFactory factory = spy(new JedisSessionRepositoryFactory());

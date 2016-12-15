@@ -20,11 +20,7 @@ import redis.clients.jedis.JedisSentinelPool;
  * <ul>
  * <li><code>pool</code> maximum size of pool.
  * <li><code>mode</code> CLUSTER|SENTINEL|SINGLE|NameOfYourCustomClass. If
- * single, we are using single redis server, otherwise we use cluster mode. You
- * can also provide the name of your own class that implements
- * {@link RedisFacade}, the class will then be called using reflection. The
- * constructor must have for arguments: ({@link JedisPoolConfig},
- * {@link RedisConfiguration} ).
+ * single, we are using single redis server, otherwise we use cluster mode. 
  * <li><code>host</code> slash separated list of DNS name or IP address of
  * cluster or sentinel nodes or server address for single node.
  * <li><code>port</code> default port for Redis servers
@@ -47,24 +43,7 @@ public class JedisSessionRepositoryFactory extends AbstractRedisSessionRepositor
     case "CLUSTER":
       return clusterFacade(poolConfig, config);
     default:
-      return getCustomRedisFacade(poolConfig, config);
-    }
-  }
-
-  /**
-   * Retrieves, using reflection, a custom Redis facade, whose class name is
-   * provided in config.clusterMode.
-   * 
-   */
-  private RedisFacade getCustomRedisFacade(JedisPoolConfig poolConfig, RedisConfiguration config) {
-    try {
-      Class<?> clazz = Class.forName(config.clusterMode);
-      Constructor<?> cons = clazz.getConstructor(JedisPoolConfig.class, RedisConfiguration.class);
-      RedisFacade customFacade = (RedisFacade)cons.newInstance(poolConfig, config);
-      return customFacade;
-    } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
-        | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-      throw new IllegalArgumentException("Unsupported redis mode: " + config, e);
+      throw new IllegalArgumentException("Unsupported redis mode: " + config);
     }
   }
 
