@@ -51,7 +51,7 @@ public class EncryptingSerializerDeserializer implements SerializerDeserializer 
   void initKey(String key) {
     try {
       byte[] keyArray = key.getBytes("UTF-8");
-      MessageDigest sha = MessageDigest.getInstance("SHA-1");
+      MessageDigest sha = MessageDigest.getInstance("SHA-256");
       keyArray = sha.digest(keyArray);
       keyArray = Arrays.copyOf(keyArray, 16);
       secretKey = new SecretKeySpec(keyArray, "AES");
