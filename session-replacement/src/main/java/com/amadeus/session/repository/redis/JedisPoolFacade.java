@@ -1,13 +1,11 @@
 package com.amadeus.session.repository.redis;
 
 import static com.amadeus.session.repository.redis.SafeEncoder.encode;
-import static com.codahale.metrics.MetricRegistry.name;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 
 import redis.clients.jedis.BinaryJedisCommands;
@@ -22,7 +20,7 @@ import redis.clients.util.Pool;
  * {@link JedisCluster}. The implementation offers subset of
  * {@link BinaryJedisCommands}.
  */
-class JedisPoolFacade extends AbstractJedisFacade implements RedisFacade {
+class JedisPoolFacade extends AbstractJedisFacade {
   private final Pool<Jedis> jedisPool;
   private final ThreadLocal<Jedis> currentJedis = new ThreadLocal<>();
 
@@ -296,37 +294,6 @@ class JedisPoolFacade extends AbstractJedisFacade implements RedisFacade {
 
   @Override
   public void startMonitoring(MetricRegistry metrics) {
-    addMetrics(jedisPool, metrics);
-  }
-
-  /**
-   * Helper method that registers metrics for a jedis pool.
-   *
-   * @param jedisPool
-   *          the pool which is monitored
-   * @param metrics
-   *          the registry to use for metrics
-   */
-  static void addMetrics(final Pool<Jedis> jedisPool, MetricRegistry metrics) {
-    final String host = jedisPool.getResource().getClient().getHost();
-    String prefix = name(RedisConfiguration.METRIC_PREFIX, "redis", host);
-    metrics.register(name(prefix, "active"), new Gauge<Integer>() {
-      @Override
-      public Integer getValue() {
-        return jedisPool.getNumActive();
-      }
-    });
-    metrics.register(name(prefix, "idle"), new Gauge<Integer>() {
-      @Override
-      public Integer getValue() {
-        return jedisPool.getNumIdle();
-      }
-    });
-    metrics.register(name(prefix, "waiting"), new Gauge<Integer>() {
-      @Override
-      public Integer getValue() {
-        return jedisPool.getNumWaiters();
-      }
-    });
+    AbstractJedisFacade.addMetrics(jedisPool, metrics);
   }
 }

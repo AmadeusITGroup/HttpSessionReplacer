@@ -19,7 +19,7 @@ import com.amadeus.session.SessionConfiguration;
  * methods to read configuratin, resolve server/sentinel/cluster member names,
  * and configure JedisPool.
  */
-class RedisConfiguration {
+public class RedisConfiguration {
   /**
    * Standard prefix for metrics.
    */
@@ -40,11 +40,13 @@ class RedisConfiguration {
    */
   public static final String REDIS_USE_IPV6 = "com.amadeus.session.redis.ipv6";
   /**
-   * System or configuration property that specifies expiration strategy used by redis.
+   * System or configuration property that specifies expiration strategy used by
+   * redis.
    */
   public static final String REDIS_EXPIRATION_STRATEGY = "com.amadeus.session.redis.expiration";
   /**
-   * System or configuration property that specifies connection and socket timeout used by redis.
+   * System or configuration property that specifies connection and socket
+   * timeout used by redis.
    */
   public static final String REDIS_TIMEOUT = "com.amadeus.session.redis.timeout";
   /**
@@ -105,7 +107,19 @@ class RedisConfiguration {
   Boolean supportIpV4;
   Integer timeout = null;
 
-  RedisConfiguration(SessionConfiguration conf) {
+  public ExpirationStrategy getStrategy() {
+    return strategy;
+  }
+
+  public Integer getTimeout() {
+    return timeout;
+  }
+  
+  public String getPoolSize() {
+    return poolSize;
+  }
+
+  public RedisConfiguration(SessionConfiguration conf) {
     readConfigurationString(conf.getProviderConfiguration());
     serverAddress(conf);
     if (masterName == null) {
@@ -182,8 +196,9 @@ class RedisConfiguration {
       try {
         strategy = ExpirationStrategy.valueOf(arg.substring(EXPIRATION_PROPERTY.length()));
       } catch (IllegalArgumentException e) {
-        logger.warn("Unknown expiration strategy. Got: `" + arg + "`, supported: "
-            + Arrays.asList(ExpirationStrategy.values()), e);
+        logger.warn(
+            "Unknown expiration strategy. Got: `" + arg + "`, supported: " + Arrays.asList(ExpirationStrategy.values()),
+            e);
       }
     } else if (arg.startsWith(TIMEOUT_PROPERTY)) {
       timeout = Integer.parseInt(arg.substring(TIMEOUT_PROPERTY.length()));
@@ -296,8 +311,7 @@ class RedisConfiguration {
     builder.append("RedisConfiguration [clusterMode=").append(clusterMode).append(", masterName=").append(masterName)
         .append(", server=").append(server).append(", port=").append(port).append(", poolSize=").append(poolSize)
         .append(", strategy=").append(strategy).append(", supportIpV6=").append(supportIpV6).append(", supportIpV4=")
-        .append(supportIpV4).append(", timeout=")
-        .append(timeout).append("]");
+        .append(supportIpV4).append(", timeout=").append(timeout).append("]");
     return builder.toString();
   }
 

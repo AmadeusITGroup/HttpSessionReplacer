@@ -70,7 +70,7 @@ public class TestJedisSessionRepositoryFactory {
     verify(factory).clusterFacade(any(JedisPoolConfig.class), eq(config));
     assertSame(clusterFacade, facade);
   }
-
+  
   @Test(expected = IllegalArgumentException.class)
   public void testUnknwonRedisFacade() {
     JedisSessionRepositoryFactory factory = spy(new JedisSessionRepositoryFactory());

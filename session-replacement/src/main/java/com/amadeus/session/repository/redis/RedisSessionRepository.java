@@ -29,7 +29,7 @@ import com.codahale.metrics.MetricRegistry;
 /**
  * Main class for implementing Redis repository logic.
  */
-class RedisSessionRepository implements SessionRepository {
+public class RedisSessionRepository implements SessionRepository {
   private static final Logger logger = LoggerFactory.getLogger(RedisSessionRepository.class);
 
   /**
@@ -97,7 +97,7 @@ class RedisSessionRepository implements SessionRepository {
   private boolean sticky;
   private final String namespace;
 
-  RedisSessionRepository(RedisFacade redis, String namespace, String owner, ExpirationStrategy strategy,
+  public RedisSessionRepository(RedisFacade redis, String namespace, String owner, ExpirationStrategy strategy,
       boolean sticky) {
     this.redis = redis;
     this.owner = owner;

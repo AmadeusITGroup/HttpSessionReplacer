@@ -47,6 +47,7 @@ public class JedisSessionRepositoryFactory extends AbstractRedisSessionRepositor
 
   /**
    * Configures Jedis pool of connection.
+   * 
    * @param config
    *
    * @return configured Jedis pool of connection.
@@ -69,8 +70,8 @@ public class JedisSessionRepositoryFactory extends AbstractRedisSessionRepositor
   }
 
   RedisFacade sentinelFacade(JedisPoolConfig poolConfig, RedisConfiguration config) {
-    return new JedisPoolFacade(new JedisSentinelPool(config.masterName, config.sentinels(), poolConfig,
-        config.timeout));
+    return new JedisPoolFacade(
+        new JedisSentinelPool(config.masterName, config.sentinels(), poolConfig, config.timeout));
   }
 
   /**
@@ -83,10 +84,15 @@ public class JedisSessionRepositoryFactory extends AbstractRedisSessionRepositor
    * @return
    */
   RedisFacade clusterFacade(JedisPoolConfig poolConfig, RedisConfiguration config) {
-    return new JedisClusterFacade(new TransactionalJedisCluster(jedisHostsAndPorts(config), config.timeout, poolConfig));
+    return new JedisClusterFacade(
+        new TransactionalJedisCluster(jedisHostsAndPorts(config), config.timeout, poolConfig));
   }
 
-  Set<HostAndPort> jedisHostsAndPorts(RedisConfiguration config) {
+  /**
+   * Extracts jedis host/port configuration
+   * @param config
+   */
+  static Set<HostAndPort> jedisHostsAndPorts(RedisConfiguration config) {
     Set<HostAndPort> hostsAndPorts = new HashSet<>();
     for (RedisConfiguration.HostAndPort hp : config.hostsAndPorts()) {
       hostsAndPorts.add(new HostAndPort(hp.host, hp.port));
