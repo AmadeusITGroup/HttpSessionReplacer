@@ -114,7 +114,7 @@ public class RedisConfiguration {
   public Integer getTimeout() {
     return timeout;
   }
-  
+
   public String getPoolSize() {
     return poolSize;
   }
@@ -211,7 +211,7 @@ public class RedisConfiguration {
    *
    * @return set containing host ip addresses and ports.
    */
-  List<HostAndPort> hostsAndPorts() {
+  public List<HostAndPort> hostsAndPorts() {
     List<HostAndPort> hostAndPort = new ArrayList<>();
     int defaultPort = Integer.parseInt(this.port);
     try {
@@ -315,13 +315,21 @@ public class RedisConfiguration {
     return builder.toString();
   }
 
-  static class HostAndPort {
+  public static class HostAndPort {
     final String host;
     final int port;
 
     HostAndPort(String host, int port) {
       this.host = host;
       this.port = port;
+    }
+
+    public String getHost() {
+      return host;
+    }
+
+    public int getPort() {
+      return port;
     }
   }
 }
