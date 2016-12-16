@@ -88,6 +88,10 @@ public class JedisSessionRepositoryFactory extends AbstractRedisSessionRepositor
         new TransactionalJedisCluster(jedisHostsAndPorts(config), config.timeout, poolConfig));
   }
 
+  /**
+   * Extracts jedis host/port configuration
+   * @param config
+   */
   static Set<HostAndPort> jedisHostsAndPorts(RedisConfiguration config) {
     Set<HostAndPort> hostsAndPorts = new HashSet<>();
     for (RedisConfiguration.HostAndPort hp : config.hostsAndPorts()) {
