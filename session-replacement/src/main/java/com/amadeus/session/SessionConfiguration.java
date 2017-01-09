@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SessionConfiguration implements Serializable {
   private static final long serialVersionUID = -4538053252686416412L;
+
   private static final Logger logger = LoggerFactory.getLogger(SessionConfiguration.class);
 
   /**
@@ -96,10 +97,11 @@ public class SessionConfiguration implements Serializable {
     public static ReplicationTrigger validate(String replicationValue) {
       try {
         return ReplicationTrigger.valueOf(replicationValue);
-      } catch (IllegalArgumentException e) { // NOSONAR
+      }
+      catch (IllegalArgumentException e) { // NOSONAR
         logger.error(
-            "Invalid configuration '{}': "
-                + "Replication trigger value was not one of [{}]. The value was {}. Using default value {}",
+            "Invalid configuration '{}': " +
+                "Replication trigger value was not one of [{}]. The value was {}. Using default value {}",
             SESSION_REPLICATION_TRIGGER, Arrays.asList(ReplicationTrigger.values()), replicationValue,
             SET_AND_NON_PRIMITIVE_GET);
       }
@@ -134,25 +136,30 @@ public class SessionConfiguration implements Serializable {
    * Indicates if sessions can be distributed or not.
    */
   public static final String DISTRIBUTABLE_SESSION = "com.amadeus.session.distributable";
+
   /**
    * Non-distributable web apps will be treated as distributable if this
    * parameter is set to <code>true</code>.
    */
   public static final String FORCE_DISTRIBUTABLE = "com.amadeus.session.distributable.force";
+
   /**
    * Default session timeout in seconds.
    */
   public static final String DEFAULT_SESSION_TIMEOUT = "com.amadeus.session.timeout";
+
   /**
    * List of attributes that must be retrieved from repository (i.e. they can't
    * be cached locally).
    */
   public static final String NON_CACHEABLE_ATTRIBUTES = "com.amadeus.session.non-cacheable";
+
   /**
    * Strategy for for triggering replication. See {@link ReplicationTrigger}
    * enumeration.
    */
   public static final String SESSION_REPLICATION_TRIGGER = "com.amadeus.session.replication-trigger";
+
   /**
    * Default strategy for detecting that attribute changed.
    */
@@ -162,10 +169,12 @@ public class SessionConfiguration implements Serializable {
    * Is session id stored in logging MDC.
    */
   public static final String LOG_MDC_SESSION_ENABLED = "com.amadeus.session.logging.mdc.enabled";
+
   /**
    * The name of the logging MDC attribute where session id is stored.
    */
   public static final String LOG_MDC_SESSION_NAME = "com.amadeus.session.logging.mdc.name";
+
   /**
    * Default key used to store session id in logging system's MDC.
    */
@@ -177,6 +186,7 @@ public class SessionConfiguration implements Serializable {
    * request that impacts the session.
    */
   public static final String STICKY_SESSIONS = "com.amadeus.session.sticky";
+
   /**
    * By default, sessions are sticky.
    */
@@ -190,15 +200,27 @@ public class SessionConfiguration implements Serializable {
    * if not present, the context name of the webapp is used as namespace.
    */
   public static final String SESSION_NAMESPACE = "com.amadeus.session.namespace";
+
   /**
    * Default session namespace is <code>default</code>
    */
   public static final String DEFAULT_SESSION_NAMESPACE = "default";
 
   /**
+   * Indicate if generated session prefixed with!Timestamp.
+   */
+  public static final String SESSION_TIMESTAMP = "com.amadeus.session.timestamp";
+
+  /**
+   * Default session timestamp is <code>false</code>
+   */
+  public static final String DEFAULT_SESSION_TIMESTAMP = "false";
+
+  /**
    * Default session timeout is 30 minutes.
    */
   public static final int DEFAULT_SESSION_TIMEOUT_VALUE_NUM = 1800;
+
   // String version of default session timeout
   private static final String DEFAULT_SESSION_TIMEOUT_VALUE = String.valueOf(DEFAULT_SESSION_TIMEOUT_VALUE_NUM);
 
@@ -207,12 +229,14 @@ public class SessionConfiguration implements Serializable {
    * environment. See {@link #initNode()} for details.
    */
   public static final String SESSION_HOST = "com.amadeus.session.host";
+
   /**
    * ServletContext parameter or system property containing the configuration
    * for the {@link SessionRepository}. See each implementation for detailed
    * format. By convention, items in the format are separated by commas.
    */
   public static final String PROVIDER_CONFIGURATION = "com.amadeus.session.repository.conf";
+
   /**
    * ServletContext parameter or system property containing the name of
    * {@link SessionRepositoryFactory} implementation. The value is either name
@@ -220,12 +244,14 @@ public class SessionConfiguration implements Serializable {
    * <code>in-memory</code>
    */
   public static final String REPOSITORY_FACTORY_NAME = "com.amadeus.session.repository.factory";
+
   /**
    * ServletContext parameter or system property containing the name of the
    * {@link SessionTracking} implementation or value from
    * <code>com.amadeus.session.servlet.SessionPropagation</code> enumeration.
    */
   public static final String SESSION_PROPAGATOR_NAME = "com.amadeus.session.tracking";
+
   /**
    * ServletContext parameter or system property containing the name of the
    * cookie or URL element for propagating session.
@@ -250,16 +276,19 @@ public class SessionConfiguration implements Serializable {
    * ServletContext parameter or system property disabled session management.
    */
   public static final String DISABLED_SESSION = "com.amadeus.session.disabled";
+
   /**
    * ServletContext parameter or system property activating sharing of instances
    * of session during concurrent requests.
    */
   public static final String REUSE_CONCURRENT_SESSION = "com.amadeus.session.reuse.concurrent";
+
   /**
    * ServletContext parameter or system property indicating what provider
    * generates session ids.
    */
   public static final String SESSION_ID_PROVIDER = "com.amadeus.session.id";
+
   /**
    * ServletContext parameter or system property specifying the length of the
    * generates session ids. Used in {@link RandomIdProvider}.
@@ -276,10 +305,12 @@ public class SessionConfiguration implements Serializable {
    * session.
    */
   public static final String INTERCEPT_LISTENERS = "com.amadeus.session.intercept.listeners";
+
   /**
    * Specifies if commit should be done on all concurrent requests to session.
    */
   public static final String COMMIT_ON_ALL_CONCURRENT = "com.amadeus.session.commit.concurrent";
+
   /**
    * Specifies key to be used for encryption. When present activates encryption
    * automatically. If key specifies a URL, key will be loaded from specified
@@ -288,26 +319,47 @@ public class SessionConfiguration implements Serializable {
   public static final String SESSION_ENCRYPTION_KEY = "com.amadeus.session.encryption.key";
 
   private int maxInactiveInterval;
+
   private boolean distributable;
+
   private boolean sticky;
+
+  private boolean timestampSufix;
+
   private boolean allowedCachedSessionReuse;
+
   private boolean interceptListeners;
+
   private boolean forceDistributable;
+
   private boolean loggingMdcActive;
+
   private boolean usingEncryption;
+
   private String loggingMdcKey;
+
   private String node;
+
   private String namespace;
+
   private String providerConfiguration;
+
   private String repositoryFactory;
+
   private String sessionTracking;
+
   private String sessionIdName;
+
   private String encryptionKey;
 
   private Set<String> nonCacheable;
+
   private ReplicationTrigger replicationTrigger;
+
   private Properties attributes;
+
   private transient AttributeProvider currentAttributeProvider;
+
   private boolean commitOnAllConcurrent;
 
   /**
@@ -317,6 +369,7 @@ public class SessionConfiguration implements Serializable {
     attributes = new Properties();
     distributable = Boolean.parseBoolean(getPropertySecured(DISTRIBUTABLE_SESSION, "true"));
     sticky = Boolean.parseBoolean(getPropertySecured(STICKY_SESSIONS, DEFAULT_STICKY_SESSIONS));
+    timestampSufix = Boolean.parseBoolean(getPropertySecured(SESSION_TIMESTAMP, DEFAULT_SESSION_TIMESTAMP));
     loggingMdcActive = Boolean.parseBoolean(getPropertySecured(LOG_MDC_SESSION_ENABLED, "true"));
     loggingMdcKey = getPropertySecured(LOG_MDC_SESSION_NAME, LOGGING_MDC_DEFAULT_KEY);
     namespace = getPropertySecured(SESSION_NAMESPACE, null);
@@ -338,7 +391,8 @@ public class SessionConfiguration implements Serializable {
       if (nonEmpty(inactiveValue)) {
         maxInactiveInterval = Integer.parseInt(inactiveValue);
       }
-    } catch (NumberFormatException e) {
+    }
+    catch (NumberFormatException e) {
       logger.error("`{}` system property was not an integer: {}, using default {}", DEFAULT_SESSION_TIMEOUT,
           inactiveValue, maxInactiveInterval);
     }
@@ -374,6 +428,7 @@ public class SessionConfiguration implements Serializable {
     currentAttributeProvider = provider;
     distributable = read(DISTRIBUTABLE_SESSION, distributable);
     sticky = read(STICKY_SESSIONS, sticky);
+    timestampSufix = read(SESSION_TIMESTAMP, timestampSufix);
     interceptListeners = read(INTERCEPT_LISTENERS, interceptListeners);
     allowedCachedSessionReuse = read(REUSE_CONCURRENT_SESSION, allowedCachedSessionReuse);
     sessionTracking = read(SESSION_PROPAGATOR_NAME, sessionTracking);
@@ -407,7 +462,8 @@ public class SessionConfiguration implements Serializable {
     if (nonEmpty(val)) {
       try {
         maxInactiveInterval = Integer.parseInt(val);
-      } catch (NumberFormatException e) {
+      }
+      catch (NumberFormatException e) {
         logger.warn("`{}` configuration attribute was not an integer: {} for source {}", DEFAULT_SESSION_TIMEOUT, val,
             provider.source());
       }
@@ -565,6 +621,25 @@ public class SessionConfiguration implements Serializable {
    */
   public void setLoggingMdcKey(String loggingMdcKey) {
     this.loggingMdcKey = loggingMdcKey;
+  }
+
+  /**
+   * Returns <code>true</code> if sessions id expected to be suffixed by !timestamp.
+   *
+   * @return <code>true</code> if session id to be suffixed by !timestamp.
+   */
+  public boolean isTimeStampSufix() {
+    return timestampSufix;
+  }
+
+  /**
+   * Sets session suffix by !timestamp. See {@link #isTimeStampSufix()}.
+   *
+   * @param timestamp
+   *          <code>true</code> if session is expected to be suffixed by timestamp
+   */
+  public void setTimeStampSufix(boolean timestamp) {
+    this.timestampSufix = timestamp;
   }
 
   /**
@@ -751,7 +826,8 @@ public class SessionConfiguration implements Serializable {
     try {
       if (getPropertySecured("os.name", null).startsWith("Windows")) {
         node = System.getenv("COMPUTERNAME");
-      } else {
+      }
+      else {
         // If it is not Windows asume it is Unix-like OS and that it
         // has HOSTNAME variable
         String hostname = System.getenv("HOSTNAME");
@@ -759,14 +835,16 @@ public class SessionConfiguration implements Serializable {
           node = hostname;
         }
       }
-    } catch (SecurityException e) {
+    }
+    catch (SecurityException e) {
       logger.info("Security exception when trying to get environmnet variable", e);
     }
     if (node == null) {
       // Try portable way
       try {
         node = InetAddress.getLocalHost().getHostName();
-      } catch (UnknownHostException e) {
+      }
+      catch (UnknownHostException e) {
         logger.info("Unable to resolve local host, that's a strange error, but somehow it occured.", e);
         // OK, last attempt: call hostname executable
         node = "unknown";
@@ -789,7 +867,8 @@ public class SessionConfiguration implements Serializable {
   public static String getPropertySecured(String key, String def) {
     try {
       return System.getProperty(key, def);
-    } catch (SecurityException e) {
+    }
+    catch (SecurityException e) {
       logger.info("Security exception when trying to get system property", e);
       return def;
     }
@@ -933,7 +1012,8 @@ public class SessionConfiguration implements Serializable {
       }
       throw new IllegalStateException(
           "Unknown protocol in url `" + url + "`. Supported protocols are file, http and https. ");
-    } catch (MalformedURLException e) { // NOSONAR Ignore
+    }
+    catch (MalformedURLException e) { // NOSONAR Ignore
       // When exception occurs, key is not URL
       logger.info("Key was not provided via url.");
     }
@@ -956,7 +1036,8 @@ public class SessionConfiguration implements Serializable {
         return encryptionKey;
       }
       throw new IllegalStateException("Unable to load key from url `" + url + "`. Destination was empty.");
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       throw new IllegalStateException("Unable to load key from url `" + url + "`.", e);
     }
   }
@@ -980,6 +1061,7 @@ public class SessionConfiguration implements Serializable {
         .append(", sessionTracking=").append(sessionTracking).append(", encryptionKey=").append(encryptionKey)
         .append(", nonCacheable=").append(nonCacheable).append(", replicationTrigger=").append(replicationTrigger)
         .append(", attributes=").append(attributes).append(", commitOnAllConcurrent=").append(commitOnAllConcurrent)
+        .append(", timestamp=").append(timestampSufix)
         .append("]");
     return builder.toString();
   }

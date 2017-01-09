@@ -31,6 +31,7 @@ public class TestSessionConfiguration {
     assertFalse(sc.isAllowedCachedSessionReuse());
     assertTrue(sc.isLoggingMdcActive());
     assertTrue(sc.isSticky());
+    assertFalse(sc.isTimeStampSufix());
     assertEquals(SessionConfiguration.DEFAULT_SESSION_NAMESPACE, sc.getNamespace());
     assertEquals(SessionConfiguration.DEFAULT_REPLICATION_TRIGGER, sc.getReplicationTrigger());
     assertEquals(SessionConfiguration.DEFAULT_SESSION_TIMEOUT_VALUE_NUM, sc.getMaxInactiveInterval());
@@ -123,7 +124,8 @@ public class TestSessionConfiguration {
       if (System.getenv("COMPUTERNAME") != null) {
         assertEquals(System.getenv("COMPUTERNAME"), node);
       }
-    } else {
+    }
+    else {
       if (System.getenv("HOSTNAME") != null) {
         assertEquals(System.getenv("HOSTNAME"), node);
       }
