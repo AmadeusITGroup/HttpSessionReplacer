@@ -16,7 +16,6 @@ import com.amadeus.session.UuidProvider;
 public abstract class BaseSessionTracking implements SessionTracking {
 
   protected String idName;
-
   protected SessionIdProvider idProvider;
 
   private boolean appendTimeStamp;

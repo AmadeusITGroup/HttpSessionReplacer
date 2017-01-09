@@ -49,7 +49,6 @@ import com.amadeus.session.repository.inmemory.InMemoryRepositoryFactory;
 public class TestSessionHelpers {
 
   private ServletContext servletContext;
-
   private SessionHelpers sessionHelpers;
 
   @Before
@@ -110,7 +109,7 @@ public class TestSessionHelpers {
     assertEquals("com.amadeus.session.repository.inmemory.InMemoryRepository", repository.getClass().getName());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected=IllegalArgumentException.class)
   public void testGetRepositoryByKeyBadClass() {
     when(servletContext.getClassLoader()).thenReturn(this.getClass().getClassLoader());
     Map<String, String> map = new HashMap<>();
@@ -122,7 +121,7 @@ public class TestSessionHelpers {
     SessionHelpers.repository(servletContext, sessionConfiguration);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected=IllegalArgumentException.class)
   public void testGetRepositoryByKeyBadId() {
     when(servletContext.getClassLoader()).thenReturn(this.getClass().getClassLoader());
     Map<String, String> map = new HashMap<>();
@@ -159,7 +158,7 @@ public class TestSessionHelpers {
     HttpRequestWrapper request = mock(HttpRequestWrapper.class);
     when(request.getServletContext()).thenReturn(servletContext);
     when(request.getResponse()).thenReturn(responseWrapped);
-    ServletResponse result = SessionHelpersFacade.prepareResponse(request, response, null);
+    ServletResponse result = SessionHelpersFacade.prepareResponse(request , response, null);
     assertSame(responseWrapped, result);
   }
 
@@ -193,7 +192,6 @@ public class TestSessionHelpers {
     SessionHelpersFacade.commitRequest(request, oldRequest, null);
     verify(request).commit();
   }
-
   @Test
   public void testDontCommitNonReWrappedRequest() {
     HttpRequestWrapper request = mock(HttpRequestWrapper.class);

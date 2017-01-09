@@ -124,8 +124,7 @@ public class TestSessionConfiguration {
       if (System.getenv("COMPUTERNAME") != null) {
         assertEquals(System.getenv("COMPUTERNAME"), node);
       }
-    }
-    else {
+    } else {
       if (System.getenv("HOSTNAME") != null) {
         assertEquals(System.getenv("HOSTNAME"), node);
       }
