@@ -109,16 +109,26 @@ mvn verify -Predis-sentinel -Dredis.host=192.168.99.100
 
 Verify that builds and test pass.
 
-Set new version for the release and commit changes. 
+Set new version for the release.
 
 ```sh
 mvn versions:set -DnewVersion=0.3.1
 ```
 
-Perform deploy to OSS Sonatype Nexus:
+Perform build with release profile to add sources and javadoc. Perform deploy to OSS Sonatype Nexus:
 
 ```sh
-mvn clean deploy
+mvn clean deploy -Prelease
+```
+
+If release is successful, commit the version and commit and tag changes in git.
+
+```sh
+mvn versions:commit
+git add *
+git commit -m "version 0.3.1"
+git tag -a v0.3.1 -m "version 0.3.1"
+git push origin --tags
 ```
 
 Set version back to snapshot and commit changes. 
