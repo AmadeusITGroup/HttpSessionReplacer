@@ -87,11 +87,11 @@ public class TestSessionHelpers {
     when(servletContext.getClassLoader()).thenReturn(this.getClass().getClassLoader());
     SessionConfiguration sessionConfiguration = new SessionConfiguration();
     sessionConfiguration.setSessionTracking("URL");
-    sessionConfiguration.setTimeStampSufix(true);
+    sessionConfiguration.setTimestampSufix(true);
     SessionTracking tracking = SessionHelpers.getTracking(servletContext, sessionConfiguration);
     assertTrue(tracking.newId().indexOf("!") > 0);
 
-    sessionConfiguration.setTimeStampSufix(false);
+    sessionConfiguration.setTimestampSufix(false);
     tracking = SessionHelpers.getTracking(servletContext, sessionConfiguration);
     assertTrue(tracking.newId().indexOf("!") < 0);
   }

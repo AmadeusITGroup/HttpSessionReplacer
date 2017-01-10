@@ -16,16 +16,17 @@ import com.amadeus.session.UuidProvider;
 public abstract class BaseSessionTracking implements SessionTracking {
 
   protected String idName;
+
   protected SessionIdProvider idProvider;
 
-  private boolean appendTimeStamp;
+  private boolean appendTimestamp;
 
   @Override
   public void configure(SessionConfiguration configuration) {
     // Read standard configuration
     idName = configuration.getSessionIdName();
     String idProviderType = configuration.getAttribute(SessionConfiguration.SESSION_ID_PROVIDER, "random");
-    appendTimeStamp = configuration.isTimeStampSufix();
+    appendTimestamp = configuration.isTimestampSufix();
     switch (idProviderType) {
     case "uuid":
       idProvider = new UuidProvider();
@@ -39,13 +40,12 @@ public abstract class BaseSessionTracking implements SessionTracking {
 
   @Override
   public String newId() {
-    if (appendTimeStamp) {
-      StringBuilder newId = new StringBuilder().append(idProvider.newId());
-      return newId.append("!").append(System.currentTimeMillis()).toString();
+    String newId = idProvider.newId();
+    if (appendTimestamp) {
+      StringBuilder suffixedId = new StringBuilder(newId.length() + 11).append(idProvider.newId());
+      newId = suffixedId.append('!').append(System.currentTimeMillis()).toString();
     }
-    else {
-      return idProvider.newId();
-    }
+    return newId;
   }
 
   @Override

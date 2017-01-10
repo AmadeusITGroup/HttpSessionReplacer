@@ -188,7 +188,7 @@ for 4, 5 or 6 there will be 8, etc.
 
 ##### Session format
 
-It is possible to twick the generated session format using proper system property.
+It is possible to tweak the generated session id format using proper configuration parameter.
 Parameter `com.amadeus.session.timestamp` can be used to enforce presence of '!xxxxx' at end of generated jsessionid
 xxxxx being the number of millis ellapsed since january 1970 and corresponding to UNIX timestamp.
 
