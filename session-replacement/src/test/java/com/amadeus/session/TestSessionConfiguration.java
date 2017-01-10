@@ -31,6 +31,7 @@ public class TestSessionConfiguration {
     assertFalse(sc.isAllowedCachedSessionReuse());
     assertTrue(sc.isLoggingMdcActive());
     assertTrue(sc.isSticky());
+    assertFalse(sc.isTimestampSufix());
     assertEquals(SessionConfiguration.DEFAULT_SESSION_NAMESPACE, sc.getNamespace());
     assertEquals(SessionConfiguration.DEFAULT_REPLICATION_TRIGGER, sc.getReplicationTrigger());
     assertEquals(SessionConfiguration.DEFAULT_SESSION_TIMEOUT_VALUE_NUM, sc.getMaxInactiveInterval());

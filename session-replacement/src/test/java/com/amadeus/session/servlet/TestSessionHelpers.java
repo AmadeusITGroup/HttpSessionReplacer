@@ -83,6 +83,20 @@ public class TestSessionHelpers {
   }
 
   @Test
+  public void testTimestamp() {
+    when(servletContext.getClassLoader()).thenReturn(this.getClass().getClassLoader());
+    SessionConfiguration sessionConfiguration = new SessionConfiguration();
+    sessionConfiguration.setSessionTracking("URL");
+    sessionConfiguration.setTimestampSufix(true);
+    SessionTracking tracking = SessionHelpers.getTracking(servletContext, sessionConfiguration);
+    assertTrue(tracking.newId().indexOf("!") > 0);
+
+    sessionConfiguration.setTimestampSufix(false);
+    tracking = SessionHelpers.getTracking(servletContext, sessionConfiguration);
+    assertTrue(tracking.newId().indexOf("!") < 0);
+  }
+
+  @Test
   public void testGetRepositoryByKeyExisting() {
     when(servletContext.getClassLoader()).thenReturn(this.getClass().getClassLoader());
     Map<String, String> map = new HashMap<>();

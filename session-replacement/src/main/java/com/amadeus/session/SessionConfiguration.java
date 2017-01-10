@@ -190,11 +190,22 @@ public class SessionConfiguration implements Serializable {
    * if not present, the context name of the webapp is used as namespace.
    */
   public static final String SESSION_NAMESPACE = "com.amadeus.session.namespace";
+  
   /**
    * Default session namespace is <code>default</code>
    */
   public static final String DEFAULT_SESSION_NAMESPACE = "default";
 
+  /**
+   * Indicate if generated session prefixed with!Timestamp.
+   */
+  public static final String SESSION_TIMESTAMP = "com.amadeus.session.timestamp";
+  
+  /**
+   * Default session timestamp is <code>false</code>
+   */
+  public static final String DEFAULT_SESSION_TIMESTAMP = "false";
+  
   /**
    * Default session timeout is 30 minutes.
    */
@@ -290,6 +301,7 @@ public class SessionConfiguration implements Serializable {
   private int maxInactiveInterval;
   private boolean distributable;
   private boolean sticky;
+  private boolean timestampSufix;
   private boolean allowedCachedSessionReuse;
   private boolean interceptListeners;
   private boolean forceDistributable;
@@ -317,6 +329,7 @@ public class SessionConfiguration implements Serializable {
     attributes = new Properties();
     distributable = Boolean.parseBoolean(getPropertySecured(DISTRIBUTABLE_SESSION, "true"));
     sticky = Boolean.parseBoolean(getPropertySecured(STICKY_SESSIONS, DEFAULT_STICKY_SESSIONS));
+    timestampSufix = Boolean.parseBoolean(getPropertySecured(SESSION_TIMESTAMP, DEFAULT_SESSION_TIMESTAMP));
     loggingMdcActive = Boolean.parseBoolean(getPropertySecured(LOG_MDC_SESSION_ENABLED, "true"));
     loggingMdcKey = getPropertySecured(LOG_MDC_SESSION_NAME, LOGGING_MDC_DEFAULT_KEY);
     namespace = getPropertySecured(SESSION_NAMESPACE, null);
@@ -374,6 +387,7 @@ public class SessionConfiguration implements Serializable {
     currentAttributeProvider = provider;
     distributable = read(DISTRIBUTABLE_SESSION, distributable);
     sticky = read(STICKY_SESSIONS, sticky);
+    timestampSufix = read(SESSION_TIMESTAMP, timestampSufix);
     interceptListeners = read(INTERCEPT_LISTENERS, interceptListeners);
     allowedCachedSessionReuse = read(REUSE_CONCURRENT_SESSION, allowedCachedSessionReuse);
     sessionTracking = read(SESSION_PROPAGATOR_NAME, sessionTracking);
@@ -587,6 +601,25 @@ public class SessionConfiguration implements Serializable {
     this.sticky = sticky;
   }
 
+  /**
+   * Returns <code>true</code> if session id is expected to be suffixed by !timestamp.
+   *
+   * @return <code>true</code> if session id to be suffixed by !timestamp.
+   */
+  public boolean isTimestampSufix() {
+    return timestampSufix;
+  }
+
+  /**
+   * Add timestamp suffix to session id if set to true. See {@link #isTimestampSufix()}.
+   *
+   * @param timestamp
+   *          <code>true</code> if session is expected to be suffixed by timestamp
+   */
+  public void setTimestampSufix(boolean timestamp) {
+    this.timestampSufix = timestamp;
+  }
+  
   /**
    * Returns id of the current node
    *
@@ -970,17 +1003,17 @@ public class SessionConfiguration implements Serializable {
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append("SessionConfiguration [namespace=").append(namespace).append(", node=").append(node)
-        .append(", sessionIdName=").append(sessionIdName).append(", maxInactiveInterval=").append(maxInactiveInterval)
-        .append(", distributable=").append(distributable).append(", sticky=").append(sticky)
-        .append(", allowedCachedSessionReuse=").append(allowedCachedSessionReuse).append(", interceptListeners=")
-        .append(interceptListeners).append(", forceDistributable=").append(forceDistributable)
-        .append(", loggingMdcActive=").append(loggingMdcActive).append(", usingEncryption=").append(usingEncryption)
-        .append(", loggingMdcKey=").append(loggingMdcKey).append(", providerConfiguration=")
-        .append(providerConfiguration).append(", repositoryFactory=").append(repositoryFactory)
-        .append(", sessionTracking=").append(sessionTracking).append(", encryptionKey=").append(encryptionKey)
-        .append(", nonCacheable=").append(nonCacheable).append(", replicationTrigger=").append(replicationTrigger)
-        .append(", attributes=").append(attributes).append(", commitOnAllConcurrent=").append(commitOnAllConcurrent)
-        .append("]");
+           .append(", sessionIdName=").append(sessionIdName).append(", maxInactiveInterval=")
+           .append(maxInactiveInterval).append(", distributable=").append(distributable).append(", sticky=")
+           .append(sticky).append(", allowedCachedSessionReuse=").append(allowedCachedSessionReuse)
+           .append(", interceptListeners=").append(interceptListeners).append(", forceDistributable=")
+           .append(forceDistributable).append(", loggingMdcActive=").append(loggingMdcActive)
+           .append(", usingEncryption=").append(usingEncryption).append(", loggingMdcKey=").append(loggingMdcKey)
+           .append(", providerConfiguration=").append(providerConfiguration).append(", repositoryFactory=")
+           .append(repositoryFactory).append(", sessionTracking=").append(sessionTracking).append(", encryptionKey=")
+           .append(encryptionKey).append(", nonCacheable=").append(nonCacheable).append(", replicationTrigger=")
+           .append(replicationTrigger).append(", attributes=").append(attributes).append(", commitOnAllConcurrent=")
+           .append(commitOnAllConcurrent).append(", timestamp=").append(timestampSufix).append("]");
     return builder.toString();
   }
 }
