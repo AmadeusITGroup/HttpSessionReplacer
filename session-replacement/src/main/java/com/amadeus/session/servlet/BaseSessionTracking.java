@@ -42,7 +42,7 @@ public abstract class BaseSessionTracking implements SessionTracking {
   public String newId() {
     String newId = idProvider.newId();
     if (appendTimestamp) {
-      StringBuilder suffixedId = new StringBuilder(newId.length() + 11).append(idProvider.newId());
+      StringBuilder suffixedId = new StringBuilder(newId.length() + 11).append(newId);
       newId = suffixedId.append('!').append(System.currentTimeMillis()).toString();
     }
     return newId;
