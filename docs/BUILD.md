@@ -104,3 +104,26 @@ point to exposed IP of the docker host.
 ```sh
 mvn verify -Predis-sentinel -Dredis.host=192.168.99.100
 ```
+
+## Creating a release
+
+Verify that builds and test pass.
+
+Set new version for the release and commit changes. 
+
+```sh
+mvn versions:set -DnewVersion=0.3.1
+```
+
+Perform deploy to OSS Sonatype Nexus:
+
+```sh
+mvn clean deploy
+```
+
+Set version back to snapshot and commit changes. 
+
+```sh
+mvn versions:set -DnewVersion=0.3-SNAPSHOT
+```
+

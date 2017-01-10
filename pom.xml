@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.amadeus</groupId>
   <artifactId>session</artifactId>
-  <version>0.2.1</version>
+  <version>0.3.0</version>
   <packaging>pom</packaging>
   <name>HttpSessionReplacer</name>
   <description>Provides management of application sessions via a session repository (e.g. Redis). General JEE container use case with HttpSession is supported.</description>

@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.amadeus</groupId>
     <artifactId>session</artifactId>
-    <version>0.2.1</version>
+    <version>0.3.0</version>
   </parent>
   <name>session-agent</name>
   <description>JVM agent that enables session support in a JEE container.</description>
