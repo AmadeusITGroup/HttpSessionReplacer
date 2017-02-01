@@ -274,7 +274,13 @@ public class SessionManager implements Closeable {
     return session;
   }
 
-  // If logging has MDC, we add session id to MDC under configured key.
+  /**
+   * Changes session id of the passed session. Session id can change only once
+   * per request.
+   *
+   * @param session
+   *          the session whose id needs to change
+   */
   private void putIdInLoggingMdc(String id) {
     if (configuration.isLoggingMdcActive()) {
       if (id == null) {
