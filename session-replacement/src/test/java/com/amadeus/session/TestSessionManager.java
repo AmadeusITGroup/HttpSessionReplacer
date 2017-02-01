@@ -17,6 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.slf4j.MDC;
 
 import com.codahale.metrics.MetricRegistry;
 
@@ -60,6 +61,7 @@ public class TestSessionManager {
     when(tracking.retrieveId(request)).thenReturn("1");
     RepositoryBackedSession retrievedSession = sessionManager.getSession(request, false, null);
     verify(request).setRequestedSessionId("1");
+    assertEquals("Session id in Logging MDC is wrong", "1", MDC.get(configuration.getLoggingMdcKey()));
     assertSame(session, retrievedSession);
   }
 
@@ -68,9 +70,31 @@ public class TestSessionManager {
     RequestWithSession request = mock(RequestWithSession.class);
     RepositoryBackedSession retrievedSession = sessionManager.getSession(request, false, null);
     verify(request).setRequestedSessionId(null);
+    assertNull("Session id shouldn't be in logging MDC", MDC.get(configuration.getLoggingMdcKey()));
     assertNull(retrievedSession);
   }
 
+  @Test
+  public void testDisableSessionInMdc() {
+    MDC.remove(configuration.getLoggingMdcKey());
+    configuration.setLoggingMdcActive(false);
+    SessionData sessionData = new SessionData("1", now(), 10);
+    RepositoryBackedSession session = mock(RepositoryBackedSession.class);
+    when(session.getId()).thenReturn("1");
+    when(repository.getSessionData("1")).thenReturn(sessionData);
+    when(factory.build(sessionData)).thenReturn(session);
+    RequestWithSession request = mock(RequestWithSession.class);
+    when(tracking.retrieveId(request)).thenReturn("1");
+    sessionManager.getSession(request, false, null);
+    assertNull("Logging MDC should remain null", MDC.get(configuration.getLoggingMdcKey()));    
+    MDC.put(configuration.getLoggingMdcKey(), "something");
+    sessionManager.getSession(request, false, null);
+    assertEquals("Logging MDC was changed", "something", MDC.get(configuration.getLoggingMdcKey()));    
+    request = mock(RequestWithSession.class);
+    sessionManager.getSession(request, false, null);
+    assertEquals("Logging MDC was changed", "something", MDC.get(configuration.getLoggingMdcKey()));    
+  }
+  
   @Test
   public void testGetSessionNoSessionIdCreate() {
     RequestWithSession request = mock(RequestWithSession.class);
@@ -81,6 +105,7 @@ public class TestSessionManager {
     RepositoryBackedSession retrievedSession = sessionManager.getSession(request, true, null);
     verify(request).setRequestedSessionId(null);
     verify(tracking).newId();
+    assertEquals("Session id in Logging MDC is wrong", "new-id", MDC.get(configuration.getLoggingMdcKey()));
     assertSame(session, retrievedSession);
     assertEquals(1, metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "created")).getCount());
   }
@@ -97,6 +122,7 @@ public class TestSessionManager {
     when(request.isIdRetrieved()).thenReturn(true);
     RepositoryBackedSession retrievedSession = sessionManager.getSession(request, false, null);
     verify(tracking, never()).retrieveId(request);
+    assertEquals("Session id in Logging MDC is wrong", "2", MDC.get(configuration.getLoggingMdcKey()));
     assertSame(session, retrievedSession);
   }
 
@@ -134,6 +160,7 @@ public class TestSessionManager {
     assertNull(retrievedSession);
 
   }
+
   @Test
   public void testGetSessionIdNotExists() {
     RequestWithSession request = mock(RequestWithSession.class);
@@ -207,7 +234,8 @@ public class TestSessionManager {
   public void testSubmitWithTimer() {
     Runnable runnable = mock(Runnable.class);
     sessionManager.submit("test", runnable);
-    ArgumentCaptor<SessionManager.RunnableWithTimer> arg= ArgumentCaptor.forClass(SessionManager.RunnableWithTimer.class);
+    ArgumentCaptor<SessionManager.RunnableWithTimer> arg = ArgumentCaptor
+        .forClass(SessionManager.RunnableWithTimer.class);
     verify(executors).submit(arg.capture());
     assertNotNull(arg.getValue().timer);
     assertSame(runnable, arg.getValue().task);
@@ -216,15 +244,16 @@ public class TestSessionManager {
   @Test
   public void testSchedule() {
     Runnable runnable = mock(Runnable.class);
-    sessionManager.schedule(null, runnable , 10);
+    sessionManager.schedule(null, runnable, 10);
     verify(executors).scheduleAtFixedRate(runnable, 10L, 10L, TimeUnit.SECONDS);
   }
 
   @Test
   public void testScheduleWithTimer() {
     Runnable runnable = mock(Runnable.class);
-    sessionManager.schedule("test", runnable , 10);
-    ArgumentCaptor<SessionManager.RunnableWithTimer> arg= ArgumentCaptor.forClass(SessionManager.RunnableWithTimer.class);
+    sessionManager.schedule("test", runnable, 10);
+    ArgumentCaptor<SessionManager.RunnableWithTimer> arg = ArgumentCaptor
+        .forClass(SessionManager.RunnableWithTimer.class);
     verify(executors).scheduleAtFixedRate(arg.capture(), eq(10L), eq(10L), eq(TimeUnit.SECONDS));
     assertNotNull(arg.getValue().timer);
     assertSame(runnable, arg.getValue().task);
@@ -233,7 +262,8 @@ public class TestSessionManager {
   @Test
   public void testDeleteAsync() {
     sessionManager.deleteAsync("1", true);
-    ArgumentCaptor<SessionManager.RunnableWithTimer> captor = ArgumentCaptor.forClass(SessionManager.RunnableWithTimer.class);
+    ArgumentCaptor<SessionManager.RunnableWithTimer> captor = ArgumentCaptor
+        .forClass(SessionManager.RunnableWithTimer.class);
     verify(executors).submit(captor.capture());
     assertNotNull(captor.getValue().timer);
     SessionData sessionData = new SessionData("1", now(), 10);
@@ -257,15 +287,24 @@ public class TestSessionManager {
 
   @Test
   public void testInvalidationConflict() {
-    assertEquals(0, metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "invalidation", "errors")).getCount());
-    assertEquals(0, metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "invalidation", "errors", "expiry")).getCount());
+    assertEquals(0,
+        metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "invalidation", "errors")).getCount());
+    assertEquals(0,
+        metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "invalidation", "errors", "expiry"))
+            .getCount());
     RepositoryBackedSession session = mock(RepositoryBackedSession.class);
     sessionManager.invalidationConflict(session, true);
-    assertEquals(0, metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "invalidation", "errors")).getCount());
-    assertEquals(1, metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "invalidation", "errors", "expiry")).getCount());
+    assertEquals(0,
+        metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "invalidation", "errors")).getCount());
+    assertEquals(1,
+        metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "invalidation", "errors", "expiry"))
+            .getCount());
     sessionManager.invalidationConflict(session, false);
-    assertEquals(1, metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "invalidation", "errors")).getCount());
-    assertEquals(1, metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "invalidation", "errors", "expiry")).getCount());
+    assertEquals(1,
+        metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "invalidation", "errors")).getCount());
+    assertEquals(1,
+        metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "invalidation", "errors", "expiry"))
+            .getCount());
   }
 
   @Test
@@ -279,7 +318,6 @@ public class TestSessionManager {
     verify(repository).sessionIdChange(sessionData);
     verify(notifier).sessionIdChanged(session, sessionData.getOldSessionId());
   }
-
 
   @Test
   public void testPreventDoubleSessionSwitch() {
