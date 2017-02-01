@@ -623,12 +623,13 @@ public class RepositoryBackedSession {
         }
         committed();
         dirty = false;
-        logger.info("Committed session: {}", sessionData);
+        logger.debug("Committed session: {}", sessionData);
       } else {
         logger.debug("Nothing to commit for session: {}", sessionData);
       }
     }
 
+    
     /**
      * Unlocks the session and returns <code>true</code> if it was last active
      * session.

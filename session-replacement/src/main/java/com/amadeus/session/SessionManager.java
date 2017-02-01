@@ -252,6 +252,7 @@ public class SessionManager implements Closeable {
    */
   public RepositoryBackedSession getSession(RequestWithSession request, boolean create, String forceId) {
     String id = retrieveId(request, forceId);
+    putIdInLoggingMdc(id);
     request.setRequestedSessionId(id);
     RepositoryBackedSession session = null;
     if (id != null) {
@@ -263,17 +264,31 @@ public class SessionManager implements Closeable {
     }
     if (session == null && create) {
       id = forceId != null ? forceId : tracking.newId();
+      putIdInLoggingMdc(id);
       logger.info("Creating new session with sessionId: '{}'", id);
       session = newSession(id);
     }
     if (session != null) {
       session.checkUsedAndLock();
-      // If logging has MDC, we add session id to MDC under configured key.
-      if (configuration.isLoggingMdcActive()) {
-        MDC.put(configuration.getLoggingMdcKey(), session.getId());
-      }
     }
     return session;
+  }
+
+  /**
+   * Changes session id of the passed session. Session id can change only once
+   * per request.
+   *
+   * @param session
+   *          the session whose id needs to change
+   */
+  private void putIdInLoggingMdc(String id) {
+    if (configuration.isLoggingMdcActive()) {
+      if (id == null) {
+        MDC.remove(configuration.getLoggingMdcKey());
+      } else {
+        MDC.put(configuration.getLoggingMdcKey(), id);
+      }
+    }
   }
 
   /**
@@ -574,7 +589,10 @@ public class SessionManager implements Closeable {
     synchronized (sessionData) {
       // Only one session switch per request is allowed.
       if (!sessionData.isIdChanged()) {
-        sessionData.setNewSessionId(tracking.newId());
+        String newId = tracking.newId();
+        logger.info("Switching session id {} to {}", sessionData.getId(), newId);
+        sessionData.setNewSessionId(newId);
+        putIdInLoggingMdc(newId);
         switched = true;
       } else {
         logger.warn("Session id was already switched for session: {}", sessionData);
