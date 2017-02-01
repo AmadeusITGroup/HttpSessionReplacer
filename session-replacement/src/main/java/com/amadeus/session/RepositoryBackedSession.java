@@ -623,7 +623,7 @@ public class RepositoryBackedSession {
         }
         committed();
         dirty = false;
-        logger.info("Committed session: {}", sessionData);
+        logger.debug("Committed session: {}", sessionData);
       } else {
         logger.debug("Nothing to commit for session: {}", sessionData);
       }
