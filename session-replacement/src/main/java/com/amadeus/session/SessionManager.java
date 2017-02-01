@@ -583,7 +583,10 @@ public class SessionManager implements Closeable {
     synchronized (sessionData) {
       // Only one session switch per request is allowed.
       if (!sessionData.isIdChanged()) {
-        sessionData.setNewSessionId(tracking.newId());
+        String newId = tracking.newId();
+        logger.info("Switching session id {} to {}", sessionData.getId(), newId);
+        sessionData.setNewSessionId(newId);
+        putIdInLoggingMdc(newId);
         switched = true;
       } else {
         logger.warn("Session id was already switched for session: {}", sessionData);

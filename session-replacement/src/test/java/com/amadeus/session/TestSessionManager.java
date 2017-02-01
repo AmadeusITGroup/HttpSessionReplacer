@@ -311,12 +311,15 @@ public class TestSessionManager {
   public void testSessionSwitch() {
     RepositoryBackedSession session = mock(RepositoryBackedSession.class);
     SessionData sessionData = mock(SessionData.class);
+    when(sessionData.getId()).thenReturn("45");
+    when(tracking.newId()).thenReturn("47");
     when(session.getSessionData()).thenReturn(sessionData);
     sessionManager.switchSessionId(session);
     verify(sessionData).isIdChanged();
     verify(sessionData).setNewSessionId(any(String.class));
     verify(repository).sessionIdChange(sessionData);
     verify(notifier).sessionIdChanged(session, sessionData.getOldSessionId());
+    assertEquals("Session id in Logging MDC is wrong", "47", MDC.get(configuration.getLoggingMdcKey()));    
   }
 
   @Test

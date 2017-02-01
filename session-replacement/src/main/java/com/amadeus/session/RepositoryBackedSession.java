@@ -629,6 +629,7 @@ public class RepositoryBackedSession {
       }
     }
 
+    
     /**
      * Unlocks the session and returns <code>true</code> if it was last active
      * session.
