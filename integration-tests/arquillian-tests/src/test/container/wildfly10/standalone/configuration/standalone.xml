@@ -90,6 +90,20 @@
                     <named-formatter name="COLOR-PATTERN"/>
                 </formatter>
             </console-handler>
+            <async-handler name="ASYNC">                                                                                                                                                                                                             
+                <queue-length value="512"/>                                                                                                                                                                                                          
+                <overflow-action value="block"/>                                                                                                                                                                                                     
+                <subhandlers>                                                                                                                                                                                                                        
+                    <handler name="CONSOLE"/>                                                                                                                                                                                                        
+                </subhandlers>                                                                                                                                                                                                                       
+            </async-handler>                                                                                                                                                                                                                         
+            <async-handler name="ASYNC-FILE">                                                                                                                                                                                                             
+                <queue-length value="512"/>                                                                                                                                                                                                          
+                <overflow-action value="block"/>                                                                                                                                                                                                     
+                <subhandlers>                                                                                                                                                                                                                        
+                    <handler name="FILE"/>                                                                                                                                                                                                        
+                </subhandlers>                                                                                                                                                                                                                       
+            </async-handler>                                                                                                                                                                                                                         
             <periodic-rotating-file-handler name="FILE" autoflush="true">
                 <formatter>
                     <named-formatter name="PATTERN"/>
@@ -108,10 +122,10 @@
                 <level name="WARN"/>
             </logger>
             <root-logger>
-                <level name="WARN"/>
+                <level name="INFO"/>
                 <handlers>
-                    <handler name="CONSOLE"/>
-                    <handler name="FILE"/>
+                    <handler name="ASYNC"/>
+                    <handler name="ASYNC-FILE"/>
                 </handlers>
             </root-logger>
             <formatter name="PATTERN">
