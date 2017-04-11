@@ -24,7 +24,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 @SuppressWarnings("javadoc")
 public class Helpers {
   static final String JAR_TO_TEST =
-      System.getProperty("session-replacement.jar.file", "target/session-replacement-0.3.2-shaded.jar");
+      System.getProperty("session-replacement.jar.file", "target/session-replacement-0.3-SNAPSHOT-shaded.jar");
 
   public static WebArchive createWebApp(String name) {
     return ShrinkWrap.create(WebArchive.class, name).addAsLibraries(new File(JAR_TO_TEST)).addClass(BaseTestServlet.class);
