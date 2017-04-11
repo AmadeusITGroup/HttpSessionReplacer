@@ -243,7 +243,7 @@ public class SessionConfiguration implements Serializable {
    *
    * @see #DEFAULT_SESSION_ID_NAME
    */
-  public static final String SESSION_ID_NAME = "com.amadeus.session.cookieName";
+  public static final String SESSION_ID_NAME = "com.amadeus.session.sessionName";
 
   /**
    * Default name for the cookie or URL element.

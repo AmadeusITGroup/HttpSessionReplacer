@@ -57,6 +57,10 @@ The testing is invoked using
 mvn verify -Pwildfly-10-managed-arquillian,arquillian-tests
 ```
 
+```sh
+mvn verify -Pwildfly-10-managed-arquillian,external.arquillian-tests
+```
+
 ### Redis Tests
 
 Redis tests require docker installation. This can be either native docker on Linux machines

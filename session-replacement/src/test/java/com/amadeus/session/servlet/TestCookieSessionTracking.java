@@ -60,7 +60,7 @@ public class TestCookieSessionTracking {
     HttpServletRequest hsr = (HttpServletRequest)request;
     UUID uuid = UUID.randomUUID();
     UUID uuidUrl = UUID.randomUUID();
-    when(hsr.getPathInfo()).thenReturn(";somesession=" + uuidUrl);
+    when(hsr.getRequestURI()).thenReturn("/url;somesession=" + uuidUrl);
     when(hsr.getCookies()).thenReturn(new Cookie[] { new Cookie("somesession", uuid.toString()) });
     assertEquals(uuid.toString(), cookieSessionTracking.retrieveId(request));
     when(hsr.getCookies()).thenReturn(new Cookie[] { new Cookie("notused", uuid.toString()) });

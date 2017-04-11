@@ -233,8 +233,8 @@ end of the path part of URL (preceding the query).
 The session is stored as a UUID inside a cookie.
 The cookie name is one of the following by descending order of priority:
 
-* Using the `com.amadeus.session.cookieName` initialization parameter of the ServletContext.
-* Using the `com.amadeus.session.cookieName` system property.
+* Using the `com.amadeus.session.sessionName` initialization parameter of the ServletContext.
+* Using the `com.amadeus.session.sessionName` system property.
 * `JSESSIONID`.
 
 In case of HTTPS requests, cookies can be marked as secure.
