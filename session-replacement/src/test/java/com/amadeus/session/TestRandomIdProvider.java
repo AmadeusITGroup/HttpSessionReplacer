@@ -35,6 +35,9 @@ public class TestRandomIdProvider {
     assertNull(provider.readId(null));
     assertEquals("ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE",
         provider.readId("ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE"));
+    long current = System.currentTimeMillis();
+    assertEquals("W9WyesOOnXe01zxxBF6WorKfnhtoe1PCnIv-bMWV!" + current,
+        provider.readId("W9WyesOOnXe01zxxBF6WorKfnhtoe1PCnIv-bMWV!" + current));
   }
 
   @Test

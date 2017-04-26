@@ -108,6 +108,7 @@ public class RandomIdProvider implements SessionIdProvider {
 
   @Override
   public String readId(String value) {
+    String timeStamp = "";
     if (value == null) {
       return null;
     }
@@ -115,10 +116,14 @@ public class RandomIdProvider implements SessionIdProvider {
     if (trimmedValue.isEmpty()) {
       return null;
     }
+    if (trimmedValue.contains("!")) {
+        timeStamp = trimmedValue.substring(trimmedValue.indexOf('!'));
+        trimmedValue = trimmedValue.substring(0, trimmedValue.indexOf('!'));
+    }
     if (trimmedValue.length() != getLengthInCharacters()) {
       return null;
     }
-    return trimmedValue;
+    return timeStamp.isEmpty() ? trimmedValue : trimmedValue + timeStamp;
   }
 
   @Override
