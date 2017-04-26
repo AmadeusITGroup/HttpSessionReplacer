@@ -28,7 +28,7 @@ JVM with agent activated.
 Container testing is using arquillian framework. Same battery of tests can be run against
 several servlet containers. All tests are part of `session-replacement` project. In this
 project, coverage report can be activated using `coverage-per-test` profile.
-Following paragraphs describe testing in specific containers.
+Following paragraphs describe integration testing with specific containers.
 
 #### Jetty 9
 
@@ -45,7 +45,7 @@ The tests run on an embedded container.
 The testing is invoked using
 
 ```sh
-mvn verify -Ptomcat-7-arquillian,arquillian-tests
+mvn verify -Ptomcat-7-embedded-arquillian,arquillian-tests
 ```
 
 #### Wildfly 10
@@ -58,7 +58,7 @@ mvn verify -Pwildfly-10-managed-arquillian,arquillian-tests
 ```
 
 ```sh
-mvn verify -Pwildfly-10-managed-arquillian,external.arquillian-tests
+mvn verify -Pwildfly-10-managed-arquillian-with-agent,external-arquillian-tests
 ```
 
 ### Redis Tests
