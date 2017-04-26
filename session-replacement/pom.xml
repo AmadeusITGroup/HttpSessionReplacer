@@ -10,14 +10,14 @@
   <name>session-replacement</name>
   <description>Implementation of session management for JEE HttpSessions and general use case. Includes implemenations of in-memory and redis session distribution.</description>
   <properties>
-    <redis.version>3.2.5</redis.version>
+    <redis.version>3.2.8</redis.version>
     <redis.image>redis:${redis.version}-alpine</redis.image>
     <jedis.version>2.9.0</jedis.version>
-    <slf4j.version>1.7.21</slf4j.version>
-    <version.arquillian>1.1.11.Final</version.arquillian>
-    <version.arquillian_jacoco>1.0.0.Alpha8</version.arquillian_jacoco>
-    <version.jetty9>9.3.14.v20161028</version.jetty9>
-    <version.tomcat7>7.0.73</version.tomcat7>
+    <slf4j.version>1.7.25</slf4j.version>
+    <version.arquillian>1.1.13.Final</version.arquillian>
+    <version.arquillian_jacoco>1.0.0.Alpha9</version.arquillian_jacoco>
+    <version.jetty9>9.3.18.v20170406</version.jetty9>
+    <version.tomcat7>7.0.77</version.tomcat7>
     <version.wildfly>10.0.0.Final</version.wildfly>
     <sonar.exclusions>**/org/slf4j/impl/*.java</sonar.exclusions>
   </properties>
