@@ -24,11 +24,15 @@ public class OtherServlet extends BaseTestServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     log(request);
     PrintWriter w = response.getWriter();
-    w.println("Previous value of attribute: " + request.getSession().getAttribute("A"));
-    request.getSession(true).setAttribute("A", "C");
-    w.println("New value of attribute: " + request.getSession().getAttribute("A"));
-    w.append("Served at: ").append(request.getContextPath()).append(" ");
-    response.flushBuffer();
+    try {
+      w.println("Previous value of attribute: " + request.getSession().getAttribute("A"));
+      request.getSession(true).setAttribute("A", "C");
+      w.println("New value of attribute: " + request.getSession().getAttribute("A"));
+      w.append("Served at: ").append(request.getContextPath()).append(" ");
+      response.flushBuffer();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
