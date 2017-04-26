@@ -7,26 +7,27 @@
 		<configuration>
 			<property name="user">arquillian</property>
 			<property name="pass">arquillian</property>
-			<property name="javaVmArguments">-Xmx512m -XX:MaxPermSize=128m -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false</property>
+			<property name="javaVmArguments">-Xmx512m -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false</property>
 		</configuration>
 	</container>
 	<container qualifier="tomcat-6-managed-arquillian-with-agent">
 		<configuration>
 			<property name="user">arquillian</property>
 			<property name="pass">arquillian</property>
-			<property name="javaVmArguments">-Xmx512m -XX:MaxPermSize=128m -javaagent:${agent.location}=interceptListeners=true -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false</property>
+			<property name="javaVmArguments">-Xmx512m -javaagent:${agent.location}=interceptListeners=true -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false</property>
 		</configuration>
 	</container>
 	<container qualifier="tomcat-7-managed-arquillian-with-agent">
 		<configuration>
 			<property name="user">arquillian</property>
 			<property name="pass">arquillian</property>
-			<property name="javaVmArguments">-Xmx512m -XX:MaxPermSize=128m -javaagent:${agent.location}=interceptListeners=true -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false</property>
+			<property name="javaVmArguments">-Xmx512m -javaagent:${agent.location}=interceptListeners=true -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.local.only=false</property>
 		</configuration>
 	</container>
 	<container qualifier="wildfly-10-managed-arquillian-with-agent">
 		<configuration>
-			<property name="javaVmArguments">-Xmx512m -XX:MaxPermSize=128m -javaagent:${agent.location}=interceptListeners=true</property>
+			<!-- For debugging prepend with -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y -->
+			<property name="javaVmArguments">-Xmx512m -javaagent:${agent.location}=interceptListeners=true</property>
 		</configuration>
 	</container>
 </arquillian>

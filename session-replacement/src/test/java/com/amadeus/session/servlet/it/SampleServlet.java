@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet implementation class SampleServlet
+ * Servlet implementation used to test session creation or popagation
  */
 @WebServlet("/TestServlet")
 public class SampleServlet extends BaseTestServlet {
@@ -27,6 +27,7 @@ public class SampleServlet extends BaseTestServlet {
     w.println("Previous value of attribute: " + request.getSession().getAttribute("A"));
     request.getSession(true).setAttribute("A", "B");
     w.println("New value of attribute: " + request.getSession().getAttribute("A"));
+    w.println("Encoded url: " + response.encodeURL("/"));
     w.append("Served at: ").append(request.getContextPath()).append(" ");
     response.flushBuffer();
   }

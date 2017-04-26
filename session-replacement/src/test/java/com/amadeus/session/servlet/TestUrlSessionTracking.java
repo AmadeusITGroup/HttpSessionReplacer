@@ -59,7 +59,7 @@ public class TestUrlSessionTracking {
     RequestWithSession request = mock(RequestWithSession.class, withSettings().extraInterfaces(HttpServletRequest.class));
     HttpServletRequest hsr = (HttpServletRequest)request;
     UUID uuid = UUID.randomUUID();
-    when(hsr.getPathInfo()).thenReturn(";somesession="+uuid);
+    when(hsr.getRequestURI()).thenReturn("/url;somesession="+uuid);
     String id = urlSessionTracking.retrieveId(request);
     assertEquals(uuid.toString(), id);
   }
@@ -71,7 +71,7 @@ public class TestUrlSessionTracking {
     urlSessionTracking.configure(sc);
     RequestWithSession request = mock(RequestWithSession.class, withSettings().extraInterfaces(HttpServletRequest.class));
     HttpServletRequest hsr = (HttpServletRequest)request;
-    when(hsr.getPathInfo()).thenReturn(";somesession=");
+    when(hsr.getRequestURI()).thenReturn("/url;somesession=");
     String id = urlSessionTracking.retrieveId(request);
     assertNull(id);
   }

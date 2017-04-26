@@ -35,11 +35,11 @@ public class UrlSessionTracking extends BaseSessionTracking implements SessionTr
 
   @Override
   public String retrieveId(RequestWithSession request) {
-    String pathInfo = ((HttpServletRequest)request).getPathInfo();
-    int sessionIdStart = pathInfo.lastIndexOf(sessionIdPathItem);
+    String requestUri = ((HttpServletRequest)request).getRequestURI();
+    int sessionIdStart = requestUri.lastIndexOf(sessionIdPathItem);
     if (sessionIdStart > -1) {
       sessionIdStart += sessionIdPathItem.length();
-      String sessionId = pathInfo.substring(sessionIdStart);
+      String sessionId = requestUri.substring(sessionIdStart);
       return clean(sessionId);
     }
     return null;

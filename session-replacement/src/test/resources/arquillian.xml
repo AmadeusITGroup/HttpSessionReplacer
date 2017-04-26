@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<arquillian xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://jboss.org/schema/arquillian"
+	xsi:schemaLocation="http://jboss.org/schema/arquillian http://www.jboss.org/schema/arquillian/arquillian_1_0.xsd">
+
+	<container qualifier="wildfly-10-managed-arquillian">
+		<configuration>
+			<!-- For debugging prepend with -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y -->		
+			<property name="javaVmArguments">-Xmx512m</property>
+		</configuration>
+	</container>
+</arquillian>

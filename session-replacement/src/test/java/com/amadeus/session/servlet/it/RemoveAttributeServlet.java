@@ -28,6 +28,7 @@ public class RemoveAttributeServlet extends BaseTestServlet {
     w.println("Previous value of attribute: " + request.getSession().getAttribute("A"));
     request.getSession(true).removeAttribute("A");
     w.println("New value of attribute: " + request.getSession().getAttribute("A"));
+    w.println("Encoded url: " + response.encodeURL("/"));
     w.print("Served at: ");
     w.print(request.getContextPath());
     w.print(" ");

@@ -28,6 +28,7 @@ public class SwitchServlet  extends BaseTestServlet {
     w.println("Previous value of attribute: " + request.getSession().getAttribute("A"));
     request.getSession(true).setAttribute("A", "S");
     w.println("New value of attribute: " + request.getSession().getAttribute("A"));
+    w.println("Encoded url: " + response.encodeURL("/"));
     w.append("Served at: ").append(request.getContextPath()).append(" ");
     response.flushBuffer();
   }

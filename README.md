@@ -228,13 +228,30 @@ The first one is based on cookies and is the default one.
 The second one is based on URL rewriting where the session is appended at the
 end of the path part of URL (preceding the query).
 
+The session propagation can be configured using web.xml (standard Servlet approach)
+
+```xml
+<web-app> 
+...
+  <session-config>
+    <tracking-mode>URL</tracking-mode>
+  </session-config>
+</web-app> 
+```
+It can also be configured using system property or servlet initialization parameter
+`com.amadeus.session.tracking`. Valid values are `COOKIE`, `URL` or `DEFAULT` 
+(which is same as `COOKIE`).
+
+The URL rewriting session propagation is not supported on Tomcat 6 based servlet 
+engines (Tomcat 6.x, JBoss 6.x).
+
 #### Cookie Session Management
 
 The session is stored as a UUID inside a cookie.
 The cookie name is one of the following by descending order of priority:
 
-* Using the `com.amadeus.session.cookieName` initialization parameter of the ServletContext.
-* Using the `com.amadeus.session.cookieName` system property.
+* Using the `com.amadeus.session.sessionName` initialization parameter of the ServletContext.
+* Using the `com.amadeus.session.sessionName` system property.
 * `JSESSIONID`.
 
 In case of HTTPS requests, cookies can be marked as secure.

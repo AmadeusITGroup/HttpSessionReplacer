@@ -85,6 +85,10 @@ $JBOSS_HOME/bin/standalone.sh -mp $JBOSS_HOME/modules:$SESSION_PATH/modules
 # on Windows: $JBOSS_HOME\bin\standalone.ps1 -mp $JBOSS_HOME\modules;$SESSION_PATH\modules
 ```
 
+### URL session propagation
+
+URL session propagation is _not_ supported in JBoss 6.x. It works in versions 7.x and in all Wildfly verions.
+
 ### Session replacement configuration in Wildfly/JBoss configuration file
 
 TODO explain configuration using system properties in standalone.xml
@@ -162,8 +166,9 @@ manifested with class cast exceptions. It is recommended to give preference to t
 Tomcat 6.x supports Servlet 2.5 specification. This environment has few limitations and prerequisites:
 
 * your web application must have at least one `Filter`, otherwise there will be no session replacement.
-* if you can modify your web application, add com.amadeus.session.servlet.SessionFilter as first filter of your web application.
+* if you can modify your web application, add `com.amadeus.session.servlet.SessionFilter` as first filter of your web application.
 * to support sending events to `HttpSessionListener` and `HttpSessionAttributeListener`, start the agent with `session=2.x` argument or set system property `com.amadeus.session.servlet.api=2.x`
+* URL session propagation is _not_ supported in Tomcat 6.x.
 
 ### Usage with Spring library
 
