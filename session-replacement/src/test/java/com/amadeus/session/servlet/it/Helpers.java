@@ -5,15 +5,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -46,7 +45,7 @@ public class Helpers {
     return new TypeSafeMatcher<HttpURLConnection>() {
 
       private ArrayList<String> actualLines;
-      private IOException exception;
+      private Exception exception;
 
       @Override
       public void describeTo(Description description) {
@@ -58,7 +57,7 @@ public class Helpers {
         List<String> cookies = connection.getHeaderFields().get("Set-Cookie");
         description.appendValueList("was ", System.lineSeparator(), System.lineSeparator(), actualLines);
         if (exception != null) {
-          description.appendText("Caught exception.").appendText(exception.getMessage());
+          description.appendText("Caught exception.").appendText(exception.toString());
         }
         if (cookies != null) {
           description.appendValueList("Cookies: ", ",", "", cookies);
@@ -69,19 +68,19 @@ public class Helpers {
       protected boolean matchesSafely(HttpURLConnection connection) {
         actualLines = new ArrayList<>();
         exception = null;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+        try (Scanner s = new Scanner(connection.getInputStream())) {
           for (String line : lines) {
-            String actualLine = reader.readLine();
-            if (actualLine == null) {
+            if (!s.hasNextLine()) {
               return false;
             }
+            String actualLine = s.nextLine();
             actualLines.add(actualLine);
             if (!line.equals(actualLine)) {
               return false;
             }
           }
           return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
           exception = e;
           return false;
         }
