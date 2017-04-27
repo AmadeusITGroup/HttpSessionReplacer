@@ -21,6 +21,8 @@ public abstract class BaseSessionTracking implements SessionTracking {
 
   private boolean appendTimestamp;
 
+  protected static final char SESSION_ID_TIMESTAMP_SEPARATOR = '!';
+
   @Override
   public void configure(SessionConfiguration configuration) {
     // Read standard configuration
@@ -63,12 +65,13 @@ public abstract class BaseSessionTracking implements SessionTracking {
    */
   protected String clean(String value) {
     String timeStamp = "";
-    if (value.contains("!")) {
-        timeStamp = value.substring(value.indexOf('!'));
-        value = value.substring(0, value.indexOf('!'));
+    int separatorIndex = value.indexOf(SESSION_ID_TIMESTAMP_SEPARATOR);
+    if (separatorIndex != -1) {
+        timeStamp = value.substring(separatorIndex);
+        value = value.substring(0, separatorIndex);
     }
     String cleanValue = idProvider.readId(value);
-    return timeStamp.isEmpty() ? cleanValue : cleanValue + timeStamp;
+    return cleanValue != null ? cleanValue + timeStamp : cleanValue;
   }
 
 }
