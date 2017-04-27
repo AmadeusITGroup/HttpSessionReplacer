@@ -62,7 +62,13 @@ public abstract class BaseSessionTracking implements SessionTracking {
    * @return extracted id or <code>null</code>
    */
   protected String clean(String value) {
-    return idProvider.readId(value);
+    String timeStamp = "";
+    if (value.contains("!")) {
+        timeStamp = value.substring(value.indexOf('!'));
+        value = value.substring(0, value.indexOf('!'));
+    }
+    String cleanValue = idProvider.readId(value);
+    return timeStamp.isEmpty() ? cleanValue : cleanValue + timeStamp;
   }
 
 }
