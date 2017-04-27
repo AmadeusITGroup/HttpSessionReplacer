@@ -116,7 +116,7 @@ Verify that builds and test pass.
 Set new version for the release.
 
 ```sh
-mvn versions:set -DnewVersion=0.3.2
+mvn versions:set -DnewVersion=0.4.0
 ```
 
 Perform build with release profile to add sources and javadoc. Perform deploy to OSS Sonatype Nexus:
@@ -131,8 +131,8 @@ If release is successful, commit the version and commit and tag changes in git.
 ```sh
 mvn versions:commit
 git add *
-git commit -m "version 0.3.2"
-git tag -a v0.3.2 -m "version 0.3.2"
+git commit -m "version 0.4.0"
+git tag -a v0.4.0 -m "version 0.4.0"
 git push origin --tags
 ```
 
