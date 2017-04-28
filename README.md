@@ -1,7 +1,7 @@
 # HTTP Session Replacement
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amadeus/session/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/com.amadeus/session)
-[![Javadocs](http://www.javadoc.io/badge/com.amadeus/session-replacement.svg?style=flat-square)](http://www.javadoc.io/badge/com.amadeus/session-replacement)
+[![Javadocs](http://www.javadoc.io/badge/com.amadeus/session-replacement.svg?style=flat-square)](http://www.javadoc.io/doc/com.amadeus/session-replacement)
 [![Travis](https://img.shields.io/travis/AmadeusITGroup/HttpSessionReplacer.svg?style=flat-square)](http://travis-ci.org/AmadeusITGroup/HttpSessionReplacer)
 [![license](https://img.shields.io/github/license/AmadeusITGroup/HttpSessionReplacer.svg?style=flat-square)](LICENSE)
 [![Dependency Status](https://www.versioneye.com/user/projects/583d2f19d2fd57003fdfbe76/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/583d2f19d2fd57003fdfbe76/)
