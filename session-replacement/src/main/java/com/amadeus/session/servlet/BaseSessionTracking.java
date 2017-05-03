@@ -1,5 +1,7 @@
 package com.amadeus.session.servlet;
 
+import java.nio.ByteBuffer;
+
 import javax.servlet.ServletContext;
 
 import com.amadeus.session.RandomIdProvider;
@@ -8,6 +10,7 @@ import com.amadeus.session.SessionConfiguration;
 import com.amadeus.session.SessionIdProvider;
 import com.amadeus.session.SessionTracking;
 import com.amadeus.session.UuidProvider;
+import com.amadeus.session.Base64MaskingHelper;
 
 /**
  * This base class for session ID tracking that can be configured via
@@ -44,8 +47,11 @@ public abstract class BaseSessionTracking implements SessionTracking {
   public String newId() {
     String newId = idProvider.newId();
     if (appendTimestamp) {
-      StringBuilder suffixedId = new StringBuilder(newId.length() + 11).append(newId);
-      newId = suffixedId.append(SESSION_ID_TIMESTAMP_SEPARATOR).append(System.currentTimeMillis()).toString();
+      StringBuilder suffixedId = new StringBuilder(newId);
+      ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+      newId = suffixedId.append(SESSION_ID_TIMESTAMP_SEPARATOR)
+              .append(Base64MaskingHelper.encode(buffer.putLong(System.currentTimeMillis()).array()))
+              .toString();
     }
     return newId;
   }
