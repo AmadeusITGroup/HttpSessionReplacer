@@ -71,12 +71,13 @@ public abstract class BaseSessionTracking implements SessionTracking {
    */
   protected String clean(String value) {
     String timeStamp = "";
+    String cleanValue = value;
     int separatorIndex = value.lastIndexOf(SESSION_ID_TIMESTAMP_SEPARATOR);
     if (separatorIndex != -1) {
         timeStamp = value.substring(separatorIndex);
-        value = value.substring(0, separatorIndex);
+        cleanValue = value.substring(0, separatorIndex);
     }
-    String cleanValue = idProvider.readId(value);
+    cleanValue = idProvider.readId(cleanValue);
     return cleanValue != null ? cleanValue + timeStamp : cleanValue;
   }
 

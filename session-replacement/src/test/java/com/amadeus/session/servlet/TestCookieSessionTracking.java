@@ -70,8 +70,8 @@ public class TestCookieSessionTracking {
         new Cookie("somesession", uuid.toString())
         });
     assertEquals(uuid.toString(), cookieSessionTracking.retrieveId(request));
-    String sessionIdWithTimestamp = uuid.toString() + "!" + System.currentTimeMillis();
-    String invalidSessionIdWithTimestamp = uuid.toString() + "-abcdefgh" + "!" + System.currentTimeMillis();
+    String sessionIdWithTimestamp = uuid.toString() + BaseSessionTracking.SESSION_ID_TIMESTAMP_SEPARATOR + System.currentTimeMillis();
+    String invalidSessionIdWithTimestamp = uuid.toString() + "-abcdefgh" + BaseSessionTracking.SESSION_ID_TIMESTAMP_SEPARATOR + System.currentTimeMillis();
     when(hsr.getCookies()).thenReturn(new Cookie[] { new Cookie("somesession", sessionIdWithTimestamp)});
     assertEquals(sessionIdWithTimestamp, cookieSessionTracking.retrieveId(request));
     when(hsr.getCookies()).thenReturn(new Cookie[] { new Cookie("somesession", invalidSessionIdWithTimestamp)});

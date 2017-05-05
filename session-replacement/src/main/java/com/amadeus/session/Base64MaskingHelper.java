@@ -23,6 +23,7 @@ public class Base64MaskingHelper {
     private static final char[] SESSION_ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
 	      .toCharArray();
     
+    private Base64MaskingHelper() {}
     /**
      * Encode the bytes into a String with a slightly modified Base64-algorithm
      * This code was written by Kevin Kelley <kelley@ruralnet.net> and adapted by

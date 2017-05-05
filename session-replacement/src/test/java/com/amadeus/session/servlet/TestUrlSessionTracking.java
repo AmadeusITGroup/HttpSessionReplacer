@@ -62,8 +62,8 @@ public class TestUrlSessionTracking {
     when(hsr.getPathInfo()).thenReturn(";somesession="+uuid);
     String id = urlSessionTracking.retrieveId(request);
     assertEquals(uuid.toString(), id);
-    String sessionIdWithTimestamp = uuid.toString() + "!" + System.currentTimeMillis();
-    String invalidSessionIdWithTimestamp = uuid.toString() + "-abcdefgh" + "!" + System.currentTimeMillis();
+    String sessionIdWithTimestamp = uuid.toString() + BaseSessionTracking.SESSION_ID_TIMESTAMP_SEPARATOR + System.currentTimeMillis();
+    String invalidSessionIdWithTimestamp = uuid.toString() + "-abcdefgh" + BaseSessionTracking.SESSION_ID_TIMESTAMP_SEPARATOR + System.currentTimeMillis();
     when(hsr.getPathInfo()).thenReturn(";somesession="+sessionIdWithTimestamp);
     assertEquals(sessionIdWithTimestamp, urlSessionTracking.retrieveId(request));
     when(hsr.getPathInfo()).thenReturn(";somesession="+invalidSessionIdWithTimestamp);
