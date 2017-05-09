@@ -65,7 +65,7 @@ public abstract class BaseSessionTracking implements SessionTracking {
    */
   protected String clean(String value) {
     if (!appendTimestamp) {
-      return idProvider.readId(cleanValue);
+      return idProvider.readId(value);
     }
     String timeStamp = "";
     String cleanValue = value;
