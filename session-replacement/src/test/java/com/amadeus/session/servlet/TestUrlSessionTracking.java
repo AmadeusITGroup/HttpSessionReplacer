@@ -62,6 +62,32 @@ public class TestUrlSessionTracking {
     when(hsr.getRequestURI()).thenReturn("/url;somesession="+uuid);
     String id = urlSessionTracking.retrieveId(request);
     assertEquals(uuid.toString(), id);
+
+    String sessionIdWithTimestamp = uuid.toString() + BaseSessionTracking.SESSION_ID_TIMESTAMP_SEPARATOR + System.currentTimeMillis();
+    String invalidSessionIdWithTimestamp = uuid.toString() + "-abcdefgh" + BaseSessionTracking.SESSION_ID_TIMESTAMP_SEPARATOR + System.currentTimeMillis();
+    String sessionIdWithoutTimestamp = uuid.toString();
+
+    when(hsr.getPathInfo()).thenReturn(";somesession="+sessionIdWithTimestamp);
+    when(hsr.getRequestURI()).thenReturn("/url;somesession="+sessionIdWithTimestamp);
+    assertNull(urlSessionTracking.retrieveId(request));
+    when(hsr.getPathInfo()).thenReturn(";somesession="+sessionIdWithoutTimestamp);
+    when(hsr.getRequestURI()).thenReturn("/url;somesession="+sessionIdWithoutTimestamp);
+    assertEquals(sessionIdWithoutTimestamp, urlSessionTracking.retrieveId(request));
+    when(hsr.getPathInfo()).thenReturn(";somesession="+invalidSessionIdWithTimestamp);
+    when(hsr.getRequestURI()).thenReturn("/url;somesession="+invalidSessionIdWithTimestamp);
+    assertNull(urlSessionTracking.retrieveId(request));
+
+    sc.setTimestampSufix(true);
+    urlSessionTracking.configure(sc);
+    when(hsr.getPathInfo()).thenReturn(";somesession="+sessionIdWithTimestamp);
+    when(hsr.getRequestURI()).thenReturn("/url;somesession="+sessionIdWithTimestamp);
+    assertEquals(sessionIdWithTimestamp, urlSessionTracking.retrieveId(request));
+    when(hsr.getPathInfo()).thenReturn(";somesession="+sessionIdWithoutTimestamp);
+    when(hsr.getRequestURI()).thenReturn("/url;somesession="+sessionIdWithoutTimestamp);
+    assertEquals(sessionIdWithoutTimestamp, urlSessionTracking.retrieveId(request));
+    when(hsr.getPathInfo()).thenReturn(";somesession="+invalidSessionIdWithTimestamp);
+    when(hsr.getRequestURI()).thenReturn("/url;somesession="+invalidSessionIdWithTimestamp);
+    assertNull(urlSessionTracking.retrieveId(request));
   }
 
   @Test
