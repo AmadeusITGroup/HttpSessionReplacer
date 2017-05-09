@@ -64,10 +64,13 @@ public abstract class BaseSessionTracking implements SessionTracking {
    * @return extracted id or <code>null</code>
    */
   protected String clean(String value) {
+    if (!appendTimestamp) {
+      return idProvider.readId(cleanValue);
+    }
     String timeStamp = "";
     String cleanValue = value;
     int separatorIndex = value.lastIndexOf(SESSION_ID_TIMESTAMP_SEPARATOR);
-    if (appendTimestamp && separatorIndex != -1) {
+    if (separatorIndex != -1) {
         timeStamp = value.substring(separatorIndex);
         cleanValue = value.substring(0, separatorIndex);
     }
