@@ -139,6 +139,6 @@ git push origin --tags
 Set version back to snapshot and commit changes. 
 
 ```sh
-mvn versions:set -DnewVersion=0.3-SNAPSHOT
+mvn versions:set -DnewVersion=0.4-SNAPSHOT
 ```
 
