@@ -63,7 +63,7 @@ class JedisPoolFacade extends AbstractJedisFacade {
       @Override
       public void onPMessage(byte[] pattern, byte[] channel, byte[] message) {
         listener.onPMessage(pattern, channel, message);
-      };
+      }
     };
     listener.link(bps);
     jedis().psubscribe(bps, encode(pattern));

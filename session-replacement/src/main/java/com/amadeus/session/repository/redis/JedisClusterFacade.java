@@ -44,7 +44,7 @@ class JedisClusterFacade extends AbstractJedisFacade {
       @Override
       public void onPMessage(byte[] pattern, byte[] channel, byte[] message) {
         listener.onPMessage(pattern, channel, message);
-      };
+      }
     };
     listener.link(bps);
     jedisCluster.psubscribe(bps, encode(pattern));

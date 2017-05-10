@@ -432,22 +432,19 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
           expirationListener = new ExpirationListener(sessionManager, keyExpirePrefix);
           expirationListener.start(redis);
           logger.info("Stopped subscribing for expiration events.");
-          break;
+          return;
         } catch (Exception e) { // NOSONAR
           if (Thread.interrupted()) {
             return;
           }
-          if (redis.isRedisException(e)) {
-            if (e.getCause() instanceof InterruptedException) {
-              logger.warn("Interrupted subscribtion for expiration events.");
-              break;
-            }
+          if (redis.isRedisException(e) && e.getCause() instanceof InterruptedException) {
+            logger.warn("Interrupted subscribtion for expiration events.");
+            return;
           }
           retryOnException(e);
           if (Thread.interrupted()) {
             return;
           }
-          retryOnException(e);
         }
       }
     }
