@@ -41,6 +41,9 @@ class TransactionalJedisCluster extends JedisCluster {
     }.runBinary(key);
   }
 
+  /**
+   * Intentionally providing the functionality in order to get Redis version.
+   */
   @Override
   public String info(final String section) {
     // INFO command can be sent to any node

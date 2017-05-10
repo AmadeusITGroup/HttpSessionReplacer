@@ -29,13 +29,11 @@ public abstract class BaseSessionTracking implements SessionTracking {
     idName = configuration.getSessionIdName();
     String idProviderType = configuration.getAttribute(SessionConfiguration.SESSION_ID_PROVIDER, "random");
     appendTimestamp = configuration.isTimestampSufix();
-    switch (idProviderType) {
-    case "uuid":
+    if ("uuid".equals(idProviderType)) {
       idProvider = new UuidProvider();
-      break;
-    default:
+    }
+    else {
       idProvider = new RandomIdProvider();
-      break;
     }
     idProvider.configure(configuration);
   }
