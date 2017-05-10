@@ -1,5 +1,6 @@
 package com.amadeus.session.repository.redis;
 
+import static com.amadeus.session.repository.redis.SafeEncoder.encode;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.junit.Assert.assertArrayEquals;
@@ -17,7 +18,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static redis.clients.util.SafeEncoder.encode;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -288,7 +288,6 @@ public class TestNotificationExpirationManagement {
     assertEquals(60000L, NotificationExpirationManagement.roundDownMinute(62000L));
   }
 
-
   @SuppressWarnings("unchecked")
   @Test
   public void testGetKeysToExpire() {
@@ -299,5 +298,12 @@ public class TestNotificationExpirationManagement {
     Set<byte[]> result = expiration.getKeysToExpire(encode("Test"));
     assertSame(expected, result);
     verify(redis).transaction(eq(encode("Test")), any(TransactionRunner.class));
+  }
+
+  @Test
+  public void testSessionExpireKeyBuilder() {
+    NotificationExpirationManagement sticky = new NotificationExpirationManagement(redis, redisSession, "test", "this",
+                                                                                   "prefix:", true);
+    assertArrayEquals(sticky.getSessionExpireKey("10"), sticky.getSessionExpireKey("this", "10"));
   }
 }

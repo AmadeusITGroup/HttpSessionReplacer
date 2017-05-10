@@ -237,7 +237,7 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
       // If stickiness is active, and there was failover, we need to delete
       // previous session expire key
       if (sticky && !owner.equals(session.getPreviousOwner())) {
-        redis.del(encode(constructKeyExpirePrefix(session.getPreviousOwner())));
+        redis.del(getSessionExpireKey(session.getPreviousOwner(), session.getId()));
       }
     }
 
@@ -375,6 +375,20 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
         .append(id).append('}').toString());
   }
 
+  /**
+   * Builds key whose expire pub event is used to expire session
+   *
+   * @param owner
+   *          node that was owner of the session
+   * @param id
+   *          session id
+   * @return key as byte array
+   */
+  byte[] getSessionExpireKey(String owner, String id) {
+    String ownerBasedPrefix = constructKeyExpirePrefix(owner);
+    return encode(new StringBuilder(ownerBasedPrefix.length() + id.length() + 1).append(ownerBasedPrefix).append('{')
+        .append(id).append('}').toString());
+  }
   /**
    * Builds expirations key for the instant in milliseconds. Key is used to
    * clean up sessions for which we didn't receive expire event.
