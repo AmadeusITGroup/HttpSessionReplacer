@@ -26,7 +26,7 @@ import redis.clients.jedis.Tuple;
 @SuppressWarnings("javadoc")
 public class TestJedisClusterFacade {
   private TransactionalJedisCluster jedisCluster;
-  private RedisFacade rf;
+  private JedisClusterFacade rf;
 
   @Before
   public void setup() {
@@ -200,10 +200,21 @@ public class TestJedisClusterFacade {
   public void testTransaction() {
     byte[] key = new byte[] {};
     TransactionRunner<?> transaction = mock(TransactionRunner.class);
+    rf.setTransactionOnKey(true);
     rf.transaction(key, transaction);
     verify(jedisCluster).transaction(key, transaction);
   }
 
+
+  @Test
+  public void testTransactionAsSequence() {
+    byte[] key = new byte[] {};
+    TransactionRunner<?> transaction = mock(TransactionRunner.class);
+    rf.transaction(key, transaction);
+    verify(jedisCluster, never()).transaction(key, transaction);
+    verify(jedisCluster).transaction(transaction);
+  }
+  
   @Test
   public void testRenameString() {
     byte[] oldkey = new byte[] { 65 };
