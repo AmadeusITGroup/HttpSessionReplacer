@@ -264,6 +264,7 @@
             <artifactId>docker-maven-plugin</artifactId>
             <extensions>true</extensions>
             <configuration>
+              <verbose>true</verbose>
               <useColor>true</useColor>
               <images>
                 <image>
@@ -274,7 +275,7 @@
                     <ports>
                       <!-- Port mappings: Redis internal port will be dynamically mapped 
                         and this (random) port will be assigned to the maven variable ${redis.port}. -->
-                      <port>+redis.host:redis.port:6379</port>
+                      <port>6379:6379</port>
                     </ports>
                     <wait>
                       <!-- Wait for this in logs -->
@@ -313,7 +314,7 @@
             <configuration>
               <systemPropertyVariables>
                 <!-- Pass redis conf to tests ... -->
-                <com.amadeus.session.repository.conf>mode=SINGLE,port=${redis.port},host=${redis.host}</com.amadeus.session.repository.conf>
+                <com.amadeus.session.repository.conf>mode=SINGLE,port=6379,host=localhost</com.amadeus.session.repository.conf>
                 <com.amadeus.session.redis.expiration>${it.com.amadeus.session.redis.expiration}</com.amadeus.session.redis.expiration>
                 <redis.integration.tests>true</redis.integration.tests>
               </systemPropertyVariables>
@@ -331,98 +332,55 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.codehaus.gmaven</groupId>
-            <artifactId>groovy-maven-plugin</artifactId>
-            <version>2.0</version>
-            <executions>
-              <execution>
-                <id>add-dynamic-properties</id>
-                <phase>initialize</phase>
-                <goals>
-                  <goal>execute</goal>
-                </goals>
-                <configuration>
-                  <source>
-                    println properties
-                    println properties.use_docker_host
-                    if (properties.use_docker_host == "true") {
-                      def dockerHost = System.getenv("DOCKER_HOST")
-                      println dockerHost
-                      def matcher = dockerHost =~ /.+\/\/([^:]+):.+/
-                      def redisHost = matcher[0][1]
-                      project.properties.redis_host = redisHost
-                      println redisHost
-                      println properties
-                    }
-                  </source>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <!-- Prepare sentinel.conf for docker image -->
-            <artifactId>maven-resources-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>copy-resources</id>
-                <phase>pre-integration-test</phase>
-                <goals>
-                  <goal>copy-resources</goal>
-                </goals>
-                <configuration>
-                  <outputDirectory>${project.build.directory}/redis</outputDirectory>
-                  <resources>
-                    <resource>
-                      <directory>${basedir}/src/test/redis</directory>
-                      <filtering>true</filtering>
-                    </resource>
-                  </resources>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
             <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
             <extensions>true</extensions>
             <configuration>
               <useColor>true</useColor>
               <logDate>default</logDate>
+              <verbose>true</verbose>
               <images>
                 <image>
                   <name>${redis.image}</name>
                   <alias>redis_master</alias>
-                  <run>
+                  <run>                  
                     <cmd>redis-server --notify-keyspace-events Ex --bind 0.0.0.0</cmd>
                     <ports>
+                      <!-- Port mappings: Redis internal port will be dynamically mapped 
+                        and this (random) port will be assigned to the maven variable ${redis.port}. -->
                       <port>6379:6379</port>
+                      <port>6380:6380</port>
+                      <port>26379:26379</port>
+                      <port>26378:26378</port>
+                      <port>26377:26377</port>
                     </ports>
-                    <net>host</net>
                     <wait>
+                      <!-- Wait for this in logs -->
                       <log>The server is now ready</log>
+                      <!-- ... but at max 10 seconds -->
                       <time>10000</time>
                     </wait>
-                  </run>
+                    <log>
+                      <enabled>true</enabled>
+                      <date>default</date>
+                    </log>
+                  </run>                  
                 </image>
                 <image>
                   <name>redis_slave</name>
                   <alias>redis_slave</alias>
-                  <build>
-                    <from>${redis.image}</from>
-                    <ports>
-                      <port>6380</port>
-                    </ports>
-                    <cmd>redis-server --port 6380 --slaveof 127.0.0.1 6379 --bind 0.0.0.0</cmd>
-                  </build>
                   <run>
+                    <cmd>redis-server --notify-keyspace-events Ex --port 6380 --slaveof 127.0.0.1 6379 --bind 0.0.0.0</cmd>
                     <ports>
-                      <port>6380:6380</port>
                     </ports>
-                    <net>host</net>
                     <wait>
                       <log>The server is now ready</log>
                       <time>10000</time>
                     </wait>
+                    <network>
+                      <mode>container</mode>
+                      <name>redis_master</name>
+                    </network>
                   </run>
                 </image>
                 <!-- Sentinel -->
@@ -431,29 +389,20 @@
                   <alias>redis_it_sentinel_1</alias>
                   <build>
                     <from>${redis.image}</from>
+                    <user>redis</user>
                     <ports>
                       <port>26379</port>
                       <port>26378</port>
                       <port>26377</port>
                     </ports>
-                    <assembly>
-                      <user>redis</user>
-                      <inline>
-                        <files>
-                          <file>
-                            <source>${project.build.directory}/redis/sentinel.conf</source>
-                            <destName>sentinel.conf</destName>
-                          </file>
-                        </files>
-                      </inline>
-                    </assembly>
+                    <runCmds>
+                      <runCmd>mkdir -p /maven</runCmd>
+                      <runCmd>touch /maven/sentinel.conf</runCmd>
+                      <runCmd>chown -R redis /maven</runCmd>
+                    </runCmds>
                   </build>
                   <run>
-                    <cmd>redis-server /maven/sentinel.conf --port 26379 --sentinel announce-port 26379 --bind 0.0.0.0</cmd>
-                    <ports>
-                      <port>26379:26379</port>
-                    </ports>
-                    <net>host</net>
+                    <cmd>redis-server /maven/sentinel.conf --port 26379 --sentinel announce-port 26379 --bind 0.0.0.0 --sentinel monitor redis_master 127.0.0.1 6379 1 --sentinel down-after-milliseconds redis_master 5000 --sentinel failover-timeout redis_master 60000 --sentinel parallel-syncs redis_master 1 --sentinel announce-ip 127.0.0.1</cmd>
                     <wait>
                       <log>Sentinel ID</log>
                       <time>10000</time>
@@ -462,36 +411,40 @@
                       <enabled>true</enabled>
                       <date>default</date>
                     </log>
+                    <network>
+                      <mode>container</mode>
+                      <name>redis_master</name>
+                    </network>
                   </run>
                 </image>
                 <image>
                   <name>redis_it_sentinel</name>
                   <alias>redis_it_sentinel_2</alias>
                   <run>
-                    <cmd>redis-server /maven/sentinel.conf --port 26378 --sentinel announce-port 26378 --bind 0.0.0.0</cmd>
-                    <ports>
-                      <port>26378:26378</port>
-                    </ports>
-                    <net>host</net>
+                    <cmd>redis-server /maven/sentinel.conf --port 26378 --sentinel announce-port 26378 --bind 0.0.0.0 --sentinel monitor redis_master 127.0.0.1 6379 1 --sentinel down-after-milliseconds redis_master 5000 --sentinel failover-timeout redis_master 60000 --sentinel parallel-syncs redis_master 1 --sentinel announce-ip 127.0.0.1</cmd>
                     <wait>
                       <log>Sentinel ID</log>
                       <time>10000</time>
                     </wait>
+                    <network>
+                      <mode>container</mode>
+                      <name>redis_master</name>
+                    </network>
                   </run>
                 </image>
                 <image>
                   <name>redis_it_sentinel</name>
                   <alias>redis_it_sentinel_3</alias>
                   <run>
-                    <cmd>redis-server /maven/sentinel.conf --port 26377 --sentinel announce-port 26377 --bind 0.0.0.0</cmd>
-                    <ports>
-                      <port>26377:26377</port>
-                    </ports>
-                    <net>host</net>
+                    <cmd>redis-server /maven/sentinel.conf --port 26377 --sentinel announce-port 26377 --bind 0.0.0.0 --sentinel monitor redis_master 127.0.0.1 6379 1 --sentinel down-after-milliseconds redis_master 5000 --sentinel failover-timeout redis_master 60000 --sentinel parallel-syncs redis_master 1 --sentinel announce-ip 127.0.0.1</cmd>
                     <wait>
                       <log>Sentinel ID</log>
                       <time>10000</time>
                     </wait>
+                    <network>
+                      <mode>container</mode>
+                      <name>redis_master</name>
+                    </network>
                   </run>
                 </image>
               </images>
@@ -518,7 +471,7 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <systemPropertyVariables>
-                <com.amadeus.session.repository.conf>mode=SENTINEL,master=redis_master,host=${redis_host}:26379/${redis_host}:26378/${redis_host}:26377</com.amadeus.session.repository.conf>
+                <com.amadeus.session.repository.conf>mode=SENTINEL,master=redis_master,host=127.0.0.1:26379/127.0.0.1:26378/127.0.0.1:26377</com.amadeus.session.repository.conf>
                 <com.amadeus.session.redis.expiration>${it.com.amadeus.session.redis.expiration}</com.amadeus.session.redis.expiration>
                 <redis.integration.tests>true</redis.integration.tests>
                 <redis.integration.tests.use.docker.host>true</redis.integration.tests.use.docker.host>
@@ -711,7 +664,7 @@
                     <ports>
                       <!-- Port mappings: Redis internal port will be dynamically mapped 
                         and this (random) port will be assigned to the maven variable ${redis.port}. -->
-                      <port>+redis.host:redis.port:6379</port>
+                      <port>6379:6379</port>
                     </ports>
                     <wait>
                       <!-- Wait for this in logs -->
