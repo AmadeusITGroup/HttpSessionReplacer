@@ -51,11 +51,8 @@ alt 1439245080 time has been reached
 	end note
 
 	Event->JavaClient: 1439245080 time reached
-	JavaClient->expirations1439245080: SMEMBERS expirations:1439245080
+	JavaClient->expirations1439245080: SPOP expirations:1439245080
 	expirations1439245080-->JavaClient: sessionId
-
-	JavaClient->expirations1439245080: DEL expirations:1439245080
-	destroy expirations1439245080
 
 	JavaClient->sessionId: EXISTS sessionId
 	note over sessionId: Redis detects that the session has expired
