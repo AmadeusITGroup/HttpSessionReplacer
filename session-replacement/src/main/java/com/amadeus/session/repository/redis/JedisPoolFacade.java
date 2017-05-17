@@ -89,156 +89,76 @@ class JedisPoolFacade extends AbstractJedisFacade {
     return jedis().hmset(key, hash);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#hsetnx(byte[],
-   * byte[], byte[])
-   */
   @Override
   public Long hsetnx(final byte[] key, final byte[] field, final byte[] value) {
     return jedis().hsetnx(key, field, value);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#hset(byte[], byte[],
-   * byte[])
-   */
   @Override
   public Long hset(final byte[] key, final byte[] field, final byte[] value) {
     return jedis().hset(key, field, value);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#hkeys(byte[])
-   */
   @Override
   public Set<byte[]> hkeys(byte[] key) {
     return jedis().hkeys(key);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#set(byte[], byte[])
-   */
   @Override
   public String set(byte[] key, byte[] value) {
     return jedis().set(key, value);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#setex(byte[], int,
-   * byte[])
-   */
   @Override
   public String setex(byte[] key, int expiry, byte[] value) {
     return jedis().setex(key, expiry, value);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#expire(byte[], int)
-   */
   @Override
   public Long expire(byte[] key, int value) {
     return jedis().expire(key, value);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#srem(byte[], byte)
-   */
   @Override
   public void srem(byte[] key, byte[]... member) {
     jedis().srem(key, member);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#sadd(byte[], byte)
-   */
   @Override
   public Long sadd(byte[] key, byte[]... member) {
     return jedis().sadd(key, member);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#del(byte)
-   */
   @Override
   public Long del(byte[]... keys) {
     return jedis().del(keys);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#exists(byte[])
-   */
   @Override
   public Boolean exists(byte[] key) {
     return jedis().exists(key);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#smembers(byte[])
-   */
   @Override
   public Set<byte[]> smembers(byte[] key) {
     return jedis().smembers(key);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#spop(byte[], long)
-   */
   @Override
   public Set<byte[]> spop(byte[] key, long count) {
     return jedis().spop(key, count);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#expireAt(byte[],
-   * long)
-   */
   @Override
   public Long expireAt(byte[] key, long unixTime) {
     return jedis().expireAt(key, unixTime);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#zadd(byte[], double,
-   * byte[])
-   */
   @Override
   public Long zadd(byte[] key, double score, byte[] elem) {
     return jedis().zadd(key, score, elem);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#zrem(byte[], byte)
-   */
   @Override
   public Long zrem(byte[] key, byte[]... fields) {
     return jedis().zrem(key, fields);

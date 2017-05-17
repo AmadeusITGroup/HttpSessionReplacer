@@ -150,18 +150,19 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
 
       logger.info("Cleaning up sessions expiring at {}", prevMin);
       byte[] key = getForcedExpirationsKey(prevMin);
-      while (true) {
-        Set<byte[]> sessionsToExpire = getKeysToExpire(key);
-        if (sessionsToExpire.isEmpty()) {
-          return;
+      Set<byte[]> sessionsToExpire = getKeysToExpire(key);
+      if (sessionsToExpire == null || sessionsToExpire.isEmpty()) {
+        return;
+      }
+      for (byte[] session : sessionsToExpire) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Cleaning-up session {}", new String(session));
         }
-        for (byte[] session : sessionsToExpire) {
-          // check if session is active
-          if (redis.exists(repository.getSessionKey(session))) {
-            // We run session delete in another thread, otherwise we would
-            // block this thread listener.
-            sessionManager.deleteAsync(encode(session), true);
-          }
+        // check if session is active
+        if (redis.exists(repository.getSessionKey(session))) {
+          // We run session delete in another thread, otherwise we would
+          // block this thread listener.
+          sessionManager.deleteAsync(encode(session), true);
         }
       }
     }
@@ -180,17 +181,18 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
 
       logger.info("Triggering up sessions expiring at {}", prevMin);
       byte[] key = getExpirationsKey(prevMin);
-      while (true) {
-        Set<byte[]> sessionsToExpire = getKeysToExpire(key);
-        if (sessionsToExpire.isEmpty()) {
-          return;
+      Set<byte[]> sessionsToExpire = getKeysToExpire(key);
+      if (sessionsToExpire == null || sessionsToExpire.isEmpty()) {
+        return;
+      }
+      for (byte[] session : sessionsToExpire) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Expiring session {}", new String(session));
         }
-        for (byte[] session : sessionsToExpire) {
-          byte[] sessionExpireKey = getSessionExpireKey(encode(session));
-          // Exists will trigger expire event. See explanation of the
-          // algorithm for the details.
-          redis.exists(sessionExpireKey);
-        }
+        byte[] sessionExpireKey = getSessionExpireKey(encode(session));
+        // Exists will trigger expire event. See explanation of the
+        // algorithm for the details.
+        redis.exists(sessionExpireKey);
       }
     }
   }

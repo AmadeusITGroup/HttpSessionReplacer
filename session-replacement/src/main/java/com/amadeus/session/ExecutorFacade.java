@@ -44,6 +44,7 @@ public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
 
   private static final int WAIT_FOR_SHUTDOWN = 10;
   private static final int CORE_THREADS_IN_POOL = 4;
+  private static final int SCHEDULER_THREADS_IN_POOL = 2;
   private static final int THREAD_KEEPALIVE_TIME = 10;
   private static final int MAXIMUM_THREADS_IN_POOL = 40;
   private static final String MAXIMUM_WORK_QUEUE_SIZE = String.valueOf(100);
@@ -80,7 +81,7 @@ public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
     ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(queueSize);
     executor = new ThreadPoolExecutor(CORE_THREADS_IN_POOL, MAXIMUM_THREADS_IN_POOL, THREAD_KEEPALIVE_TIME, SECONDS,
         workQueue, this, new ThreadPoolExecutor.CallerRunsPolicy());
-    scheduledExecutor = new ScheduledThreadPoolExecutor(1, this, new DiscardAndLog());
+    scheduledExecutor = new ScheduledThreadPoolExecutor(SCHEDULER_THREADS_IN_POOL, this, new DiscardAndLog());
   }
 
   /**

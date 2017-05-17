@@ -7,8 +7,8 @@ import java.util.Set;
 import com.codahale.metrics.MetricRegistry;
 
 /**
- * This interface offers subset of redis.clients.jedis.BinaryJedisCommands. The
- * subset offers commands used by redis session repository implementation.
+ * This interface offers subset of redis.clients.jedis.BinaryJedisCommands. The subset offers commands used by redis
+ * session repository implementation.
  */
 public interface RedisFacade {
 
@@ -31,16 +31,19 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#hdel(byte[], byte[]...)
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param fields
-   * @return If the field was present in the hash it is deleted and 1 is returned, otherwise 0 is returned and no operation is performed.
+   * @return If the field was present in the hash it is deleted and 1 is returned, otherwise 0 is returned and no
+   *         operation is performed.
    */
   Long hdel(byte[] key, byte[]... fields);
 
   /**
    * See redis.clients.jedis.BinaryJedisCommands#hmget(byte[], byte[]...)
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param fields
    *
    * @return list of retrieved values
@@ -50,8 +53,10 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#hmset(byte[], Map)
    *
-   * @param key key as byte array
-   * @param hash map of fields to modify
+   * @param key
+   *          key as byte array
+   * @param hash
+   *          map of fields to modify
    * @return status of the operation
    */
   String hmset(byte[] key, Map<byte[], byte[]> hash);
@@ -59,9 +64,12 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#hsetnx(byte[], byte[], byte[])
    *
-   * @param key key as byte array
-   * @param field field to modify
-   * @param value value of the field
+   * @param key
+   *          key as byte array
+   * @param field
+   *          field to modify
+   * @param value
+   *          value of the field
    * @return status of the operation
    */
   Long hsetnx(byte[] key, byte[] field, byte[] value);
@@ -69,7 +77,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#hset(byte[], byte[], byte[])
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param field
    * @param value
    * @return status of the operation
@@ -79,7 +88,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#hkeys(byte[])
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @return
    */
   Set<byte[]> hkeys(byte[] key);
@@ -87,7 +97,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#set(byte[], byte[])
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param value
    * @return
    */
@@ -96,7 +107,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#setx(byte[], int, byte[])
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param expiry
    * @param value
    * @return
@@ -106,7 +118,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#expire(byte[], int)
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param value
    * @return
    */
@@ -115,7 +128,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#srem(byte[], byte[]...)
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param member
    */
   void srem(byte[] key, byte[]... member);
@@ -123,7 +137,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#sadd(byte[], byte[]...)
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param member
    * @return
    */
@@ -132,7 +147,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#del(byte[]...)
    *
-   * @param keys key as byte arrays
+   * @param keys
+   *          key as byte arrays
    * @return
    */
   Long del(byte[]... keys);
@@ -140,7 +156,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#exists(byte[])
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @return
    */
   Boolean exists(byte[] key);
@@ -148,7 +165,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#smembers(byte[])
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @return
    */
   Set<byte[]> smembers(byte[] key);
@@ -156,7 +174,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#spop(byte[], long)
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param count
    * @return
    */
@@ -165,7 +184,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#expireAt(byte[], long)
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param unixTime
    * @return
    */
@@ -174,7 +194,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#zadd(byte[], byte[]...)
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param score
    * @param elem
    * @return
@@ -184,17 +205,18 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#zrem(byte[], byte[]...)
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param fields
    * @return
    */
   Long zrem(byte[] key, byte[]... fields);
 
   /**
-   * See redis.clients.jedis.BinaryJedisCommands#zrangeByScore(byte[], double,
-   * double)
+   * See redis.clients.jedis.BinaryJedisCommands#zrangeByScore(byte[], double, double)
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param start
    * @param end
    * @return
@@ -204,7 +226,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#zrange(byte[], long, long)
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @param start
    * @param end
    * @return
@@ -214,7 +237,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#persist(byte[])
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @return
    */
   Long persist(byte[] key);
@@ -237,17 +261,15 @@ public interface RedisFacade {
   String info(String section);
 
   /**
-   * Returns true if redis implementation supports SPOP that returns multiple
-   * elements (http://redis.io/commands/spop). This is command is supported in
-   * redis v3.2 and later.
+   * Returns true if redis implementation supports SPOP that returns multiple elements (http://redis.io/commands/spop).
+   * This is command is supported in redis v3.2 and later.
    *
    * @return <code>true</code> if SPOP with multiple results is supported
    */
   boolean supportsMultiSpop();
 
   /**
-   * Dissociates jedis connection from the current thread and returns it to the
-   * pool.
+   * Dissociates jedis connection from the current thread and returns it to the pool.
    */
   void requestFinished();
 
@@ -259,7 +281,8 @@ public interface RedisFacade {
   /**
    * See redis.clients.jedis.BinaryJedisCommands#get(byte[])
    *
-   * @param key key as byte array
+   * @param key
+   *          key as byte array
    * @return
    */
   byte[] get(byte[] key);
@@ -274,8 +297,7 @@ public interface RedisFacade {
   Long publish(byte[] channel, byte[] message);
 
   /**
-   * Starts monitoring Redis interaction. This method can be used to add metrics
-   * to metric registry.
+   * Starts monitoring Redis interaction. This method can be used to add metrics to metric registry.
    *
    * @param metrics
    */
@@ -291,12 +313,11 @@ public interface RedisFacade {
   boolean isRedisException(Exception e);
 
   /**
-   * Executes redis transaction associated to a key. When using cluster, key
-   * must be provided as the transaction is linked to a single slot.
+   * Executes redis transaction associated to a key. When using cluster, key must be provided as the transaction is
+   * linked to a single slot.
    *
-   * @param key key as byte array
-   *          used when performing transaction on cluster to fix the node where
-   *          transaction occurs.
+   * @param key
+   *          key as byte array used when performing transaction on cluster to fix the node where transaction occurs.
    * @param transaction
    *          the implementation of transaction
    * @return result of transaction
@@ -310,20 +331,22 @@ public interface RedisFacade {
    *          the result type
    */
   public interface ResponseFacade<T> {
+
     T get();
   }
 
   /**
-   * Implementation of this interface can be run within a redis transaction. The
-   * transaction is sequence of redis commands executed atomically.
+   * Implementation of this interface can be run within a redis transaction. The transaction is sequence of redis
+   * commands executed atomically.
    * <p>
-   * See <a href="http://redis.io/topics/transactions">http://redis.io/topics/
-   * transactions</a> for details about transactions.
+   * See <a href="http://redis.io/topics/transactions">http://redis.io/topics/ transactions</a> for details about
+   * transactions.
    *
    * @param <T>
    *          result type of the transaction
    */
   interface TransactionRunner<T> {
+
     /**
      * Runs transaction and returns its result.
      *
@@ -335,8 +358,7 @@ public interface RedisFacade {
   }
 
   /**
-   * Used to encapsulate redis library's transaction (MULTI)
-   * processing.
+   * Used to encapsulate redis library's transaction (MULTI) processing.
    *
    */
   interface TransactionFacade {
@@ -344,15 +366,17 @@ public interface RedisFacade {
     /**
      * See redis.clients.jedis.Transaction#hdel(byte[], byte[]...)
      *
-     * @param key key as byte array
+     * @param key
+     *          key as byte array
      * @param fields
      */
-    void hdel(byte[] key, byte[]...fields);
+    void hdel(byte[] key, byte[]... fields);
 
     /**
      * See redis.clients.jedis.Transaction#hmset(byte[], Map)
      *
-     * @param key key as byte array
+     * @param key
+     *          key as byte array
      * @param hash
      */
     void hmset(byte[] key, Map<byte[], byte[]> hash);
@@ -360,14 +384,16 @@ public interface RedisFacade {
     /**
      * See redis.clients.jedis.Transaction#del(byte[]...)
      *
-     * @param keys key as byte arrays
+     * @param keys
+     *          key as byte arrays
      */
     void del(byte[]... keys);
 
     /**
      * See redis.clients.jedis.Transaction#smembers(byte[])
      *
-     * @param key key as byte array
+     * @param key
+     *          key as byte array
      * @return
      */
     RedisFacade.ResponseFacade<Set<byte[]>> smembers(byte[] key);

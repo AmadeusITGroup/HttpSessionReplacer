@@ -21,13 +21,13 @@ import redis.clients.jedis.exceptions.JedisClusterException;
 import redis.clients.util.JedisClusterCRC16;
 
 /**
- * This class acts as facade to {@link JedisCluster}. The implementation offers
- * subset of {@link BinaryJedisCommands}, and, for methods that are not
- * supported in cluster (e.g. rename), it also provides semantically similar
+ * This class acts as facade to {@link JedisCluster}. The implementation offers subset of {@link BinaryJedisCommands},
+ * and, for methods that are not supported in cluster (e.g. rename), it also provides semantically similar
  * implementations.
  */
 class JedisClusterFacade extends AbstractJedisFacade {
   private final TransactionalJedisCluster jedisCluster;
+  private boolean transactionOnKey;
 
   /**
    * Creates RedisFacade from jedis cluster
@@ -70,12 +70,6 @@ class JedisClusterFacade extends AbstractJedisFacade {
     return jedisCluster.hmset(key, hash);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#hsetnx(byte[],
-   * byte[], byte[])
-   */
   @Override
   public Long hsetnx(final byte[] key, final byte[] field, final byte[] value) {
     return jedisCluster.hsetnx(key, field, value);
@@ -143,12 +137,6 @@ class JedisClusterFacade extends AbstractJedisFacade {
     return jedisCluster.expireAt(key, unixTime);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#zadd(byte[], double,
-   * byte[])
-   */
   @Override
   public Long zadd(byte[] key, double score, byte[] elem) {
     return jedisCluster.zadd(key, score, elem);
@@ -164,50 +152,25 @@ class JedisClusterFacade extends AbstractJedisFacade {
     return jedisCluster.zrem(key, fields);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.amadeus.session.repository.redis.IRedisFacade#zrangeByScore(byte[],
-   * double, double)
-   */
   @Override
   public Set<byte[]> zrangeByScore(byte[] key, double start, double end) {
     return jedisCluster.zrangeByScore(key, start, end);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#zrange(byte[], long,
-   * long)
-   */
   @Override
   public Set<byte[]> zrange(byte[] key, long start, long end) {
     return jedisCluster.zrange(key, start, end);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#persist(byte[])
-   */
   @Override
   public Long persist(byte[] key) {
     return jedisCluster.persist(key);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.amadeus.session.repository.redis.IRedisFacade#info(java.lang.String)
-   */
   @Override
   public String info(String section) {
     return jedisCluster.info(section);
   }
-
 
   @Override
   public void close() {
@@ -235,9 +198,8 @@ class JedisClusterFacade extends AbstractJedisFacade {
   }
 
   /**
-   * Implements move of Redis elements where oldkey and newkey don't fall in
-   * same slot. The concrete implementation depends on the type of data at
-   * oldkey.
+   * Implements move of Redis elements where oldkey and newkey don't fall in same slot. The concrete implementation
+   * depends on the type of data at oldkey.
    *
    * @param oldkey
    * @param newkey
@@ -247,30 +209,30 @@ class JedisClusterFacade extends AbstractJedisFacade {
     String type = jedisCluster.type(oldkey);
     String result;
     switch (type) {
-    case "string":
-      result = renameString(oldkey, newkey);
-      break;
-    case "hash":
-      result = renameHash(oldkey, newkey);
-      break;
-    case "set":
-      result = renameSet(oldkey, newkey);
-      break;
-    case "list":
-      result = renameList(oldkey, newkey);
-      break;
-    case "zrange":
-      result = renameZRange(oldkey, newkey);
-      break;
-    default:
-      throw new JedisClusterException("Unknown element type " + type + " for key " + encode(oldkey));
+      case "string":
+        result = renameString(oldkey, newkey);
+        break;
+      case "hash":
+        result = renameHash(oldkey, newkey);
+        break;
+      case "set":
+        result = renameSet(oldkey, newkey);
+        break;
+      case "list":
+        result = renameList(oldkey, newkey);
+        break;
+      case "zrange":
+        result = renameZRange(oldkey, newkey);
+        break;
+      default:
+        throw new JedisClusterException("Unknown element type " + type + " for key " + encode(oldkey));
     }
     return result;
   }
 
   /**
-   * Renames Redis set. As this operation may span multiple servers, we add set
-   * elements to new key, and then remove the old key.
+   * Renames Redis set. As this operation may span multiple servers, we add set elements to new key, and then remove the
+   * old key.
    *
    * @param oldkey
    *          the old set key
@@ -289,8 +251,8 @@ class JedisClusterFacade extends AbstractJedisFacade {
   }
 
   /**
-   * Renames Redis hash. As this operation may span multiple servers, we add
-   * hash elements to new key, and then remove the old key.
+   * Renames Redis hash. As this operation may span multiple servers, we add hash elements to new key, and then remove
+   * the old key.
    *
    * @param oldkey
    *          the old hash key
@@ -309,8 +271,8 @@ class JedisClusterFacade extends AbstractJedisFacade {
   }
 
   /**
-   * Renames simple Redis key. As this operation may span multiple servers, we
-   * set newkey element to value of oldkey element, then remove the old key.
+   * Renames simple Redis key. As this operation may span multiple servers, we set newkey element to value of oldkey
+   * element, then remove the old key.
    *
    * @param oldkey
    *          the old key
@@ -329,9 +291,8 @@ class JedisClusterFacade extends AbstractJedisFacade {
   }
 
   /**
-   * Renames Redis list. As this operation may span multiple servers, we RPUSH
-   * newkey elements with full LRANGE of oldkey elements, then remove the old
-   * key.
+   * Renames Redis list. As this operation may span multiple servers, we RPUSH newkey elements with full LRANGE of
+   * oldkey elements, then remove the old key.
    *
    * @param oldkey
    *          the old key
@@ -350,9 +311,8 @@ class JedisClusterFacade extends AbstractJedisFacade {
   }
 
   /**
-   * Renames Redis ZRANGE. As this operation may span multiple servers, we
-   * retrieve old ZRANGE, insert them (ZADD) at newkey, then remove the old key.
-   * The
+   * Renames Redis ZRANGE. As this operation may span multiple servers, we retrieve old ZRANGE, insert them (ZADD) at
+   * newkey, then remove the old key. The
    *
    * @param oldkey
    *          the old key
@@ -391,14 +351,22 @@ class JedisClusterFacade extends AbstractJedisFacade {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.amadeus.session.repository.redis.IRedisFacade#transaction(byte[],
-   * com.amadeus.session.repository.redis.RedisFacade.RedisTransaction)
-   */
   @Override
   public <T> RedisFacade.ResponseFacade<T> transaction(final byte[] key, final TransactionRunner<T> transaction) {
-    return jedisCluster.transaction(key, transaction);
+    if (transactionOnKey) {
+      return jedisCluster.transaction(key, transaction);
+    }
+    return jedisCluster.transaction(transaction);
+  }
+
+  /**
+   * If set to true, cluster transaction will be executed in multi mode on node owns slot for transaction key. If set to
+   * false, each transaction step is executed on node depending of step's own key. This is default behavior.
+   * 
+   * @param transactionOnKey
+   *          set true to use MULTI command for transactions
+   */
+  public void setTransactionOnKey(boolean transactionOnKey) {
+    this.transactionOnKey = transactionOnKey;
   }
 }
