@@ -14,7 +14,7 @@ comes with in-memory and Redis based implementation.
 
 The project is inspired by Spring Session project, but it has additional motivation to
 avoid any dependency on Spring libraries, and, so, make it usable in applications that
-don't use Spring, or that use an older version. 
+don't use Spring, or that use an older version.
 Much of the redis logic is inspired and builds on work done in Spring Session.
 The implementation, however, uses the Jedis library directly.
 This makes the algorithm easier to port to other languages.
@@ -24,7 +24,7 @@ change) and as compatible as possible with wide variety of the JEE containers, a
 offering full support for session API including different session listeners.
 
 Redis support includes both single instance, sentinel based and cluster modes.
-Two session expiration strategies are available when using Redis. One is based 
+Two session expiration strategies are available when using Redis. One is based
 on Redis notifications, and antoher on sorted sets (ZRANGE).
 
 Useful links:
@@ -231,18 +231,18 @@ end of the path part of URL (preceding the query).
 The session propagation can be configured using web.xml (standard Servlet approach)
 
 ```xml
-<web-app> 
+<web-app>
 ...
   <session-config>
     <tracking-mode>URL</tracking-mode>
   </session-config>
-</web-app> 
+</web-app>
 ```
 It can also be configured using system property or servlet initialization parameter
-`com.amadeus.session.tracking`. Valid values are `COOKIE`, `URL` or `DEFAULT` 
+`com.amadeus.session.tracking`. Valid values are `COOKIE`, `URL` or `DEFAULT`
 (which is same as `COOKIE`).
 
-The URL rewriting session propagation is not supported on Tomcat 6 based servlet 
+The URL rewriting session propagation is not supported on Tomcat 6 based servlet
 engines (Tomcat 6.x, JBoss 6.x).
 
 #### Cookie Session Management
@@ -387,8 +387,8 @@ The agent will set following system properties:
   server.
 
 * `com.amadeus.session.debug` - `true` if agent debug level tracing is activated.
-  
-  
+
+
 ## Session repository
 
 The session repository is the storage were sessions are stored between requests.
@@ -490,7 +490,7 @@ This, for example, allows using Kubernetes services to get all cluster nodes.
 The data for a single session is stored on a single Redis node using the hash
 tags in the key name (i.e. session is put in braces in key {33fdd1b6-b496-4b33-9f7d-df96679d32fe}).
 
-Due to characteristics of the Redis cluster, the update of data is not done in atomic mode. 
+Due to characteristics of the Redis cluster, the update of data is not done in atomic mode.
 
 #### Redis Configuration
 
@@ -826,12 +826,14 @@ configured via `com.amadeus.session.namespace`.
 * `com.amadeus.session.deleted` measures the total number of deleted sessions as well as rate of sessions measures rate of sessions deleted in the last 1, 5 and 15 minutes.
 * `com.amadeus.session.missing` measures the total number of session which were not found in repository and also measures rate of such occurrences in last 1, 5 and 15 minutes.
 * `com.amadeus.session.retrieved` measures the total number of session retrievals as well as the rate of sessions retrieval from store in last 1, 5 and 15 minutes.
-* `com.amadeus.session.timers.commit` measures the histogram (distribution) of the  elapsed time during commit as well as the total number of commits and rate of commits over the last 1, 5 and 15 minutes.
-* `com.amadeus.session.timers.fetch` measures the histogram (distribution) of elapsed time during fetches of session data from the repository as well as the total number of fetch requests and rate of fetch requests over the last 1, 5 and 15 minutes.
+* `com.amadeus.session.timer.commit` measures the histogram (distribution) of the  elapsed time during commit as well as the total number of commits and rate of commits over the last 1, 5 and 15 minutes.
+* `com.amadeus.session.timer.fetch` measures the histogram (distribution) of elapsed time during fetches of session data from the repository as well as the total number of fetch requests and rate of fetch requests over the last 1, 5 and 15 minutes.
 * `com.amadeus.session.serialized.bytes` measures the amount of data that was serialized to be sent.
 * `com.amadeus.session.serialized.distribution` measures the statistical information about data that was serialized in last 5 minutes.
 * `com.amadeus.session.deserialized.bytes` measures the amount of data that was deserialized when received.
 * `com.amadeus.session.deserialized.distribution` measures the statistical information about data that was deserialized in last 5 minutes.
+* `com.amadeus.session.invalidation.errors.expiry` measures the total number of invalidation errors.
+* `com.amadeus.session.invalidation.errors` measures the total number of invalidation on expiry errors.
 
 Total number of active sessions is the total number of created sessions on all
 nodes minus total number of deleted sessions on all nodes.
