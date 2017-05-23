@@ -775,6 +775,8 @@ initiate deletion. For example, at the instant 1439246090000, we would use
 ZRANGEBYSCORE com.amadeus.session:all-sessions-set 0 1439246090000
 ```
 
+For diagram explaining the strategy, see see [docs/SortedSetExpirationStrategy.md](docs/SortedSetExpirationStrategy.md).
+
 ##### Session stickiness
 
 When using ZRANGE strategy with session stickiness, we store owner node of each session.
