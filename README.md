@@ -629,33 +629,7 @@ SETEX com.amadeus.session:expire:webapp-namespace:{33fdd1b6-b496-4b33-9f7d-df966
 
 ##### Sequence diagram of the notification expiration strategy
 
-```
-+-----------------------------------------------+                                                     +-------------------+
-|            Java Client                        |                                                     |       REDIS       |
-|                                               |                                                     |                   |
-| NEW EVENT: creation of a session              |                                                     |                   |
-|                                               |                                                     |                   |
-|maxInactiveInterval = 1800s                    +----EXPIRE webapp-namespace:{sessionId} 2100--------->  Session created  |
-|maxInactiveIntervalDelay =1800s + 5 min = 2100 |----SETEX webapp-namespace:expire:{sessionId} 1800 "">                   |
-|exp=unixTime+maxInactiveInterval=1439245070    +----SADD expirations:1439245070 sessionId------------>                   |
-|expDelay = exp + 5min = 1439245370             +----EXPIREAT expirations:1439245070 1439245370------->                   |
-|                                               |                                                     |                   |
-|                                               |                                                     |                   |
-|                                               +----SREM expirations:1439245070 sessionId------------>                   |
-| NEW EVENT: access to the session              |----SADD expirations:1439245080 sessionId------------>  Session modified |
-|                                               +----EXPIREAT expirations:1439245080 1439245380------->                   |
-|                                               +----EXPIRE webapp-namespace:{sessionId} 2100--------->                   |
-|                                               |----SETEX webapp-namespace:expire:{sessionId} 1800 "">                   |
-|                                               |                                                     |                   |
-|                                               |                                                     |                   |
-| NEW EVENT: 1439245080 time reached            +----SPOP expirations:1439245080----------------------> Return sessionIds |
-|                                               |    DEL expirations:1439245080                       |                   |
-|                                               |                                                     |                   |
-|                                               |                                                     |                   |
-|                                               +----EXISTS webapp-namespace:{sessionId}-------------->Session has expired|
-|                                               <------------Session expired notification-------------+                   |
-+-----------------------------------------------+                                                     +-------------------+
-```
+![Notification expiration strategy sequence diagram](https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgTm90aWZpY2F0aW9uIGV4cGlyAAUGc3RyYXRlZ3kKCkV2ZW50LT5KYXZhQ2xpZW50OiBDcmVhdGUgc2Vzc2lvbgoAEQotPgANB0lkABURYWN0aXYALAtJZAoKbm90ZSByaWdodCBvZiAAVwwKICBtYXhJbgAxBWVJbnRlcnZhbCA9IDE4MDBzICAgIAAMF0RlbGF5ID0AIQYrIDUgbWluID0gMjEwMCAKZW5kIG5vdGUKAIEcGEVYUElSRQCBGQoAMwUAIA4AgiAFZVMAgV4KU0VURVgAgjYGZToADwkAgSQFICIiAIFuCgAqDwCBXx9leHA9dW5peFRpbWUrAIF4Ez0xNDM5MjQ1MDcwACgHAIFzByBleHAgKyA1AIFyBgAfBzM3MCAAgWcYAINsCnMASgo6IFNBREQAhAcLczoAZgsAgzkKAIFQDgA2EABEJACCbQZBVABUGACBOAoKCgCEeRVBY2Nlc3MAhHkVAIFFFlNSRU0AgTgiZGVzdHJveQCBQhcAgiIgODA6AIIoGTgAghkoOABDJQCCJB44AII4CjgAhUgvAIU9OQoKCgphbHQAhHUIMDgwIHRpbWUgaGFzIGJlZW4gcmVhY2hlZAoJAId8BW92ZXIgAIhiBTogCgkJUmVkaXMAJwVub3QgZGV0ZWN0ZWQgdGgAhFkMCgkJV2Ugbm90aWZ5IGhpbSBtYW51YWxseQoJAIdbCgkAiSkTAIEEEACBAgkAgkYjU1BPUACDOxcKCQCDcBUtAIorDgCJcAsAYw0AiHUNSVNUUwCKGgsAghkLAIpSCwCCHwYAghcGcyB0aGF0AIIcBQCLDAcAgmUFAIkjBmQKCQCLCwkAizgOAIk8BwAgCACCRwYAjAQHCgplbHNlAFURAIJ0DgCJew8AMytlbgCLdQgAg3cFAIxPDWxlYW5pbmcgcHJvY2VzcwCLHQ4AgXcMREVMAIccEwCMUwsAixkdREVMAIsjEQCHZg4AiyALQ29udGFjdCBHaXRIdWIg&s=modern-blue)
 
 The diagram displays a case where redis expiration (done with
   `SETEX webapp-namespace:expire:{sessionId} 1800`) was not triggered.
@@ -668,6 +642,8 @@ If they have, it will then push this notification to our Java client.
 
 Please note that this diagram is without session stickiness.
 Besides, we removed the prefix `com.amadeus.session` for readability.
+
+For diagram source code, see [docs/NotificationExpirationStrategy.md](docs/NotificationExpirationStrategy.md).
 
 #### Session stickiness
 
