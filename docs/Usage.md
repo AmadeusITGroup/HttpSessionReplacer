@@ -178,7 +178,32 @@ The library is fully compatible with Spring library, and there is no need additi
 
 ### Session replacement agent configuration
 
+Redis configuration can be passed in arguments of the session agent:
+
+```
+-javagent:session-agent.jar=mode=SINGLE,expiration=ZRANGE,host=localhost
+```
+
 ### Session replacement servlet context configuration
+
+Redis can be configured via `ServletContext` parameters:
+
+```xml
+<web-app>
+... 
+    <!-- Redis server -->
+    <context-param>
+        <param-name>com.amadeus.session.redis.host</param-name>
+        <param-value>localhost</param-value>
+    </context-param>
+    <!-- Expiration startegy -->
+    <context-param>
+        <param-name>com.amadeus.session.redis.expiration</param-name>
+        <param-value>ZRANGE</param-value>
+    </context-param>
+...     
+</web-app>
+```
 
 ### Using NOTIF expiration strategy
 
@@ -189,7 +214,7 @@ That can be done either in command line:
 redis --notify-keyspace-events Ex
 ```
 
-or in redis.conf:
+or in `redis.conf`:
 
 ```
 notify-keyspace-events Ex
@@ -199,14 +224,21 @@ For more details, see [redis keyspace notifications](http://redis.io/topics/noti
 
 ### Single Redis Instance
 
+When using single Redis instance or twemproxy, the only required configuration is host address
+of server and, when not using default port 6379, the Redis port. 
+
 ### Redis Sentinel Configuration
 
 See [redis sentinel](http://redis.io/topics/sentinel) for more information. It is recommended to
-have at least 3 sentinels and one or two slaves for the master.
+have at least 3 sentinels and one or two slaves for the master. The configuration should provide
+list of sentinels in `host` or `com.amadeus.session.redis.host` configuration element and 
+master address in `master` or `com.amadeus.session.redis.master` configuration element.
 
 ### Redis Cluster Configuration
 
 See [redis cluster tutorial](http://redis.io/topics/cluster-tutorial) for more information.
+When configuring for Redis Cluster, `host` or `com.amadeus.session.redis.host` configuration element 
+contains list of cluster nodes of which at least one must be reachable.
 
 When using redis cluster mode, if some of hash slots are not covered (i.e. when
 one master goes down), other masters will be replying with CLUSTERDOWN error 
