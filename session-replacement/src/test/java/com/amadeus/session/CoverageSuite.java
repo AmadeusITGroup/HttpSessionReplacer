@@ -12,6 +12,7 @@ import com.amadeus.session.repository.redis.TestNotificationExpirationManagement
 import com.amadeus.session.repository.redis.TestRedisConfiguration;
 import com.amadeus.session.repository.redis.TestRedisSessionRepository;
 import com.amadeus.session.repository.redis.TestSortedSetExpiration;
+import com.amadeus.session.repository.redis.TestSortedSetExpirationWithStickiness;
 import com.amadeus.session.servlet.TestCookieSessionTracking;
 import com.amadeus.session.servlet.TestHttpRequestWrapper;
 import com.amadeus.session.servlet.TestHttpResponseWrapper;
@@ -61,7 +62,8 @@ import com.amadeus.session.servlet.TestWebXmlParser;
   TestNotificationExpirationManagement.class,
   TestRedisConfiguration.class,
   TestJedisSessionRepositoryFactory.class,
-  TestSortedSetExpiration.class
+  TestSortedSetExpiration.class,
+  TestSortedSetExpirationWithStickiness.class
 })
 public class CoverageSuite {
 

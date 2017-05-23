@@ -28,19 +28,21 @@ import com.amadeus.session.SessionManager;
 import com.amadeus.session.repository.redis.SortedSetSessionExpirationManagement.CleanupTask;
 
 @SuppressWarnings("javadoc")
-public class TestSortedSetExpiration {
+public class TestSortedSetExpirationWithStickiness {
 
   private RedisSessionRepository redisSession;
   private RedisFacade redis;
   private SortedSetSessionExpirationManagement expiration;
   private SessionData session;
+  
+  private static final byte[] ONE_WITH_NODE = new byte[]{'1', ':', 'n', 'o', 'd', 'e'};
 
   @Before
   public void setup() {
     redisSession = mock(RedisSessionRepository.class);
     redis = mock(RedisFacade.class);
     when(redisSession.sessionKey("1")).thenReturn(new byte[]{'1'});
-    expiration = new SortedSetSessionExpirationManagement(redis, redisSession, "test", false, null);
+    expiration = new SortedSetSessionExpirationManagement(redis, redisSession, "test", true, "node");
     session = new SessionData("1", 100, 10);
   }
   @Test
@@ -53,7 +55,7 @@ public class TestSortedSetExpiration {
     assertArrayEquals(expectedKey, captureKey.getValue());
     assertNotNull(captureFields.getValue());
     assertEquals(1, captureFields.getAllValues().size());
-    assertArrayEquals(new byte[]{'1'}, captureFields.getAllValues().get(0));
+    assertArrayEquals(ONE_WITH_NODE, captureFields.getAllValues().get(0));
   }
 
   @Test
@@ -65,11 +67,11 @@ public class TestSortedSetExpiration {
     ArgumentCaptor<Double> captureScore = ArgumentCaptor.forClass(Double.class);
     verify(redis).zadd(captureExpireKey.capture(), captureScore.capture(), captureSessionKey.capture());
     assertArrayEquals(expectedKey, captureExpireKey.getValue());
-    assertArrayEquals(new byte[]{'1'}, captureSessionKey.getValue());
+    assertArrayEquals(ONE_WITH_NODE, captureSessionKey.getValue());
     assertEquals(Double.valueOf(10100), captureScore.getValue());
     ArgumentCaptor<Integer> captureExpireAt = ArgumentCaptor.forClass(Integer.class);
     verify(redis).expire(captureSessionKey.capture(), captureExpireAt.capture());
-    assertArrayEquals(new byte[]{'1'}, captureSessionKey.getValue());
+    assertEquals("1", encode(captureSessionKey.getValue()));
     assertEquals(310, captureExpireAt.getValue().intValue());
   }
 
@@ -83,10 +85,10 @@ public class TestSortedSetExpiration {
     ArgumentCaptor<Double> captureScore = ArgumentCaptor.forClass(Double.class);
     verify(redis).zadd(captureExpireKey.capture(), captureScore.capture(), captureSessionKey.capture());
     assertArrayEquals(expectedKey, captureExpireKey.getValue());
-    assertArrayEquals(new byte[]{'1'}, captureSessionKey.getValue());
+    assertArrayEquals(ONE_WITH_NODE, captureSessionKey.getValue());
     assertEquals(Double.valueOf(Double.MAX_VALUE), captureScore.getValue());
     verify(redis).persist(captureSessionKey.capture());
-    assertArrayEquals(new byte[]{'1'}, captureSessionKey.getValue());
+    assertEquals("1", encode(captureSessionKey.getValue()));
   }
 
   @Test
@@ -99,11 +101,11 @@ public class TestSortedSetExpiration {
     expiration.sessionIdChange(session);
     verify(redis).zrem(captureExpireKey.capture(), captureValue.capture());
     assertEquals("com.amadeus.session:all-sessions-set:test", encode(captureExpireKey.getValue()));
-    assertEquals("1", encode(captureValue.getValue()));
+    assertEquals("1:node", encode(captureValue.getValue()));
     verify(redis).zadd(captureExpireKey.capture(), captureInstant.capture(), captureValue.capture());
     assertEquals("com.amadeus.session:all-sessions-set:test", encode(captureExpireKey.getValue()));
     assertEquals(Double.valueOf(10100), captureInstant.getValue());
-    assertEquals("2", encode(captureValue.getValue()));
+    assertEquals("2:node", encode(captureValue.getValue()));
   }
 
   @Test
@@ -127,9 +129,9 @@ public class TestSortedSetExpiration {
     long now = System.currentTimeMillis();
     // Using LinkedHashSet to guarantee the order
     Set<byte[]> zrange = new LinkedHashSet<>();
-    byte[] key1 = new byte[]{'1'};
+    byte[] key1 = ONE_WITH_NODE;
     zrange.add(key1);
-    byte[] key2 = new byte[]{'2'};
+    byte[] key2 = new byte[]{'2', ':', 'n', 'o', 'd', 'e'};
     zrange.add(key2);
     when(redis.zrangeByScore(any(byte[].class), any(double.class), any(double.class))).thenReturn(zrange);
     when(redis.zrem(any(byte[].class), eq(key1))).thenReturn(Long.valueOf(1L));
@@ -144,8 +146,8 @@ public class TestSortedSetExpiration {
     ArgumentCaptor<byte[]> captureKey = ArgumentCaptor.forClass(byte[].class);
     verify(redis, times(4)).zrem(captureExpireKey.capture(), captureKey.capture());
 
-    assertEquals("1", encode(captureKey.getAllValues().get(0)));
-    assertEquals("2", encode(captureKey.getAllValues().get(1)));
+    assertEquals("1:node", encode(captureKey.getAllValues().get(0)));
+    assertEquals("2:node", encode(captureKey.getAllValues().get(1)));
     verify(manager, times(2)).delete("1", true);
     verify(manager, never()).delete("2", true);
   }
