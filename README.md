@@ -775,6 +775,18 @@ initiate deletion. For example, at the instant 1439246090000, we would use
 ZRANGEBYSCORE com.amadeus.session:all-sessions-set 0 1439246090000
 ```
 
+##### Session stickiness
+
+When using ZRANGE strategy with session stickiness, we store owner node of each session.
+The background task will first retreive all sessions from last 5 minutes and expire only ones
+belong to the node in question. 
+
+After this, the background task will load all sessions that expired until 5 
+minutes before now. It is assumed that all of those sessions no longer have
+legitimate owner, as otherwise, the owner node would have time to expire them. 
+Consequently, they can be removed by any node, and first node that removes
+their key from sorted set will be the one that will exipre them.
+
 ## Session Encryption
 
 See [docs/ENCRYPTION.md](docs/ENCRYPTION.md).

@@ -38,6 +38,7 @@ class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
   private static Logger logger = LoggerFactory.getLogger(SortedSetSessionExpirationManagement.class.getName());
   static final String ALLSESSIONS_KEY = "com.amadeus.session:all-sessions-set:";
   static final int SESSION_PERSISTENCE_SAFETY_MARGIN = (int)TimeUnit.MINUTES.toSeconds(5);
+  private static final long SESSION_PERSISTENCE_SAFETY_MARGIN_MILLIS = TimeUnit.MINUTES.toMillis(5);
   private static final Long ONE = Long.valueOf(1L);
   /**
    * 10 second cleanup interval
@@ -136,6 +137,7 @@ class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
    * key, it will expire it.
    */
   final class CleanupTask implements Runnable {
+    
     private final SessionManager sessionManager;
 
     CleanupTask(SessionManager sessionManager) {
@@ -145,11 +147,13 @@ class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
     @Override
     public void run() {
       long now = System.currentTimeMillis();
-      long start = 0;
+      long start = sticky ? now - SESSION_PERSISTENCE_SAFETY_MARGIN_MILLIS : 0;
 
       logger.info("Cleaning up sessions expiring at {}", now);
       expireSessions(start, now, !sticky);
-      expireSessions(0, start, true);
+      if (sticky) {
+        expireSessions(0, start, true);
+      }
     }
 
     /**

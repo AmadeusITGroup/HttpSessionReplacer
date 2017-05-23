@@ -115,8 +115,8 @@ public class TestSortedSetExpiration {
     ArgumentCaptor<byte[]> captureExpireKey = ArgumentCaptor.forClass(byte[].class);
     ArgumentCaptor<Double> captureStart = ArgumentCaptor.forClass(Double.class);
     ArgumentCaptor<Double> captureEnd= ArgumentCaptor.forClass(Double.class);
-    verify(redis, times(2)).zrangeByScore(captureExpireKey.capture(), captureStart.capture(), captureEnd.capture());
-    assertEquals(Double.valueOf(0), captureStart.getAllValues().get(1));
+    verify(redis).zrangeByScore(captureExpireKey.capture(), captureStart.capture(), captureEnd.capture());
+    assertEquals(Double.valueOf(0), captureStart.getAllValues().get(0));
     assertTrue(now <= captureEnd.getAllValues().get(0).longValue());
   }
 
@@ -138,15 +138,15 @@ public class TestSortedSetExpiration {
     ArgumentCaptor<byte[]> captureExpireKey = ArgumentCaptor.forClass(byte[].class);
     ArgumentCaptor<Double> captureStart = ArgumentCaptor.forClass(Double.class);
     ArgumentCaptor<Double> captureEnd= ArgumentCaptor.forClass(Double.class);
-    verify(redis, times(2)).zrangeByScore(captureExpireKey.capture(), captureStart.capture(), captureEnd.capture());
-    assertEquals(Double.valueOf(0), captureStart.getAllValues().get(1));
+    verify(redis).zrangeByScore(captureExpireKey.capture(), captureStart.capture(), captureEnd.capture());
+    assertEquals(Double.valueOf(0), captureStart.getAllValues().get(0));
     assertTrue(captureEnd.getAllValues().get(0).longValue() >= now);
     ArgumentCaptor<byte[]> captureKey = ArgumentCaptor.forClass(byte[].class);
-    verify(redis, times(4)).zrem(captureExpireKey.capture(), captureKey.capture());
+    verify(redis, times(2)).zrem(captureExpireKey.capture(), captureKey.capture());
 
     assertEquals("1", encode(captureKey.getAllValues().get(0)));
     assertEquals("2", encode(captureKey.getAllValues().get(1)));
-    verify(manager, times(2)).delete("1", true);
+    verify(manager).delete("1", true);
     verify(manager, never()).delete("2", true);
   }
 
