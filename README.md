@@ -775,8 +775,6 @@ initiate deletion. For example, at the instant 1439246090000, we would use
 ZRANGEBYSCORE com.amadeus.session:all-sessions-set 0 1439246090000
 ```
 
-For diagram explaining the strategy, see see [docs/SortedSetExpirationStrategy.md](docs/SortedSetExpirationStrategy.md).
-
 ##### Session stickiness
 
 When using ZRANGE strategy with session stickiness, we store owner node of each session.
@@ -788,6 +786,10 @@ minutes before now. It is assumed that all of those sessions no longer have
 legitimate owner, as otherwise, the owner node would have time to expire them. 
 Consequently, they can be removed by any node, and first node that removes
 their key from sorted set will be the one that will exipre them.
+
+ž![Sorted set expiration strategy sequence diagram](https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgU29ydGVkIHNldCBleHBpcmF0aW9uIHN0cmF0ZWd5CgpFdmVudC0-SmF2YUNsaWVudDogQ3JlYXRlIHNlc3Npb24KABEKLT4ADQdJZAAVEWFjdGl2ACwLSWQKCm5vdGUgcmlnaHQgb2YgAFcMCiAgbWF4SW4AMQVlSW50ZXJ2YWwgPSAxODAwcwAIFkRlbGF5ID0AHQUgKyA1IG1pbiA9IDIxMDBzIAplbmQgbm90ZQoAgRgYRVhQSVJFAIEVCgA0BQAgDmFsbC0AgW8Hcy1zZXQ6IFpBREQgAAcQAIFZCjpub2RlIG5vdygpKwCBPRMAggsKAEoQCgoAgmUVQWNjZXNzAIJxCQA_XgCBei4KCmFsdCBldmVyeSA2MCBzCgoJAIQoE3J1bgCEYQZlIHRhc2sKCQCCQB9SQU5HRUJZU0NPUkUAglYSAIJUBS01bWluAIJeBgoJAIRNBW92ZXIAhEENSWYgAIMEBT09IHRoaXMACAUAWSJFTQCDPxsKAFEbADYFd2FzIHN1AIMrBWZ1bACBWw4AhkEMZGVsZQCGCQ0AgS0XUmV0cmlldmUgb2xkAIZzCHMAggE_MACCNwsAd4EZCmVuAIgjCACDSBEAgi0QIHByb2Nlc3MAh1cOAIcFCyBERUwAiHcLZGVzdHJveQCJCAwAiUIMAIUkBgCDayE&s=modern-blue)
+
+For diagram source code, see [docs/SortedSetExpirationStrategy.md](docs/SortedSetExpirationStrategy.md).
 
 ## Session Encryption
 
