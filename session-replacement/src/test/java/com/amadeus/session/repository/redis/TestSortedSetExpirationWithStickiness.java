@@ -153,6 +153,38 @@ public class TestSortedSetExpirationWithStickiness {
   }
 
   @Test
+  public void testSessionCleanupZrangeOtherNode() {
+    SessionManager manager = mock(SessionManager.class);
+    CleanupTask task = expiration.new CleanupTask(manager);
+    long now = System.currentTimeMillis();
+    // Using LinkedHashSet to guarantee the order
+    Set<byte[]> zrange = new LinkedHashSet<>();
+    byte[] key1 = new byte[]{'1', ':', 'n', 'o', 'd', '2'};
+    zrange.add(key1);
+    byte[] key2 = new byte[]{'2', ':', 'n', 'o', 'd', 'e'};
+    zrange.add(key2);
+    when(redis.zrangeByScore(any(byte[].class), any(double.class), any(double.class))).thenReturn(zrange);
+    when(redis.zrem(any(byte[].class), eq(key1))).thenReturn(Long.valueOf(1L));
+    when(redis.zrem(any(byte[].class), eq(key2))).thenReturn(Long.valueOf(0L));
+    task.run();
+    ArgumentCaptor<byte[]> captureExpireKey = ArgumentCaptor.forClass(byte[].class);
+    ArgumentCaptor<Double> captureStart = ArgumentCaptor.forClass(Double.class);
+    ArgumentCaptor<Double> captureEnd= ArgumentCaptor.forClass(Double.class);
+    verify(redis, times(2)).zrangeByScore(captureExpireKey.capture(), captureStart.capture(), captureEnd.capture());
+    assertEquals(Double.valueOf(0), captureStart.getAllValues().get(1));
+    assertTrue(captureEnd.getAllValues().get(0).longValue() >= now);
+    ArgumentCaptor<byte[]> captureKey = ArgumentCaptor.forClass(byte[].class);
+    // We don't remove element when we do first call (local node), 
+    // but we do when we do second call (clean old sessions from other nodes)
+    verify(redis, times(3)).zrem(captureExpireKey.capture(), captureKey.capture());
+
+    assertEquals("2:node", encode(captureKey.getAllValues().get(0)));
+    assertEquals("1:nod2", encode(captureKey.getAllValues().get(1)));
+    verify(manager).delete("1", true);
+    verify(manager, never()).delete("2", true);
+  }
+
+  @Test
   public void testStartCleanup() {
     SessionManager manager = mock(SessionManager.class);
     SessionConfiguration conf = new SessionConfiguration();
