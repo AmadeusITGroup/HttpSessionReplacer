@@ -12,10 +12,9 @@ This project provides session management including, possibly, distributed
 session repository for JEE and other java containers. Default implementation
 comes with in-memory and Redis based implementation.
 
-The project is inspired by Spring Session project, but it has additional motivation to
-avoid any dependency on Spring libraries, and, so, make it usable in applications that
+The project is inspired by Spring Session project and reuses some of redis logic from it.
+Its objective is to avoid any dependency on Spring libraries, and, so, make it usable in applications that
 don't use Spring, or that use an older version.
-Much of the redis logic is inspired and builds on work done in Spring Session.
 The implementation, however, uses the Jedis library directly.
 This makes the algorithm easier to port to other languages.
 
