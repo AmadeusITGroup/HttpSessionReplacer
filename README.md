@@ -544,13 +544,13 @@ any necessary processing.
 On the other hand, putting expiration assures that data will be removed from
 the store even if no clean-up has been performed.
 
-**NOTE:** The session management ensures that no expired
-sessions are returned to an application.
+**NOTE:** The session management ensures that expired
+sessions are not returned to an application.
 This means there is no need to check the expiration before using a session.
 
 **NOTE:** For safety reasons, many session management objects expire 5 minutes
-after the time instant where object expires.
-This is a hardcoded value meant as a safety margin to complete all necessary processing.
+after the time instant when the session expires.
+This is a hardcoded value and is meant as a safety margin to complete all necessary processing.
 
 #### Notification expiration strategy
 
@@ -560,22 +560,22 @@ from Redis to clean-up and delete expired sessions.
 
 Expiration is not tracked directly on the session key itself since this would
 mean the session data would no longer be available.
-Instead a special session expires key is used. In our example the expires key is:
+Instead, a special session expiration key is used. In our example the expiration key is:
 
 ```redis
 SETEX com.amadeus.session:expire:webapp-namespace:{33fdd1b6-b496-4b33-9f7d-df96679d32fe} 1800 ""
 ```
 
-When a session expires key expires, the keyspace notification triggers a
-lookup of the actual session and if it exists the deletion and clean-up of the
-session starts.
+When this key expires, a keyspace notification event triggers a
+lookup for the actual session and if it exists the session removal
+starts.
 
 One problem with relying on Redis expiration exclusively is that Redis makes
 no guarantee of when the expired event will be fired if the key has not been
 accessed. Specifically the background task that Redis uses to clean up
 expired keys is a low priority task and may not trigger the key expiration.
 For additional details see the [Timing of expired events](http://redis.io/topics/notifications)
-section in the Redis documentation.
+section in the Redis documentation. 
 
 ##### Missed expire events
 
@@ -611,13 +611,6 @@ then a `DEL` command is issued.
 This `SMEMBERS` command returns the list of sessions for which to explicitly
 request session expires key (using `EXISTS`). By accessing the key, rather than deleting it,
 we ensure that Redis deletes the key for us only if the TTL is expired.
-
-**NOTE**: We do not explicitly delete the session expire keys since in
-some instances there may be a race condition that incorrectly identifies
-a key as expired when it is not. Short of using distributed locks
-(which would kill our performance) there is no way to ensure the consistency of the expiration
-mapping. By simply accessing the key, we ensure that the key is only removed
-if the TTL on that key is expired.
 
 ##### Session access
 
