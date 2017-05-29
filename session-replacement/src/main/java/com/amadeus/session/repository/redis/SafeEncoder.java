@@ -30,9 +30,23 @@ public final class SafeEncoder {
    *
    * @param data
    *          byte array
-   * @return decoded sring
+   * @return decoded string
    */
   public static String encode(final byte[] data) {
     return new String(data, StandardCharsets.UTF_8);
+  }
+
+  /**
+   * 
+   * @param data
+   *          byte array
+   * @param offset
+   *          offset in byte array
+   * @param length
+   *          length of bytes to convert into string
+   * @return decoded string
+   */
+  public static String encode(final byte[] data, int offset, int length) {
+    return new String(data, offset, length, StandardCharsets.UTF_8);
   }
 }

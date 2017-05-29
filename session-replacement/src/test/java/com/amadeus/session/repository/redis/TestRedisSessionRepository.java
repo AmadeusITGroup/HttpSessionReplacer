@@ -294,10 +294,10 @@ public class TestRedisSessionRepository {
       ArgumentCaptor<byte[]> newSessionKey = ArgumentCaptor.forClass(byte[].class);
       ArgumentCaptor<byte[]> oldSessionKey = ArgumentCaptor.forClass(byte[].class);
       verify(facade).zrem(expirekey.capture(), oldSessionKey.capture());
-      assertEquals(encode(rsr.sessionKey("old-id")), encode(oldSessionKey.getValue()));
+      assertEquals("old-id", encode(oldSessionKey.getValue()));
       ArgumentCaptor<Double> score = ArgumentCaptor.forClass(Double.class);
       verify(facade).zadd(expirekey.capture(), score.capture(), newSessionKey.capture());
-      assertEquals(encode(rsr.sessionKey("new-id")), encode(newSessionKey.getValue()));
+      assertEquals("new-id", encode(newSessionKey.getValue()));
     }
   }
 

@@ -110,7 +110,7 @@ public class RedisSessionRepository implements SessionRepository {
     this.sticky = sticky;
     if (strategy == ExpirationStrategy.ZRANGE) {
       logger.info("Using ZRANGE (SortedSet) expiration managment");
-      expirationManager = new SortedSetSessionExpirationManagement(redis, this, namespace);
+      expirationManager = new SortedSetSessionExpirationManagement(redis, this, namespace, sticky, owner);
 
     } else {
       logger.info("Using notification expiration managment");
