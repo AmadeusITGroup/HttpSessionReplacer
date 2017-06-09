@@ -130,11 +130,10 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
   }
 
   private String getEmbededdSessionId() {
-	 if (embeddedRequest != null && embeddedRequest.session != null
-				&& embeddedRequest.session.isValid()) {
-		return embeddedRequest.session.getId();
-	 }
-	 return null;
+    if (embeddedRequest != null && embeddedRequest.session != null && embeddedRequest.session.isValid()) {
+      return embeddedRequest.session.getId();
+    }
+    return null;
   }
 
   /**
