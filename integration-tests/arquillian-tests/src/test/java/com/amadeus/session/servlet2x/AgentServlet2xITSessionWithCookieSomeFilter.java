@@ -72,8 +72,8 @@ public class AgentServlet2xITSessionWithCookieSomeFilter extends AbstractITSessi
     URL urlInvalidate = url(baseURL, "InvalidateServlet", "testListenerCalled");
     HttpURLConnection invalidateConnection = (HttpURLConnection) urlInvalidate.openConnection();
     setSessionCookie(invalidateConnection, originalCookie);
-    assertThat(invalidateConnection, matchLines("Invalidated"));
+    assertThat(invalidateConnection, matchLines("Invalidated", "newSessionIdAfterInvalidate"));
     listenerConnection = (HttpURLConnection) urlQueryListener.openConnection();
-    assertThat(listenerConnection, matchLines("Create called: 2", "Destroy called: 2"));
+    assertThat(listenerConnection, matchLines("Create called: 3", "Destroy called: 2"));
   }
 }

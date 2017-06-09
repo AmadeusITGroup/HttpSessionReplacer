@@ -124,13 +124,16 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
     if (embeddedRequest != null) {
       embeddedRequest.retrieveSessionIfNeeded(create);
     }
-    if (session == null) {
+    if (session == null || !session.isValid()) {
       session = (RepositoryBackedHttpSession)manager.getSession(this, create, getEmbededdSessionId());
     }
   }
 
   private String getEmbededdSessionId() {
-    return embeddedRequest != null ? embeddedRequest.session.getId() : null;
+    if (embeddedRequest != null && embeddedRequest.session != null && embeddedRequest.session.isValid()) {
+      return embeddedRequest.session.getId();
+    }
+    return null;
   }
 
   /**

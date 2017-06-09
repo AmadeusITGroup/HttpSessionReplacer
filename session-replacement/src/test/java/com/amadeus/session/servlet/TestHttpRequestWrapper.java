@@ -12,6 +12,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,8 +21,10 @@ import com.amadeus.session.SessionManager;
 @SuppressWarnings("javadoc")
 public class TestHttpRequestWrapper {
 
-  private ServletContext servletContext;
-  private SessionManager sessionManager;
+  private static final String NEW_SESSION_ID = "11";
+  private static final String SESSION_ID     = "10";
+  private ServletContext      servletContext;
+  private SessionManager      sessionManager;
 
   @Before
   public void setUp() throws Exception {
@@ -64,7 +67,7 @@ public class TestHttpRequestWrapper {
   public void testGetSession() {
     HttpServletRequest wrappedSimple = mock(HttpServletRequest.class);
     RepositoryBackedHttpSession session = mock(RepositoryBackedHttpSession.class);
-    when(session.getId()).thenReturn("10");
+    when(session.getId()).thenReturn(SESSION_ID);
     HttpRequestWrapper wrappedHttpRequestWrapper = spy(new HttpRequestWrapper(wrappedSimple, servletContext));
     wrappedHttpRequestWrapper.session = session;
     HttpServletRequest wrappedComplex = new HttpServletRequestWrapper(wrappedHttpRequestWrapper);
@@ -73,12 +76,31 @@ public class TestHttpRequestWrapper {
     verify(wrappedHttpRequestWrapper).getSession(true);
     verify(wrappedHttpRequestWrapper).getSession(true);
   }
+  
+  @Test
+  public void testNewSessionIdCreatedIfSessionWasInvalidated() {
+    HttpServletRequest wrappedSimple = mock(HttpServletRequest.class);
+    RepositoryBackedHttpSession invalidSession = mock(RepositoryBackedHttpSession.class);
+    RepositoryBackedHttpSession newSession = mock(RepositoryBackedHttpSession.class);
+    when(newSession.getId()).thenReturn(NEW_SESSION_ID);
+    when(invalidSession.getId()).thenReturn(SESSION_ID);
+    when(invalidSession.isValid()).thenReturn(false);
+    HttpRequestWrapper wrappedHttpRequestWrapper = spy(new HttpRequestWrapper(wrappedSimple, servletContext));
+    wrappedHttpRequestWrapper.session = invalidSession;
+    HttpServletRequest wrappedComplex = new HttpServletRequestWrapper(wrappedHttpRequestWrapper);
+    HttpRequestWrapper req = new HttpRequestWrapper(wrappedComplex, servletContext);
+    when(sessionManager.getSession(req, true, SESSION_ID)).thenReturn(invalidSession);
+    when(sessionManager.getSession(req, true, null)).thenReturn(newSession);
+    RepositoryBackedHttpSession session2 = req.getSession();
+    Assert.assertNotNull(session2);
+    assertEquals(NEW_SESSION_ID, session2.getId());
+  }
 
   @Test
   public void testCommitWithSession() {
     HttpServletRequest wrappedSimple = mock(HttpServletRequest.class);
     RepositoryBackedHttpSession session = mock(RepositoryBackedHttpSession.class);
-    when(session.getId()).thenReturn("10");
+    when(session.getId()).thenReturn(SESSION_ID);
     HttpRequestWrapper req = spy(new HttpRequestWrapper(wrappedSimple, servletContext));
     req.session = session;
     req.commit();
@@ -96,10 +118,10 @@ public class TestHttpRequestWrapper {
   }
 
   @Test
-  public void testCommiWrapped() {
+  public void testCommitWrapped() {
     HttpServletRequest wrappedSimple = mock(HttpServletRequest.class);
     RepositoryBackedHttpSession session = mock(RepositoryBackedHttpSession.class);
-    when(session.getId()).thenReturn("10");
+    when(session.getId()).thenReturn(SESSION_ID);
     HttpRequestWrapper wrappedHttpRequestWrapper = spy(new HttpRequestWrapper(wrappedSimple, servletContext));
     wrappedHttpRequestWrapper.session = session;
     HttpServletRequest wrappedComplex = new HttpServletRequestWrapper(wrappedHttpRequestWrapper);
@@ -114,7 +136,7 @@ public class TestHttpRequestWrapper {
   public void testCommitted() {
     HttpServletRequest wrappedSimple = mock(HttpServletRequest.class);
     RepositoryBackedHttpSession session = mock(RepositoryBackedHttpSession.class);
-    when(session.getId()).thenReturn("10");
+    when(session.getId()).thenReturn(SESSION_ID);
     HttpRequestWrapper wrappedHttpRequestWrapper = spy(new HttpRequestWrapper(wrappedSimple, servletContext));
     wrappedHttpRequestWrapper.session = session;
     HttpServletRequest wrappedComplex = new HttpServletRequestWrapper(wrappedHttpRequestWrapper);
@@ -145,9 +167,9 @@ public class TestHttpRequestWrapper {
     HttpRequestWrapper req = new HttpRequestWrapper(wrappedSimple, servletContext);
     RepositoryBackedHttpSession session = mock(RepositoryBackedHttpSession.class);
     when(sessionManager.getSession(req, false, null)).thenReturn(session);
-    when(session.getId()).thenReturn("10");
+    when(session.getId()).thenReturn(SESSION_ID);
     String id = req.changeSessionId();
-    assertEquals("10", id);
+    assertEquals(SESSION_ID, id);
     verify(sessionManager).switchSessionId(session);
     verify(session).getId();
   }
@@ -165,9 +187,9 @@ public class TestHttpRequestWrapper {
   public void testGetSetRequestedSessionId() {
     HttpServletRequest wrappedSimple = mock(HttpServletRequest.class);
     HttpRequestWrapper req = spy(new HttpRequestWrapper(wrappedSimple, servletContext));
-    req.setRequestedSessionId("10");
+    req.setRequestedSessionId(SESSION_ID);
     String id = req.getRequestedSessionId();
-    assertEquals("10", id);
+    assertEquals(SESSION_ID, id);
     verify(req, never()).getSession(false);
   }
 }
