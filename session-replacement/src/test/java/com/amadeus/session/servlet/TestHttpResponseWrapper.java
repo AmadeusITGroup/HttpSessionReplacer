@@ -3,6 +3,7 @@ package com.amadeus.session.servlet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 
 import javax.servlet.ServletOutputStream;
@@ -23,8 +25,10 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.amadeus.session.SessionConfiguration;
+import com.amadeus.session.SessionManager;
 import com.amadeus.session.servlet.HttpResponseWrapper.SaveSessionServletOutputStream;
-import com.amadeus.session.servlet.HttpResponseWrapper.ServletPrintWriter;
+import com.amadeus.session.servlet.HttpResponseWrapper.SimplestServletPrintWriter;
 
 @SuppressWarnings("javadoc")
 public class TestHttpResponseWrapper {
@@ -33,13 +37,21 @@ public class TestHttpResponseWrapper {
   private HttpServletResponse response;
   private HttpResponseWrapper responseWrapper;
   private ByteArrayOutputStream outputStream;
+  private StringWriter outputWriter;
+  private SessionConfiguration configuration;
+  private SessionManager manager;
 
   @Before
   public void setupWrapper() throws IOException {
     requestWrapper = mock(HttpRequestWrapper.class);
     response = mock(HttpServletResponse.class);
+    manager = mock(SessionManager.class);
+    configuration = new SessionConfiguration();
+    when(manager.getConfiguration()).thenReturn(configuration);
+    when(requestWrapper.getManager()).thenReturn(manager );
     responseWrapper = new HttpResponseWrapper31(requestWrapper, response);
     outputStream = new ByteArrayOutputStream();
+    outputWriter = new StringWriter();
     when(response.getOutputStream()).thenReturn(new ServletOutputStream() {
       @Override
       public void write(int b) throws IOException {
@@ -55,6 +67,7 @@ public class TestHttpResponseWrapper {
         return false;
       }
     });
+    when(response.getWriter()).thenReturn(new PrintWriter(outputWriter));
   }
 
   @Test
@@ -103,8 +116,9 @@ public class TestHttpResponseWrapper {
 
   @Test
   public void testPropagateOnSendErrorAfterWriter() throws IOException {
-    ServletPrintWriter writer = responseWrapper.getWriter();
+    SimplestServletPrintWriter writer = (SimplestServletPrintWriter) responseWrapper.getWriter();
     responseWrapper.sendError(404, "test");
+    verify(requestWrapper, atLeastOnce()).propagateSession();
     assertTrue(writer.closing);
   }
 
@@ -149,7 +163,7 @@ public class TestHttpResponseWrapper {
     os.println();
     verify(requestWrapper, never()).propagateSession();
     os.println("1234567890");
-    verify(requestWrapper).propagateSession();
+    verify(requestWrapper, atLeastOnce()).propagateSession();
   }
 
   @Test
@@ -221,7 +235,7 @@ public class TestHttpResponseWrapper {
   @Test
   public void testServletPrintWriter() throws IOException {
     Writer wrapped = mock(Writer.class);
-    final ServletPrintWriter writer = new HttpResponseWrapper.ServletPrintWriter(wrapped);
+    final SimplestServletPrintWriter writer = new SimplestServletPrintWriter(wrapped);
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
@@ -233,7 +247,23 @@ public class TestHttpResponseWrapper {
     writer.close();
     verify(wrapped).close();
   }
+  
+  @Test
+  public void testSimpleServletPrintWriter() throws IOException {
+    PrintWriter wrapped = mock(PrintWriter.class);
+    final PrintWriter writer = new SimplestServletPrintWriter(wrapped);
+    writer.close();
+    verify(wrapped).close();
+  }
 
+  @Test
+  public void testDelegateServletPrintWriter() throws IOException {
+    PrintWriter wrapped = mock(PrintWriter.class);
+    final PrintWriter writer = responseWrapper.new DelegateServletPrintWriter(wrapped);
+    writer.close();
+    verify(wrapped).close();
+  }
+  
   @Test
   public void testStreamClose() throws IOException {
     ServletOutputStream os = responseWrapper.getOutputStream();
@@ -264,8 +294,8 @@ public class TestHttpResponseWrapper {
 
   @Test
   public void testTwiceWriter() throws IOException {
-    ServletPrintWriter writer1 = responseWrapper.getWriter();
-    ServletPrintWriter writer2 = responseWrapper.getWriter();
+    PrintWriter writer1 = responseWrapper.getWriter();
+    PrintWriter writer2 = responseWrapper.getWriter();
     assertSame(writer1, writer2);
   }
 

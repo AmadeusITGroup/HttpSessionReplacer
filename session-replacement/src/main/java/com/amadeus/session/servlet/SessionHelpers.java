@@ -394,6 +394,9 @@ public final class SessionHelpers {
       HttpRequestWrapper httpRequestWrapper = (HttpRequestWrapper)request;
       try {
         httpRequestWrapper.commit();
+        if (httpRequestWrapper.getResponse() != null) {
+          httpRequestWrapper.getResponse().flushBuffer();
+        }
       } catch (Exception e) { // NOSONAR
         // Recover from any exception and log it
         logger.error("An exception occured while commiting the session.", e);

@@ -39,7 +39,6 @@ public class GetAllAttributesServlet extends HttpServlet {
     w.println("Attributes in session: " + list);
     w.println("Encoded url: " + response.encodeURL("/"));
     w.append("Served at: ").append(request.getContextPath()).append(" ");
-    response.flushBuffer();
   }
 
   /**

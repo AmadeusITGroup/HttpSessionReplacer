@@ -30,6 +30,5 @@ public class InvalidateSession2x extends BaseServlet {
     } else {
       w.println("No session");
     }
-    response.flushBuffer();
   }
 }

@@ -29,7 +29,6 @@ public class OtherServlet extends BaseTestServlet {
       request.getSession(true).setAttribute("A", "C");
       w.println("New value of attribute: " + request.getSession().getAttribute("A"));
       w.append("Served at: ").append(request.getContextPath()).append(" ");
-      response.flushBuffer();
     } catch (Exception e) {
       e.printStackTrace();
     }

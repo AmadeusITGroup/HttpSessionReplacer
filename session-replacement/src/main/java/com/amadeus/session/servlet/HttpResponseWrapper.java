@@ -14,19 +14,19 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import com.amadeus.session.ResponseWithSessionId;
 
 /**
- * Allows ensuring that the session is propagated if the response is committed.
- * Each of the methods that can commit response will invoke
- * {@link #propagateSession()} method to insure that session id has been
- * propagated.
+ * Allows ensuring that the session is propagated if the response is committed. Each of the methods that can commit
+ * response will invoke {@link #propagateSession()} method to insure that session id has been propagated.
  */
 class HttpResponseWrapper extends HttpServletResponseWrapper implements ResponseWithSessionId {
   private static final int LN_LENGTH = System.getProperty("line.separator").length();
+  private static final byte[] CRLF = new byte[] { '\r', '\n' };
 
   private final HttpRequestWrapper request;
-  private ServletPrintWriter writer;
+  private PrintWriter writer;
   private long contentWritten;
   protected long contentLength;
   private SaveSessionServletOutputStream outputStream;
+  private final boolean delegatePrintWriter;
 
   /**
    * Default constructor
@@ -38,6 +38,7 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
    */
   HttpResponseWrapper(HttpRequestWrapper request, HttpServletResponse response) {
     super(response);
+    delegatePrintWriter = request.getManager().getConfiguration().isDelegateWriter();
 
     this.request = request;
   }
@@ -65,8 +66,7 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
   @Override
   public SaveSessionServletOutputStream getOutputStream() throws IOException {
     if (writer != null) {
-      throw new IllegalStateException(
-          "Only one of getWriter()/getOutputStream() can be called, and writer is already used.");
+      throw new IllegalStateException("Only one of getWriter()/getOutputStream() can be called, and writer is already used.");
     }
     if (outputStream == null) {
       outputStream = wrapOutputStream(super.getOutputStream());
@@ -75,10 +75,9 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
   }
 
   @Override
-  public ServletPrintWriter getWriter() throws IOException {
+  public PrintWriter getWriter() throws IOException {
     if (outputStream != null) {
-      throw new IllegalStateException(
-          "Only one of getWriter()/getOutputStream() can be called, and output stream is already used.");
+      throw new IllegalStateException("Only one of getWriter()/getOutputStream() can be called, and output stream is already used.");
     }
     if (writer == null) {
       writer = wrapPrintWriter();
@@ -87,36 +86,40 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
   }
 
   /**
-   * Wraps output stream into one that is capable of tracking when we need to
-   * write headers and commit session.
+   * Wraps output stream into one that is capable of tracking when we need to write headers and commit session.
    *
    * @param servletOutputStream
    * @return
    * @throws IOException
    */
-  protected SaveSessionServletOutputStream wrapOutputStream(ServletOutputStream servletOutputStream)
-      throws IOException {
+  protected SaveSessionServletOutputStream wrapOutputStream(ServletOutputStream servletOutputStream) throws IOException {
     return new SaveSessionServletOutputStream(servletOutputStream);
   }
 
   /**
    * Creates print writer that is capable of tracking when we need to write
    * headers and commit session.
+   * 
+   * If system property <code>com.amadeus.session.delegate.printwriter</code> is set
+   * to <code>true</code>, we rely on containers implementation of PrintWriter.
    *
    * @return writer that tracks when we need to write headers and commit session
    * @throws IOException
    *           if an exception occurred during stream or writer creation
    */
-  private ServletPrintWriter wrapPrintWriter() throws IOException {
+  private PrintWriter wrapPrintWriter() throws IOException {
     String encoding = getCharacterEncoding();
     if (encoding == null) {
       // Using default coding as per Servlet standard
       encoding = "ISO-8859-1";
       setCharacterEncoding(encoding);
     }
+    if (delegatePrintWriter) {
+      return new DelegateServletPrintWriter(super.getWriter());
+    }
     SaveSessionServletOutputStream wrappedStream = wrapOutputStream(super.getOutputStream());
     OutputStreamWriter osw = new OutputStreamWriter(wrappedStream, encoding);
-    ServletPrintWriter myWriter = new ServletPrintWriter(osw);
+    SimplestServletPrintWriter myWriter = new SimplestServletPrintWriter(osw);
     wrappedStream.setAssociated(myWriter);
     return myWriter;
   }
@@ -148,21 +151,24 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
   }
 
   /**
-   * Adds the contentLengthToWrite to the total contentWritten size and checks
-   * to see if the response should be written.
+   * Adds the contentLengthToWrite to the total contentWritten size and checks to see if the response should be written.
    *
    * @param contentLengthToWrite
    *          the size of the content that is about to be written.
    * @throws IOException
    *           if there was an error during flush
    */
-  private void checkContentLength(int contentLengthToWrite) throws IOException {
+  private void checkContentLength(int contentLengthToWrite) {
     this.contentWritten += contentLengthToWrite;
     boolean isBodyFullyWritten = this.contentLength > 0 && this.contentWritten >= this.contentLength;
     int bufferSize = getBufferSize();
     boolean requiresFlush = bufferSize > 0 && this.contentWritten >= bufferSize;
     if (isBodyFullyWritten || requiresFlush) {
-      flushAndPropagate();
+      try {
+        flushAndPropagate();
+      } catch (IOException ex) {
+        throw new RuntimeException(ex);
+      }
     }
   }
 
@@ -172,7 +178,7 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
     // If we called reset, we shouldn't assume session was propagated.
     request.removeAttribute(Attributes.SESSION_PROPAGATED);
   }
-
+  
   @Override
   public String encodeURL(String url) {
     return request.encodeURL(url);
@@ -196,15 +202,14 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
   }
 
   /**
-   * Ensures that session is indeed committed when calling methods that commit
-   * the response. We delegate all methods to the original
-   * {@link javax.servlet.ServletOutputStream} to ensure that the behavior is as
-   * close as possible to the original one. To check if session needs to be
-   * committed, we are counting number of bytes written out.
+   * Ensures that session is indeed committed when calling methods that commit the response. We delegate all methods to
+   * the original {@link javax.servlet.ServletOutputStream} to ensure that the behavior is as close as possible to the
+   * original one. To check if session needs to be committed, we are counting number of bytes written out.
    *
    * Based on Spring Session code.
    */
   class SaveSessionServletOutputStream extends ServletOutputStream {
+
     protected final ServletOutputStream delegate;
     private Closeable associated;
     boolean closing;
@@ -224,17 +229,17 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
     void setAssociated(Closeable associated) {
       this.associated = associated;
     }
-
+    
     @Override
     public void write(int b) throws IOException {
       checkContentLength(1);
-      this.delegate.write(b);
+      delegate.write(b);
     }
 
     @Override
     public void flush() throws IOException {
       request.propagateSession();
-      this.delegate.flush();
+      delegate.flush();
     }
 
     @Override
@@ -247,144 +252,98 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
         associated.close();
       }
       request.propagateSession();
-      this.delegate.close();
+      delegate.flush();
+      delegate.close();
     }
 
     @Override
     public int hashCode() {
-      return this.delegate.hashCode();
+      return delegate.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-      return this.delegate.equals(obj);
+      return delegate.equals(obj);
     }
 
-    @Override
     public void print(boolean b) throws IOException {
-      String s = String.valueOf(b);
-      checkContentLength(s.length());
-      this.delegate.print(s);
+      super.print(b);
     }
 
-    @Override
-    public void print(char x) throws IOException {
-      String s = String.valueOf(x);
-      checkContentLength(s.length());
-      this.delegate.print(s);
+    public void print(char c) throws IOException {
+      print(String.valueOf(c));
     }
 
-    @Override
-    public void print(double x) throws IOException {
-      String s = String.valueOf(x);
-      checkContentLength(s.length());
-      this.delegate.print(s);
+    public void print(int i) throws IOException {
+      print(String.valueOf(i));
     }
 
-    @Override
-    public void print(float x) throws IOException {
-      String s = String.valueOf(x);
-      checkContentLength(s.length());
-      this.delegate.print(s);
+    public void print(long l) throws IOException {
+      print(String.valueOf(l));
     }
 
-    @Override
-    public void print(int x) throws IOException {
-      String s = String.valueOf(x);
-      checkContentLength(s.length());
-      this.delegate.print(s);
+    public void print(float f) throws IOException {
+      print(String.valueOf(f));
     }
 
-    @Override
-    public void print(long x) throws IOException {
-      String s = String.valueOf(x);
-      checkContentLength(s.length());
-      this.delegate.print(s);
+    public void print(double d) throws IOException {
+      print(String.valueOf(d));
     }
 
-    @Override
-    public void print(String str) throws IOException {
-      checkContentLength(String.valueOf(str).length());
-      this.delegate.print(str);
-    }
-
-    @Override
     public void println() throws IOException {
-      checkContentLength(LN_LENGTH);
-      this.delegate.println();
+      write(CRLF);
     }
 
-    @Override
-    public void println(boolean x) throws IOException {
-      String s = String.valueOf(x);
-      checkContentLength(s.length() + LN_LENGTH);
-      this.delegate.println(s);
+    public void println(String s) throws IOException {
+      print(s);
+      println();
     }
 
-    @Override
-    public void println(char x) throws IOException {
-      String s = String.valueOf(x);
-      checkContentLength(s.length() + LN_LENGTH);
-      this.delegate.println(s);
+    public void println(boolean b) throws IOException {
+      print(b);
+      println();
     }
 
-    @Override
-    public void println(int x) throws IOException {
-      String s = String.valueOf(x);
-      checkContentLength(s.length() + LN_LENGTH);
-      this.delegate.println(s);
+    public void println(char c) throws IOException {
+      print(c);
+      println();
     }
 
-    @Override
-    public void println(long x) throws IOException {
-      String s = String.valueOf(x);
-      checkContentLength(s.length() + LN_LENGTH);
-      this.delegate.println(s);
+    public void println(int i) throws IOException {
+      print(i);
+      println();
     }
 
-    @Override
-    public void println(float x) throws IOException {
-      String s = String.valueOf(x);
-      checkContentLength(s.length() + LN_LENGTH);
-      this.delegate.println(s);
+    public void println(long l) throws IOException {
+      print(l);
+      println();
     }
 
-    @Override
-    public void println(double x) throws IOException {
-      String s = String.valueOf(x);
-      checkContentLength(s.length() + LN_LENGTH);
-      this.delegate.println(s);
-    }
-
-    @Override
-    public void println(String str) throws IOException {
-      str = String.valueOf(str); // NOSONAR
-      checkContentLength(LN_LENGTH + str.length());
-      this.delegate.println(str);
+    public void println(float f) throws IOException {
+      print(f);
+      println();
     }
 
     @Override
     public void write(byte[] b) throws IOException {
       checkContentLength(b.length);
-      this.delegate.write(b);
+      delegate.write(b);
     }
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
       checkContentLength(len);
-      this.delegate.write(b, off, len);
+      delegate.write(b, off, len);
     }
 
     @Override
     public String toString() {
-      return getClass().getName() + "[delegate=" + this.delegate.toString() + "]";
+      return getClass().getName() + "[delegate=" + delegate.toString() + "]";
     }
 
     /**
-     * For servlet 3.1. We do nothing in this method as the library may run in
-     * servlet 2.x or 3.0 container. See
-     * {@link HttpResponseWrapper31.SaveSessionServlet31OutputStream} for logic
-     * used in servlet 3.1 containers.
+     * For servlet 3.1. We do nothing in this method as the library may run in servlet 2.x or 3.0 container. See
+     * {@link HttpResponseWrapper31.SaveSessionServlet31OutputStream} for logic used in servlet 3.1 containers.
      */
     @Override
     public boolean isReady() {
@@ -398,20 +357,20 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
     }
   }
 
+
   /**
    * Wrapper for {@link PrintWriter} that manages re-entrace of close() method.
    */
-  static class ServletPrintWriter extends PrintWriter {
-
+  static class SimplestServletPrintWriter extends PrintWriter {
     /**
      * Flag that says that close() method has been called.
      */
     boolean closing;
 
-    ServletPrintWriter(Writer out) {
+    SimplestServletPrintWriter(Writer out) {
       super(out);
     }
-
+    
     @Override
     public void close() {
       // If close method has already been called, we will not re-enter
@@ -424,8 +383,118 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
   }
 
   /**
-   * Closes associated servlet {@link PrintWriter} and
-   * {@link ServletOutputStream}.
+   * Wrapper for {@link PrintWriter} that relies on underlying container's PrintWriter implementation.
+   */
+  class DelegateServletPrintWriter extends PrintWriter {
+    private final PrintWriter delegate;
+
+    DelegateServletPrintWriter(PrintWriter delegate) {
+      super(delegate);
+      this.delegate = delegate;
+    }
+
+    @Override
+    public void flush() {
+      request.propagateSession();
+      delegate.flush();
+    }
+
+    @Override
+    public void close() {
+      request.propagateSession();
+      delegate.close();
+    }
+
+    public int hashCode() {
+      return delegate.hashCode();
+    }
+
+    public boolean equals(Object obj) {
+      return delegate.equals(obj);
+    }
+
+    public String toString() {
+      return getClass().getName() + "[delegate=" + delegate.toString() + "]";
+    }
+
+    @Override
+    public boolean checkError() {
+      return delegate.checkError();
+    }
+
+    @Override
+    public void write(int c) {
+      String s = Character.toString((char) c);
+      write(s);
+    }
+
+    @Override
+    public void write(char[] buf, int off, int len) {
+      checkContentLength(len);
+      delegate.write(buf, off, len);
+    }
+
+    @Override
+    public void write(char[] buf) {
+      checkContentLength(buf.length);
+      delegate.write(buf);
+    }
+
+    @Override
+    public void write(String s, int off, int len) {
+      checkContentLength(len);
+      delegate.write(s, off, len);
+    }
+
+    public void write(final String s) {
+      write(s, 0, s.length());
+    }
+
+    public void print(final boolean b) {
+      write(Boolean.toString(b));
+    }
+
+    public void print(final char c) {
+      write(Character.toString(c));
+    }
+
+    public void print(final int i) {
+      write(Integer.toString(i));
+    }
+
+    public void print(final long l) {
+      write(Long.toString(l));
+    }
+
+    public void print(final float f) {
+      write(Float.toString(f));
+    }
+
+    public void print(final double d) {
+      write(Double.toString(d));
+    }
+
+    public void print(final char[] s) {
+      write(s);
+    }
+
+    public void print(final String s) {
+      write(s == null ? "null" : s);
+    }
+
+    public void print(final Object obj) {
+      write(obj == null ? "null" : obj.toString());
+    }
+
+    @Override
+    public void println() {
+      checkContentLength(LN_LENGTH);
+      super.println();
+    }
+  }
+
+  /**
+   * Closes associated servlet {@link PrintWriter} and {@link ServletOutputStream}.
    *
    * @throws IOException
    *           if exception occurred on close.
@@ -437,5 +506,5 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
     if (outputStream != null) {
       outputStream.close();
     }
-  }
+  }  
 }

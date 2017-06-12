@@ -297,6 +297,11 @@ public class SessionConfiguration implements Serializable {
    * address. Otherwise it is treated literally.
    */
   public static final String SESSION_ENCRYPTION_KEY = "com.amadeus.session.encryption.key";
+  /**
+   * Set to <code>true</code> if session should delegate PrintWriter implementation to container. By default it is
+   * <code>false</code> and session replacer provides it's own implementation.
+   */
+  public static final String DELEGATE_WRITER = "com.amadeus.session.delegate.writer";
 
   private int maxInactiveInterval;
   private boolean distributable;
@@ -321,6 +326,7 @@ public class SessionConfiguration implements Serializable {
   private Properties attributes;
   private transient AttributeProvider currentAttributeProvider;
   private boolean commitOnAllConcurrent;
+  private boolean delegateWriter;
 
   /**
    * Default constructor.
@@ -341,6 +347,7 @@ public class SessionConfiguration implements Serializable {
     interceptListeners = Boolean.parseBoolean(getPropertySecured(INTERCEPT_LISTENERS, null));
     forceDistributable = Boolean.parseBoolean(getPropertySecured(FORCE_DISTRIBUTABLE, null));
     commitOnAllConcurrent = Boolean.parseBoolean(getPropertySecured(COMMIT_ON_ALL_CONCURRENT, null));
+    delegateWriter = Boolean.parseBoolean(getPropertySecured(DELEGATE_WRITER, null));
 
     setNonCacheable(getPropertySecured(NON_CACHEABLE_ATTRIBUTES, null));
     String replicationValue = getPropertySecured(SESSION_REPLICATION_TRIGGER, DEFAULT_REPLICATION_TRIGGER.toString());
@@ -971,6 +978,14 @@ public class SessionConfiguration implements Serializable {
       logger.info("Key was not provided via url.");
     }
     return encryptionKey;
+  }
+
+  public boolean isDelegateWriter() {
+    return delegateWriter;
+  }
+
+  public void setDelegateWriter(boolean delegateWriter) {
+    this.delegateWriter = delegateWriter;
   }
 
   /**

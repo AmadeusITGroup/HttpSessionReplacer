@@ -99,6 +99,9 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
    * @return returns <code>true</code> if session was stored
    */
   boolean propagateSession() {
+    if (committed && !isDirty()) {
+      return true;
+    }
     if (getRepositoryBackedSession(false) == null) {
       setPropagateOnCreate(true);
       return false;

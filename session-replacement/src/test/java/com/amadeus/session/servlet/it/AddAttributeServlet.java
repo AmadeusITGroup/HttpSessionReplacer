@@ -28,7 +28,6 @@ public class AddAttributeServlet extends BaseTestServlet {
     request.getSession(true).setAttribute("B", "D");
     w.println("New value of attribute B: " + request.getSession().getAttribute("B"));
     w.append("Served at: ").append(request.getContextPath()).append(" ");
-    response.flushBuffer();
   }
 
   /**

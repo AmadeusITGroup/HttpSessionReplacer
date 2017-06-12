@@ -32,7 +32,6 @@ public class RemoveAttributeServlet extends BaseTestServlet {
     w.print("Served at: ");
     w.print(request.getContextPath());
     w.print(" ");
-    w.flush();
 //    PrintWriter w = response.getWriter();
 //    log("Got writer w");
 //    w.println("Previous value of attribute: " + request.getSession().getAttribute("A"));
@@ -40,7 +39,6 @@ public class RemoveAttributeServlet extends BaseTestServlet {
 //    w.println("New value of attribute: " + request.getSession().getAttribute("A"));
 //    w.append("Served at: ").append(request.getContextPath()).append(" ");
 //    w.flush();
-    response.flushBuffer();
   }
 
   /**
