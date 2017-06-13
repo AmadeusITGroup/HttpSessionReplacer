@@ -57,6 +57,10 @@ class CookieSessionTracking extends BaseSessionTracking implements SessionTracki
    * to javascript.
    */
   static final String COOKIE_HTTP_ONLY_PARAMETER = "com.amadeus.session.cookie.httpOnly";
+  /**
+   * Used to specify domain or path on witch will be applied the cookie
+   */
+  static final String COOKIE_PATH_PARAMETER = "path";
   private boolean httpOnly = true;
   private boolean contextPath = false;
   private Boolean secure;

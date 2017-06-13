@@ -55,7 +55,7 @@ public class TestWebXmlParser {
       + "<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" "
       + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
       + "version=\"3.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd\">"
-      + "<session-config><cookie-config><secure>false</secure><http-only>true</http-only></cookie-config>"
+      + "<session-config><cookie-config><secure>false</secure><http-only>true</http-only><path>/test</path></cookie-config>"
       + "<tracking-mode>COOKIE</tracking-mode></session-config>"
       + "</web-app>";
 
@@ -172,6 +172,7 @@ public class TestWebXmlParser {
       assertEquals("COOKIE", sessionConfiguration.getSessionTracking());
       assertEquals("true", sessionConfiguration.getAttribute(CookieSessionTracking.COOKIE_HTTP_ONLY_PARAMETER, null));
       assertEquals("false", sessionConfiguration.getAttribute(CookieSessionTracking.SECURE_COOKIE_PARAMETER, null));
+      assertEquals("/test", sessionConfiguration.getAttribute(CookieSessionTracking.COOKIE_PATH_PARAMETER, null));
     }
   }
 

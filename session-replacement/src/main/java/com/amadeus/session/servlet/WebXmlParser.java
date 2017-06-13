@@ -145,6 +145,10 @@ final class WebXmlParser {
     if (isNonEmpty(trackingMode)) {
       sessionConfiguration.setSessionTracking(sessionTracking(trackingMode));
     }
+    String path = xpath.evaluate("/web-app/session-config/cookie-config/path/text()", document);
+    if (isNonEmpty(path)) {
+      sessionConfiguration.setAttribute(CookieSessionTracking.COOKIE_PATH_PARAMETER, path);
+    }
   }
 
   /**
