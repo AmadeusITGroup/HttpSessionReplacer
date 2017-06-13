@@ -50,12 +50,18 @@ public class TestSessionHelpers {
 
   private ServletContext servletContext;
   private SessionHelpers sessionHelpers;
+  private SessionManager sessionManager;
+  private SessionConfiguration sessionConfiguration;
 
   @Before
   public void enableSession() {
     servletContext = mock(ServletContext.class);
     sessionHelpers = new SessionHelpers();
     when(servletContext.getAttribute(SessionHelpers.SESSION_HELPERS)).thenReturn(sessionHelpers);
+    sessionManager = mock(SessionManager.class);
+    sessionConfiguration = new SessionConfiguration();
+    when(sessionManager.getConfiguration()).thenReturn(sessionConfiguration);
+    when(servletContext.getAttribute(Attributes.SESSION_MANAGER)).thenReturn(sessionManager);
   }
 
   @Test
@@ -248,6 +254,7 @@ public class TestSessionHelpers {
     when(request.getServletContext()).thenReturn(servletContext);
     ServletResponse response = mock(HttpServletResponse.class);
     ServletContext originalServletContext = mock(ServletContext.class);
+    when(originalServletContext.getAttribute(Attributes.SESSION_MANAGER)).thenReturn(sessionManager);
     ServletRequest result = SessionHelpersFacade.prepareRequest(request, response, originalServletContext);
     assertNotNull(result);
     assertNotSame(request, result);
@@ -293,10 +300,15 @@ public class TestSessionHelpers {
     ServletResponse response = mock(HttpServletResponse.class);
     ServletContext originalServletContext = mock(ServletContext.class);
     originalServletContext.setAttribute(SessionHelpers.REQUEST_WRAPPED_ATTRIBUTE, request);
+    when(originalServletContext.getAttribute(Attributes.SESSION_MANAGER)).thenReturn(sessionManager);
     ServletRequest reWrappedRequest = mock(HttpServletRequest.class);
     when(reWrappedRequest.getAttribute(SessionHelpers.REQUEST_WRAPPED_ATTRIBUTE)).thenReturn(request);
     ServletContext another = mock(ServletContext.class);
     when(another.getAttribute(SessionHelpers.SESSION_HELPERS)).thenReturn(new SessionHelpers());
+    SessionManager anotherSessionManager = mock(SessionManager.class);
+    SessionConfiguration anotherSessionConfiguration = new SessionConfiguration();
+    when(sessionManager.getConfiguration()).thenReturn(anotherSessionConfiguration);
+    when(another.getAttribute(Attributes.SESSION_MANAGER)).thenReturn(anotherSessionManager);
     when(reWrappedRequest.getServletContext()).thenReturn(another);
     ServletRequest result = SessionHelpersFacade.prepareRequest(reWrappedRequest, response, originalServletContext);
     assertNotNull(result);

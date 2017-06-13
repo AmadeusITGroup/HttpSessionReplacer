@@ -24,6 +24,5 @@ public class SessionListenerCalled2x extends BaseServlet {
     PrintWriter w = response.getWriter();
     w.println("Create called: " + CallCountingSessionListener.numberOfTimesCreateCalled);
     w.println("Destroy called: " + CallCountingSessionListener.numberOfTimesDestroyedCalled);
-    response.flushBuffer();
   }
 }

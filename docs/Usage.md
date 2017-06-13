@@ -174,6 +174,17 @@ Tomcat 6.x supports Servlet 2.5 specification. This environment has few limitati
 
 The library is fully compatible with Spring library, and there is no need additional for any special configuration. Note, however, that you can't use Spring Session and Http Session Replacement at the same time.
 
+## Performance consideration
+
+### Servlet Writer replacement
+
+The library replaces containers own implementation for Servlet PrintWriter with
+a standard PrintWriter implementation. In undertow based containers like 
+Wildfly and JBoss EAP this may have impact on servlet performance. It is
+possible to deactivate this replacement and delegate calls to container's own
+implementation. This is done by setting system property or servlet 
+initialization parameter `com.amadeus.session.delegate.writer` to `true`. 
+
 ## Redis configuration
 
 ### Session replacement agent configuration
@@ -186,7 +197,7 @@ Redis configuration can be passed in arguments of the session agent:
 
 ### Session replacement servlet context configuration
 
-Redis can be configured via `ServletContext` parameters:
+Redis can be configured via `ServletContext` initialization parameters:
 
 ```xml
 <web-app>

@@ -26,6 +26,5 @@ public class OtherServlet2x extends BaseServlet {
     request.getSession(true).setAttribute("A", "C");
     w.println("New value of attribute: " + request.getSession().getAttribute("A"));
     w.append("Served at: ").append(request.getContextPath()).append(" ");
-    response.flushBuffer();
   }
 }

@@ -735,5 +735,63 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>wildfly-10-managed-arquillian-redislabs</id>
+      <properties>
+        <serverRoot>${project.build.directory}/wildfly-${version.wildfly}</serverRoot>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.wildfly.arquillian</groupId>
+          <artifactId>wildfly-arquillian-container-managed</artifactId>
+          <version>2.0.2.Final</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <configuration>
+              <skip>${maven.test.skip}</skip>
+            </configuration>
+            <executions>
+              <execution>
+                <id>unpack</id>
+                <phase>process-test-classes</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>org.wildfly</groupId>
+                      <artifactId>wildfly-dist</artifactId>
+                      <version>${version.wildfly}</version>
+                      <type>zip</type>
+                      <overWrite>false</overWrite>
+                      <outputDirectory>${project.build.directory}</outputDirectory>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <environmentVariables>
+                <JBOSS_HOME>${project.build.directory}/wildfly-${version.wildfly}</JBOSS_HOME>
+              </environmentVariables>
+              <systemPropertyVariables>
+                <arquillian.launch>wildfly-10-managed-arquillian-redislabs</arquillian.launch>
+                <com.amadeus.session.repository.factory>redis</com.amadeus.session.repository.factory>
+                <com.amadeus.session.redis.port>12000</com.amadeus.session.redis.port>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 </project>

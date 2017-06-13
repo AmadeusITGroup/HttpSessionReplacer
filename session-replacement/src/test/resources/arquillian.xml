@@ -9,4 +9,10 @@
 			<property name="javaVmArguments">-Xmx512m</property>
 		</configuration>
 	</container>
+	<container qualifier="wildfly-10-managed-arquillian-redislabs">
+		<configuration>
+			<!-- For debugging prepend with -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y -->		
+			<property name="javaVmArguments">-Xmx512m -Dcom.amadeus.session.repository.factory=redis -Dcom.amadeus.session.redis.port=12000 -Dcom.amadeus.session.redis.expiration=ZRANGE</property>
+		</configuration>
+	</container>
 </arquillian>
