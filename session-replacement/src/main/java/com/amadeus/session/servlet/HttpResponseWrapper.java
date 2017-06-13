@@ -167,7 +167,7 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
       try {
         flushAndPropagate();
       } catch (IOException ex) {
-        throw new RuntimeException(ex);
+        throw new IllegalStateException(ex);
       }
     }
   }
