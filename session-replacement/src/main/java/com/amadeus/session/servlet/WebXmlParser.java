@@ -147,8 +147,11 @@ final class WebXmlParser {
     }
     String path = xpath.evaluate("/web-app/session-config/cookie-config/path/text()", document);
     if (isNonEmpty(path)) {
-      sessionConfiguration.setAttribute(CookieSessionTracking.COOKIE_PATH_PARAMETER, path);
+      sessionConfiguration.setAttribute(CookieSessionTracking.COOKIE_CONTEXT_PATH_PARAMETER, path);
     }
+    logger.info("xpath: " + xpath.toString());
+    logger.info("NamespaceContext: " + xpath.getNamespaceContext());
+    logger.info("path found: " + path);
   }
 
   /**

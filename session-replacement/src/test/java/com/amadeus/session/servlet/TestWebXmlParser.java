@@ -172,7 +172,7 @@ public class TestWebXmlParser {
       assertEquals("COOKIE", sessionConfiguration.getSessionTracking());
       assertEquals("true", sessionConfiguration.getAttribute(CookieSessionTracking.COOKIE_HTTP_ONLY_PARAMETER, null));
       assertEquals("false", sessionConfiguration.getAttribute(CookieSessionTracking.SECURE_COOKIE_PARAMETER, null));
-      assertEquals("/test", sessionConfiguration.getAttribute(CookieSessionTracking.COOKIE_PATH_PARAMETER, null));
+      assertEquals("/test", sessionConfiguration.getAttribute(CookieSessionTracking.COOKIE_CONTEXT_PATH_PARAMETER, null));
     }
   }
 
