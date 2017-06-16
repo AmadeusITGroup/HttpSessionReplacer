@@ -13,8 +13,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -26,7 +24,6 @@ import com.amadeus.session.SessionConfiguration;
  * This class parses web.xml and extracts session related configuration.
  */
 final class WebXmlParser {
-  private static final Logger logger = LoggerFactory.getLogger(WebXmlParser.class);
 
   // Hide default constructor
   private WebXmlParser() {
@@ -149,9 +146,6 @@ final class WebXmlParser {
     if (isNonEmpty(path)) {
       sessionConfiguration.setAttribute(CookieSessionTracking.COOKIE_CONTEXT_PATH_PARAMETER, path);
     }
-    logger.info("xpath: " + xpath.toString());
-    logger.info("NamespaceContext: " + xpath.getNamespaceContext());
-    logger.info("path found: " + path);
   }
 
   /**
@@ -169,7 +163,6 @@ final class WebXmlParser {
     if ("URL".equalsIgnoreCase(trackingMode)) {
       return SessionPropagation.URL.name();
     }
-    logger.warn("Unsupported session tracking mode {}. Will be using default one.", trackingMode);
     return SessionPropagation.DEFAULT.name();
   }
 

@@ -5,9 +5,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.amadeus.session.RepositoryBackedSession;
 import com.amadeus.session.RequestWithSession;
 import com.amadeus.session.SessionConfiguration;
@@ -46,7 +43,6 @@ import com.amadeus.session.SessionTracking;
  *
  */
 class CookieSessionTracking extends BaseSessionTracking implements SessionTracking {
-  private static final Logger logger = LoggerFactory.getLogger(CookieSessionTracking.class);
   /**
    * Used to configure context path of the cookie.
    */
@@ -105,7 +101,7 @@ class CookieSessionTracking extends BaseSessionTracking implements SessionTracki
     if (contextPath != null && !contextPath.isEmpty()) {
       return contextPath;
     }
-    return "/";
+    return request.getContextPath();
   }
 
   @Override
@@ -114,6 +110,5 @@ class CookieSessionTracking extends BaseSessionTracking implements SessionTracki
     httpOnly = Boolean.valueOf(conf.getAttribute(COOKIE_HTTP_ONLY_PARAMETER, "true"));
     secure = Boolean.valueOf(conf.getAttribute(SECURE_COOKIE_PARAMETER, "false"));
     contextPath = conf.getAttribute(COOKIE_CONTEXT_PATH_PARAMETER, "");
-    logger.info("contextPath:" + contextPath);
   }
 }

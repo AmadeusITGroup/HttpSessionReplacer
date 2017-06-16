@@ -118,7 +118,7 @@ public class TestCookieSessionTracking {
     verify(response).addCookie(cookie.capture());
     assertEquals("somesession", cookie.getValue().getName());
     assertEquals(0, cookie.getValue().getMaxAge());
-    assertEquals("/", cookie.getValue().getPath());
+    assertEquals("path", cookie.getValue().getPath());
   }
 
   @Test
@@ -140,7 +140,7 @@ public class TestCookieSessionTracking {
     assertEquals("somesession", cookie.getValue().getName());
     assertEquals("", cookie.getValue().getValue());
     assertEquals(0, cookie.getValue().getMaxAge());
-    assertEquals("/", cookie.getValue().getPath());
+    assertEquals("path", cookie.getValue().getPath());
   }
 
   @Test
@@ -162,7 +162,7 @@ public class TestCookieSessionTracking {
     assertEquals("somesession", cookie.getValue().getName());
     assertEquals("123", cookie.getValue().getValue());
     assertEquals(-1, cookie.getValue().getMaxAge());
-    assertEquals("/", cookie.getValue().getPath());
+    assertEquals("path", cookie.getValue().getPath());
   }
   
   @Test
