@@ -24,6 +24,7 @@ import com.amadeus.session.SessionConfiguration;
 @SuppressWarnings("javadoc")
 public class TestCookieSessionTracking {
 
+  private static final String COOKIE_PATH_TEST = "cookiePathTest/";
   private CookieSessionTracking cookieSessionTracking;
 
   @Before
@@ -117,7 +118,7 @@ public class TestCookieSessionTracking {
     verify(response).addCookie(cookie.capture());
     assertEquals("somesession", cookie.getValue().getName());
     assertEquals(0, cookie.getValue().getMaxAge());
-    assertEquals("path/", cookie.getValue().getPath());
+    assertEquals(CookieSessionTracking.DEFAULT_CONTEXT_PATH, cookie.getValue().getPath());
   }
 
   @Test
@@ -139,7 +140,7 @@ public class TestCookieSessionTracking {
     assertEquals("somesession", cookie.getValue().getName());
     assertEquals("", cookie.getValue().getValue());
     assertEquals(0, cookie.getValue().getMaxAge());
-    assertEquals("path/", cookie.getValue().getPath());
+    assertEquals(CookieSessionTracking.DEFAULT_CONTEXT_PATH, cookie.getValue().getPath());
   }
 
   @Test
@@ -161,6 +162,29 @@ public class TestCookieSessionTracking {
     assertEquals("somesession", cookie.getValue().getName());
     assertEquals("123", cookie.getValue().getValue());
     assertEquals(-1, cookie.getValue().getMaxAge());
-    assertEquals("path/", cookie.getValue().getPath());
+    assertEquals(CookieSessionTracking.DEFAULT_CONTEXT_PATH, cookie.getValue().getPath());
+  }
+  
+  @Test
+  public void testCookiePath() {
+    SessionConfiguration sc = new SessionConfiguration();
+    sc.setSessionIdName("somesession");
+    sc.setAttribute(CookieSessionTracking.COOKIE_CONTEXT_PATH_PARAMETER, COOKIE_PATH_TEST);
+    cookieSessionTracking.configure(sc);
+    RequestWithSession request = mock(RequestWithSession.class,
+                                      withSettings().extraInterfaces(HttpServletRequest.class));
+    when(((HttpServletRequest) request).getContextPath()).thenReturn("path");
+    RepositoryBackedSession session = mock(RepositoryBackedSession.class);
+    when(session.getId()).thenReturn("123");
+    when(session.isValid()).thenReturn(true);
+    when(request.getRepositoryBackedSession(false)).thenReturn(session);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    cookieSessionTracking.propagateSession(request, response);
+    ArgumentCaptor<Cookie> cookie = ArgumentCaptor.forClass(Cookie.class);
+    verify(response).addCookie(cookie.capture());
+    assertEquals("somesession", cookie.getValue().getName());
+    assertEquals("123", cookie.getValue().getValue());
+    assertEquals(-1, cookie.getValue().getMaxAge());
+    assertEquals(COOKIE_PATH_TEST, cookie.getValue().getPath());
   }
 }
