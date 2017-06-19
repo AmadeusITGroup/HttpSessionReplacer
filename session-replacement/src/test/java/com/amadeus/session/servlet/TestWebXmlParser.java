@@ -30,31 +30,31 @@ public class TestWebXmlParser {
   static final String withInvalidSessionDuration = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
       + "<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" "
       + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-      + "version=\"3.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd\">"
+      + "version=\"3.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd\">"
       + "<session-config>" + "<session-timeout>A</session-timeout>" + "</session-config>" + "</web-app>";
 
   static final String withEmptySessionDuration = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
       + "<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" "
       + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-      + "version=\"3.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd\">"
+      + "version=\"3.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd\">"
       + "<session-config>" + "<session-timeout>A</session-timeout>" + "</session-config>" + "</web-app>";
 
   static final String withInvalidTrackingMode = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
       + "<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" "
       + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-      + "version=\"3.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd\">"
+      + "version=\"3.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd\">"
       + "<session-config><tracking-mode>BAD</tracking-mode></session-config>"
       + "</web-app>";
   static final String withUrlTrackingMode = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
       + "<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" "
       + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-      + "version=\"3.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd\">"
+      + "version=\"3.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd\">"
       + "<session-config><tracking-mode>URL</tracking-mode></session-config>"
       + "</web-app>";
   static final String withSessionConfig = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
       + "<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" "
       + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-      + "version=\"3.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd\">"
+      + "version=\"3.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd\">"
       + "<session-config><cookie-config><secure>false</secure><http-only>true</http-only><path>/test</path></cookie-config>"
       + "<tracking-mode>COOKIE</tracking-mode></session-config>"
       + "</web-app>";

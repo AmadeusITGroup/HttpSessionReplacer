@@ -43,6 +43,7 @@ import com.amadeus.session.SessionTracking;
  *
  */
 class CookieSessionTracking extends BaseSessionTracking implements SessionTracking {
+  static final String DEFAULT_CONTEXT_PATH = "/";
   /**
    * Used to configure context path of the cookie.
    */
@@ -98,10 +99,10 @@ class CookieSessionTracking extends BaseSessionTracking implements SessionTracki
   }
 
   private String cookiePath(HttpServletRequest request) {
-    if (contextPath != null && !contextPath.isEmpty()) {
+    if (contextPath != null) {
       return contextPath;
     }
-    return request.getContextPath();
+    return DEFAULT_CONTEXT_PATH;
   }
 
   @Override
@@ -109,6 +110,6 @@ class CookieSessionTracking extends BaseSessionTracking implements SessionTracki
     super.configure(conf);
     httpOnly = Boolean.valueOf(conf.getAttribute(COOKIE_HTTP_ONLY_PARAMETER, "true"));
     secure = Boolean.valueOf(conf.getAttribute(SECURE_COOKIE_PARAMETER, "false"));
-    contextPath = conf.getAttribute(COOKIE_CONTEXT_PATH_PARAMETER, "");
+    contextPath = conf.getAttribute(COOKIE_CONTEXT_PATH_PARAMETER, null);
   }
 }
