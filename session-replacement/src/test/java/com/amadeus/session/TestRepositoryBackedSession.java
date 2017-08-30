@@ -179,7 +179,7 @@ public class TestRepositoryBackedSession {
     when(repository.prepareRemove(sessionData("1"))).thenReturn(Boolean.TRUE);
     rbs.invalidate();
     verify(repository).prepareRemove(sessionData("1"));
-    verify(repository).remove(sessionData);
+    verify(manager).remove(sessionData);
     verify(notifier).sessionDestroyed(refEq(rbs), eq(false));
     assertFalse(rbs.isValid());
     rbs.getAttribute("Test");
