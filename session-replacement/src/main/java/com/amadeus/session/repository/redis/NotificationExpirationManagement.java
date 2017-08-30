@@ -4,7 +4,6 @@ import static com.amadeus.session.repository.redis.SafeEncoder.encode;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
