@@ -201,6 +201,8 @@ public class SessionManager implements Closeable {
       logger.debug("Session was in cache, but it was expired, sessionId: {}", sessionId);
 
       if (session.isValid()) {
+    	logger.info("deleting session with sessionId: '{}'", sessionId );
+        deletedSessions.mark();
         session.doInvalidate(true);
       }
       return null;
@@ -339,6 +341,7 @@ public class SessionManager implements Closeable {
   public void delete(String sessionId, boolean expired) {
     RepositoryBackedSession session = fetchSession(sessionId, false);
     if (session != null) {
+      logger.info("deleting session with sessionId: '{}'", sessionId );
       deletedSessions.mark();
       session.doInvalidate(expired);
     } else if (!expired) {
@@ -615,5 +618,11 @@ public class SessionManager implements Closeable {
   public String toString() {
     return new StringBuilder().append("SessionManager [namespace=").append(configuration.getNamespace()).append("]")
         .toString();
+  }
+
+  public void remove(SessionData sessionData) {
+	logger.info("deleting session with sessionId: '{}'", sessionData.getId() );
+	deletedSessions.mark();
+	getRepository().remove(sessionData);
   }
 }

@@ -4,6 +4,7 @@ import static com.amadeus.session.repository.redis.SafeEncoder.encode;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
@@ -59,7 +60,7 @@ import com.amadeus.session.repository.redis.RedisFacade.TransactionRunner;
 class NotificationExpirationManagement implements RedisExpirationStrategy {
   static Logger logger = LoggerFactory.getLogger(NotificationExpirationManagement.class);
 
-  private static final long ONE_MINUTE = TimeUnit.MINUTES.toMillis(1);
+  private static final long ONE_MINUTE_IN_SECOND = TimeUnit.MINUTES.toSeconds(1);
 
   private static final int SPOP_BULK_SIZE = 1000;
 
@@ -147,7 +148,7 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
     @Override
     public void run() {
       long prevMin = roundDownMinute(System.currentTimeMillis());
-
+      
       logger.info("Cleaning up sessions expiring at {}", prevMin);
       byte[] key = getForcedExpirationsKey(prevMin);
       Set<byte[]> sessionsToExpire = getKeysToExpire(key);
@@ -323,13 +324,13 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
     // were
     // not received by nodes.
     Runnable taskTriggerExpiration = new TriggerExpiredSessionsTask();
-    cleanupFuture = sessionManager.schedule("redis.expiration-cleanup", taskTriggerExpiration, ONE_MINUTE);
+    cleanupFuture = sessionManager.schedule("redis.expiration-cleanup", taskTriggerExpiration, ONE_MINUTE_IN_SECOND);
     if (sticky) {
       // When we have sticky sessions, we perform also second pass to capture
       // sessions
       // that were not cleaned by the node that last accessed them
       Runnable taskForceExpiration = new CleanHangingSessionsTask(sessionManager);
-      forceCleanupFuture = sessionManager.schedule("redis.force-cleanup", taskForceExpiration, ONE_MINUTE);
+      forceCleanupFuture = sessionManager.schedule("redis.force-cleanup", taskForceExpiration, ONE_MINUTE_IN_SECOND);
     }
   }
 
