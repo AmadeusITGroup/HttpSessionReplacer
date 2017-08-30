@@ -17,6 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.slf4j.MDC;
 
 import com.codahale.metrics.MetricRegistry;
@@ -248,6 +249,13 @@ public class TestSessionManager {
     verify(executors).scheduleAtFixedRate(runnable, 10L, 10L, TimeUnit.SECONDS);
   }
 
+  @Test
+  public void testScheduleMinutes() {
+    Runnable runnable = mock(Runnable.class);
+    sessionManager.schedule(null, runnable, TimeUnit.MINUTES.toSeconds(1));
+    verify(executors).scheduleAtFixedRate(runnable, 60L, 60L, TimeUnit.SECONDS);
+  }
+  
   @Test
   public void testScheduleWithTimer() {
     Runnable runnable = mock(Runnable.class);
