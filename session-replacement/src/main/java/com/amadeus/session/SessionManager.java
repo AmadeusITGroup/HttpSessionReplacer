@@ -348,7 +348,7 @@ public class SessionManager implements Closeable {
   }
 
   private void markSessionDeletion(String sessionId) {
-	  logger.info("deleting session with sessionId: '{}'", sessionId );
+    logger.info("deleting session with sessionId: '{}'", sessionId );
     deletedSessions.mark();
   }
 
