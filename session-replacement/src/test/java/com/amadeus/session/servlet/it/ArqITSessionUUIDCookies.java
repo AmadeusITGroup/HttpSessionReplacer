@@ -37,7 +37,7 @@ public class ArqITSessionUUIDCookies extends AbstractITSession {
   @Deployment(testable = false, name = "uuid")
   public static WebArchive startFirst() {
     return Helpers.createWebApp("uuid.war").addClass(SampleServlet.class)
-    .setWebXML(new StringAsset(Descriptors.create(WebAppDescriptor.class).version("2.5")
+    .setWebXML(new StringAsset(Descriptors.create(WebAppDescriptor.class).version("3.0")
     .getOrCreateContextParam().paramName(SessionConfiguration.SESSION_ID_PROVIDER).paramValue("uuid").up()
     .exportAsString()));
   }
