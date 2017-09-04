@@ -249,6 +249,13 @@ public class TestSessionManager {
   }
 
   @Test
+  public void testScheduleMinutes() {
+    Runnable runnable = mock(Runnable.class);
+    sessionManager.schedule(null, runnable, TimeUnit.MINUTES.toSeconds(1));
+    verify(executors).scheduleAtFixedRate(runnable, 60L, 60L, TimeUnit.SECONDS);
+  }
+  
+  @Test
   public void testScheduleWithTimer() {
     Runnable runnable = mock(Runnable.class);
     sessionManager.schedule("test", runnable, 10);
@@ -334,4 +341,15 @@ public class TestSessionManager {
     verify(repository, never()).sessionIdChange(sessionData);
     verify(notifier, never()).sessionIdChanged(session, sessionData.getOldSessionId());
   }
+  
+  @Test
+  public void testRemove() {
+    SessionData sessionData = new SessionData("1", now(), 10);
+    RepositoryBackedSession session = mock(RepositoryBackedSession.class);
+    when(repository.getSessionData("1")).thenReturn(sessionData);
+    when(factory.build(sessionData)).thenReturn(session);
+    sessionManager.remove(sessionData);
+    assertEquals(1, metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "deleted")).getCount());
+  }
+  
 }
