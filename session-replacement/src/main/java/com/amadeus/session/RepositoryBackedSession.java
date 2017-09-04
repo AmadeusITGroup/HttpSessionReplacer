@@ -363,7 +363,7 @@ public class RepositoryBackedSession {
   private void finishInvalidation(boolean canRemove) {
     invalid = true;
     if (canRemove) {
-      manager.getRepository().remove(sessionData);
+      manager.remove(sessionData);
     }
   }
 

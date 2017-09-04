@@ -59,7 +59,7 @@ import com.amadeus.session.repository.redis.RedisFacade.TransactionRunner;
 class NotificationExpirationManagement implements RedisExpirationStrategy {
   static Logger logger = LoggerFactory.getLogger(NotificationExpirationManagement.class);
 
-  private static final long ONE_MINUTE = TimeUnit.MINUTES.toMillis(1);
+  private static final long ONE_MINUTE = TimeUnit.MINUTES.toSeconds(1);
 
   private static final int SPOP_BULK_SIZE = 1000;
 

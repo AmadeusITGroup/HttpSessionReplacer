@@ -201,6 +201,7 @@ public class SessionManager implements Closeable {
       logger.debug("Session was in cache, but it was expired, sessionId: {}", sessionId);
 
       if (session.isValid()) {
+        markSessionDeletion(sessionId);
         session.doInvalidate(true);
       }
       return null;
@@ -339,13 +340,19 @@ public class SessionManager implements Closeable {
   public void delete(String sessionId, boolean expired) {
     RepositoryBackedSession session = fetchSession(sessionId, false);
     if (session != null) {
-      deletedSessions.mark();
+      markSessionDeletion(sessionId);
       session.doInvalidate(expired);
     } else if (!expired) {
       logger.debug("Session not found in repository for sessionId: '{}'", sessionId);
     }
   }
 
+  private void markSessionDeletion(String sessionId) {
+    logger.info("deleting session with sessionId: '{}'", sessionId );
+    deletedSessions.mark();
+  }
+
+  
   /**
    * Called when request has been finished. Notifies repository of that fact.
    */
@@ -615,5 +622,10 @@ public class SessionManager implements Closeable {
   public String toString() {
     return new StringBuilder().append("SessionManager [namespace=").append(configuration.getNamespace()).append("]")
         .toString();
+  }
+
+  public void remove(SessionData sessionData) {
+    markSessionDeletion( sessionData.getId() );
+    getRepository().remove(sessionData);
   }
 }
