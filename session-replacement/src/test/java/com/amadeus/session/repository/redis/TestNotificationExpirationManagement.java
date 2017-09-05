@@ -8,9 +8,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -164,9 +165,9 @@ public class TestNotificationExpirationManagement {
   @Test
   public void testSubscriptionRunner() {
     SessionManager sessionManager = mock(SessionManager.class);
-    expiration.startExpiredSessionsTask(sessionManager );
-    ArgumentCaptor<Runnable> cleanupCapture = ArgumentCaptor.forClass(Runnable.class);
-    verify(sessionManager).submit(anyString(), cleanupCapture.capture());
+    expiration.startExpiredSessionsTask(sessionManager);
+    ArgumentCaptor<NotificationExpirationManagement.SubscriptionRunner> cleanupCapture = ArgumentCaptor.forClass(NotificationExpirationManagement.SubscriptionRunner.class);
+    verify(sessionManager).submit((String)isNull(), cleanupCapture.capture());
     cleanupCapture.getValue().run();
     verify(redis).psubscribe(any(RedisFacade.RedisPubSub.class), anyString());
   }
