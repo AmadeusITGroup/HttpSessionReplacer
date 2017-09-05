@@ -1,7 +1,5 @@
 package com.amadeus.session.servlet;
 
-import java.io.IOException;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
@@ -29,7 +27,7 @@ class HttpResponseWrapper31 extends HttpResponseWrapper implements ResponseWithS
   }
 
   @Override
-  protected SaveSessionServletOutputStream wrapOutputStream(ServletOutputStream outputStream) throws IOException {
+  protected SaveSessionServletOutputStream wrapOutputStream(ServletOutputStream outputStream) {
     return new SaveSessionServlet31OutputStream(outputStream);
   }
 

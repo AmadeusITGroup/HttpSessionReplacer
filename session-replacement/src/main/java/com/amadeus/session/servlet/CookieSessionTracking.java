@@ -94,11 +94,11 @@ class CookieSessionTracking extends BaseSessionTracking implements SessionTracki
     if (secure) {
       cookie.setSecure(httpRequest.isSecure());
     }
-    cookie.setPath(cookiePath(httpRequest));
+    cookie.setPath(cookiePath());
     ((HttpServletResponse)response).addCookie(cookie);
   }
 
-  private String cookiePath(HttpServletRequest request) {
+  private String cookiePath() {
     if (contextPath != null) {
       return contextPath;
     }
