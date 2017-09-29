@@ -148,7 +148,9 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
     public void run() {
       long prevMin = roundDownMinute(System.currentTimeMillis());
 
-      logger.info("Cleaning up sessions expiring at {}", prevMin);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Cleaning up sessions expiring at {}", prevMin);
+      }
       byte[] key = getForcedExpirationsKey(prevMin);
       Set<byte[]> sessionsToExpire = getKeysToExpire(key);
       if (sessionsToExpire == null || sessionsToExpire.isEmpty()) {
@@ -178,8 +180,9 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
     @Override
     public void run() {
       long prevMin = roundDownMinute(System.currentTimeMillis());
-
-      logger.info("Triggering up sessions expiring at {}", prevMin);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Triggering up sessions expiring at {}", prevMin);
+      }
       byte[] key = getExpirationsKey(prevMin);
       Set<byte[]> sessionsToExpire = getKeysToExpire(key);
       if (sessionsToExpire == null || sessionsToExpire.isEmpty()) {

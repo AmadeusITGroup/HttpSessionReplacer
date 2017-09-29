@@ -149,7 +149,11 @@ class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
       long now = System.currentTimeMillis();
       long start = sticky ? now - SESSION_PERSISTENCE_SAFETY_MARGIN_MILLIS : 0;
 
-      logger.info("Cleaning up sessions expiring at {}", now);
+      
+      if (logger.isDebugEnabled()) {
+        logger.debug("Cleaning up sessions expiring at {}", now);
+      }
+      
       expireSessions(start, now, !sticky);
       if (sticky) {
         expireSessions(0, start, true);
