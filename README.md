@@ -24,7 +24,7 @@ offering full support for session API including different session listeners.
 
 Redis support includes both single instance, sentinel based and cluster modes.
 Two session expiration strategies are available when using Redis. One is based
-on Redis notifications, and antoher on sorted sets (ZRANGE).
+on Redis notifications, and another on sorted sets (ZRANGE).
 
 Useful links:
 
@@ -65,7 +65,7 @@ Different repository implementations are supported by the session replacement me
 #### Configuration
 
 Most of the configuration can be specified with `ServletContext`s initialization
-parameters, system properties and some paramaters can be provided via the agent.
+parameters, system properties and some parameters can be provided via the agent.
 Unless otherwise specified the general rule for priority of configuration is as
 follows in descending order:
 
@@ -120,7 +120,8 @@ session storage in repository.
   Normally, unless using container specific interface,
   container should not be aware of the existence of the session.
 
-* The *Agent* performs instrumentation as described below.
+* The *Agent* performs instrumentation as described below. The instrumentation
+performs bytecode injection in order to attain zero code impact on application code.
 
 ### Session management
 
@@ -312,6 +313,11 @@ Non-cacheable attributes are specified as comma-separated list using
 
 The project comes with a java agent that is used to instrument the `ServletContext`
 implementation of the JEE container as well as any `Filter` used by web applications.
+The purpose of this instrumentation is to intercept all interactions with session
+as exposed by container and replace them with implementation in this library. This
+instrumentation allows using new session mechanism in existing applications without
+modifying their code.
+ 
 The agent also allows the setting of global defaults for the session management.
 
 ### Filter instrumentation
