@@ -1,7 +1,6 @@
 package com.amadeus.session.servlet.it;
 
 import static com.amadeus.session.servlet.it.Helpers.callWebapp;
-import static com.amadeus.session.servlet.it.Helpers.matchLines;
 import static com.amadeus.session.servlet.it.Helpers.setSessionCookie;
 import static com.amadeus.session.servlet.it.Helpers.url;
 import static org.hamcrest.CoreMatchers.not;
@@ -12,6 +11,7 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -73,8 +73,16 @@ public class ArqITSessionWithSecureCookie extends AbstractITSession {
     HttpURLConnection connection = (HttpURLConnection) urlTest.openConnection();
     setSessionCookie(connection, originalCookie);
     connection.connect();
-    List<String> cookies = connection.getHeaderFields().get("Set-Cookie");
+    List<String> cookies = toLowerCase(connection.getHeaderFields().get("Set-Cookie"));
     assertThat(cookies, hasItem(containsString("secure")));
+  }
+
+  private List<String> toLowerCase(List<String> list) {
+    ArrayList<String> result = new ArrayList<>(list.size());
+    for (String s : list) {
+      result.add(s.toLowerCase());
+    }
+    return result;
   }
 
   @RunAsClient
@@ -86,8 +94,8 @@ public class ArqITSessionWithSecureCookie extends AbstractITSession {
     HttpURLConnection connection = (HttpURLConnection) urlTest.openConnection();
     setSessionCookie(connection, originalCookie);
     connection.connect();
-    List<String> cookies = connection.getHeaderFields().get("Set-Cookie");
-    assertThat(cookies, not(hasItem(containsString("secure"))));
+    List<String> cookies = toLowerCase(connection.getHeaderFields().get("Set-Cookie"));
+    assertThat(cookies, not(hasItem(containsString(("secure")))));
   }
 
   @RunAsClient
@@ -99,7 +107,7 @@ public class ArqITSessionWithSecureCookie extends AbstractITSession {
     HttpURLConnection connection = (HttpURLConnection) urlTest.openConnection();
     setSessionCookie(connection, originalCookie);
     connection.connect();
-    List<String> cookies = connection.getHeaderFields().get("Set-Cookie");
+    List<String> cookies = toLowerCase(connection.getHeaderFields().get("Set-Cookie"));
     assertThat(cookies, not(hasItem(containsString("secure"))));
   }
 }
