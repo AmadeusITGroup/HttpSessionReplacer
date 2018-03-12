@@ -118,4 +118,9 @@ class CookieSessionTracking extends BaseSessionTracking implements SessionTracki
     secureOnlyOnSecuredRequest = Boolean.valueOf(conf.getAttribute(SECURE_COOKIE_ON_SECURED_REQUEST_PARAMETER, "false"));
     contextPath = conf.getAttribute(COOKIE_CONTEXT_PATH_PARAMETER, null);
   }
+
+  @Override
+  public boolean isCookieTracking() {
+    return true;
+  }
 }

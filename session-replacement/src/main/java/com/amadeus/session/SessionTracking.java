@@ -50,4 +50,11 @@ public interface SessionTracking {
    * @return encoded URL
    */
   String encodeUrl(RequestWithSession request, String url);
+
+  /**
+   * Tells whether the tracking is done using cookies or URL rewrite (example with ;jsessionid=... in the URL).
+   * 
+   * @return true if tracking is done with cookies, false if it is done using URL rewrite
+   */
+  boolean isCookieTracking();
 }

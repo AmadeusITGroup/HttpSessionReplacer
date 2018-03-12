@@ -21,7 +21,6 @@ import org.slf4j.MDC;
 
 import com.codahale.metrics.MetricRegistry;
 
-@SuppressWarnings("javadoc")
 public class TestSessionManager {
   private ExecutorFacade executors;
   private SessionFactory factory;
@@ -60,7 +59,7 @@ public class TestSessionManager {
     RequestWithSession request = mock(RequestWithSession.class);
     when(tracking.retrieveId(request)).thenReturn("1");
     RepositoryBackedSession retrievedSession = sessionManager.getSession(request, false, null);
-    verify(request).setRequestedSessionId("1");
+    verify(request).setRequestedSessionId("1", false);
     assertEquals("Session id in Logging MDC is wrong", "1", MDC.get(configuration.getLoggingMdcKey()));
     assertSame(session, retrievedSession);
   }
@@ -69,7 +68,7 @@ public class TestSessionManager {
   public void testGetSessionNoSessionId() {
     RequestWithSession request = mock(RequestWithSession.class);
     RepositoryBackedSession retrievedSession = sessionManager.getSession(request, false, null);
-    verify(request).setRequestedSessionId(null);
+    verify(request).setRequestedSessionId(null, false);
     assertNull("Session id shouldn't be in logging MDC", MDC.get(configuration.getLoggingMdcKey()));
     assertNull(retrievedSession);
   }
@@ -103,7 +102,7 @@ public class TestSessionManager {
     when(session.getId()).thenReturn("new-id");
     when(factory.build(any(SessionData.class))).thenReturn(session);
     RepositoryBackedSession retrievedSession = sessionManager.getSession(request, true, null);
-    verify(request).setRequestedSessionId(null);
+    verify(request).setRequestedSessionId(null, false);
     verify(tracking).newId();
     assertEquals("Session id in Logging MDC is wrong", "new-id", MDC.get(configuration.getLoggingMdcKey()));
     assertSame(session, retrievedSession);
