@@ -1,7 +1,9 @@
 package com.amadeus.session.servlet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -18,7 +20,6 @@ import org.junit.Test;
 
 import com.amadeus.session.SessionManager;
 
-@SuppressWarnings("javadoc")
 public class TestHttpRequestWrapper {
 
   private static final String NEW_SESSION_ID = "11";
@@ -187,9 +188,50 @@ public class TestHttpRequestWrapper {
   public void testGetSetRequestedSessionId() {
     HttpServletRequest wrappedSimple = mock(HttpServletRequest.class);
     HttpRequestWrapper req = spy(new HttpRequestWrapper(wrappedSimple, servletContext));
-    req.setRequestedSessionId(SESSION_ID);
+    req.setRequestedSessionId(SESSION_ID, true);
     String id = req.getRequestedSessionId();
     assertEquals(SESSION_ID, id);
+    verify(req, never()).getSession(false);
+  }
+
+  @Test
+  public void testIsRequestedSessionIdValidTrue() {
+    HttpServletRequest wrappedSimple = mock(HttpServletRequest.class);
+    HttpRequestWrapper req = spy(new HttpRequestWrapper(wrappedSimple, servletContext));
+    req.setRequestedSessionId(SESSION_ID, true);
+    req.repositoryChecked();
+    assertTrue(req.isRequestedSessionIdValid());
+    verify(req, never()).getSession(false);
+  }
+
+  @Test
+  public void testIsRequestedSessionIdValidFalse() {
+    HttpServletRequest wrappedSimple = mock(HttpServletRequest.class);
+    HttpRequestWrapper req = spy(new HttpRequestWrapper(wrappedSimple, servletContext));
+    req.setRequestedSessionId(SESSION_ID, true);
+    assertFalse(req.isRequestedSessionIdValid());
+    verify(req, never()).getSession(false);
+  }
+
+  @Test
+  public void testIsRequestedSessionIdFromCookie() {
+    HttpServletRequest wrappedSimple = mock(HttpServletRequest.class);
+    HttpRequestWrapper req = spy(new HttpRequestWrapper(wrappedSimple, servletContext));
+    req.setRequestedSessionId(SESSION_ID, true);
+    assertTrue(req.isRequestedSessionIdFromCookie());
+    assertFalse(req.isRequestedSessionIdFromURL());
+    assertFalse(req.isRequestedSessionIdFromUrl());
+    verify(req, never()).getSession(false);
+  }
+
+  @Test
+  public void testIsRequestedSessionIdFromURL() {
+    HttpServletRequest wrappedSimple = mock(HttpServletRequest.class);
+    HttpRequestWrapper req = spy(new HttpRequestWrapper(wrappedSimple, servletContext));
+    req.setRequestedSessionId(SESSION_ID, false);
+    assertFalse(req.isRequestedSessionIdFromCookie());
+    assertTrue(req.isRequestedSessionIdFromURL());
+    assertTrue(req.isRequestedSessionIdFromUrl());
     verify(req, never()).getSession(false);
   }
 }

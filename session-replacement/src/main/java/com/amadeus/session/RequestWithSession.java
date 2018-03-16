@@ -75,8 +75,10 @@ public interface RequestWithSession {
    *
    * @param id
    *          the id that has been retrieved from request.
+   * @param isFromCookie
+   *          true if the id was retrieved from a session cookie, false if it was retrieved from the URL
    */
-  void setRequestedSessionId(String id);
+  void setRequestedSessionId(String id, boolean isFromCookie);
 
   /**
    * Returns <code>true</code> if repository was checked to see if it contains

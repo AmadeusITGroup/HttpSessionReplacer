@@ -73,4 +73,9 @@ public class UrlSessionTracking extends BaseSessionTracking implements SessionTr
 
     return path + '?' + query;
   }
+
+  @Override
+  public boolean isCookieTracking() {
+    return false;
+  }
 }

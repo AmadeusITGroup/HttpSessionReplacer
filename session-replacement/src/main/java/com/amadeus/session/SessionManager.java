@@ -254,7 +254,7 @@ public class SessionManager implements Closeable {
   public RepositoryBackedSession getSession(RequestWithSession request, boolean create, String forceId) {
     String id = retrieveId(request, forceId);
     putIdInLoggingMdc(id);
-    request.setRequestedSessionId(id);
+    request.setRequestedSessionId(id, tracking.isCookieTracking());
     RepositoryBackedSession session = null;
     if (id != null) {
       session = fetchSession(id, true);
