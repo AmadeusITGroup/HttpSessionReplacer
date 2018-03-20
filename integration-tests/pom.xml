@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.amadeus</groupId>
     <artifactId>session</artifactId>
-    <version>0.4.8</version>
+    <version>0.4-SNAPSHOT</version>
   </parent>
   <packaging>pom</packaging>
   <name>integration-tests</name>
