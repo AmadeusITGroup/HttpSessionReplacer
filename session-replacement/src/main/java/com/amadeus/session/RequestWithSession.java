@@ -81,6 +81,13 @@ public interface RequestWithSession {
   void setRequestedSessionId(String id, boolean isFromCookie);
 
   /**
+   * Returns <code>true</code> if session id came from cookie.
+   * 
+   * @return <code>true</code> if session id came from cookie.
+   */
+  boolean isRequestedSessionIdFromCookie();
+
+  /**
    * Returns <code>true</code> if repository was checked to see if it contains
    * the session corresponding to request.
    *

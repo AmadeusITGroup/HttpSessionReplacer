@@ -68,14 +68,22 @@ class CookieSessionTracking extends BaseSessionTracking implements SessionTracki
   private Boolean secureOnlyOnSecuredRequest;
 
   @Override
-  public String retrieveId(RequestWithSession request) {
+  public IdAndSource retrieveId(RequestWithSession request) {
     Cookie[] cookies = ((HttpServletRequest)request).getCookies();
     if (cookies != null) {
       for (Cookie cookie : cookies) {
         if (idName.equals(cookie.getName())) {
-          return clean(cookie.getValue());
+          String id = clean(cookie.getValue());
+          if (id != null) {
+            return new IdAndSource(id, isCookieTracking());
+          } else {
+            return null;
+          }
         }
       }
+    }
+    if (this.nextSessionTracking != null) {
+      return this.nextSessionTracking.retrieveId(request);
     }
     return null;
   }

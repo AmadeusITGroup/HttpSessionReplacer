@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.amadeus.session.SessionManager;
+import com.amadeus.session.SessionTracking;
 
 public class TestHttpRequestWrapper {
 
@@ -90,7 +91,7 @@ public class TestHttpRequestWrapper {
     wrappedHttpRequestWrapper.session = invalidSession;
     HttpServletRequest wrappedComplex = new HttpServletRequestWrapper(wrappedHttpRequestWrapper);
     HttpRequestWrapper req = new HttpRequestWrapper(wrappedComplex, servletContext);
-    when(sessionManager.getSession(req, true, SESSION_ID)).thenReturn(invalidSession);
+    when(sessionManager.getSession(req, true, new SessionTracking.IdAndSource(SESSION_ID, false))).thenReturn(invalidSession);
     when(sessionManager.getSession(req, true, null)).thenReturn(newSession);
     RepositoryBackedHttpSession session2 = req.getSession();
     Assert.assertNotNull(session2);

@@ -232,8 +232,8 @@ public class SessionConfiguration implements Serializable {
    */
   public static final String REPOSITORY_FACTORY_NAME = "com.amadeus.session.repository.factory";
   /**
-   * ServletContext parameter or system property containing the name of the
-   * {@link SessionTracking} implementation or value from
+   * ServletContext parameter or system property containing comma delimited list 
+   * of the names of  {@link SessionTracking} implementations or values from
    * <code>com.amadeus.session.servlet.SessionPropagation</code> enumeration.
    */
   public static final String SESSION_PROPAGATOR_NAME = "com.amadeus.session.tracking";
@@ -317,7 +317,7 @@ public class SessionConfiguration implements Serializable {
   private String namespace;
   private String providerConfiguration;
   private String repositoryFactory;
-  private String sessionTracking;
+  private String[] sessionTracking;
   private String sessionIdName;
   private String encryptionKey;
 
@@ -342,7 +342,7 @@ public class SessionConfiguration implements Serializable {
     sessionIdName = getPropertySecured(SESSION_ID_NAME, DEFAULT_SESSION_ID_NAME);
     providerConfiguration = getPropertySecured(PROVIDER_CONFIGURATION, null);
     repositoryFactory = getPropertySecured(REPOSITORY_FACTORY_NAME, null);
-    sessionTracking = getPropertySecured(SESSION_PROPAGATOR_NAME, null);
+    sessionTracking = parsePropagators(getPropertySecured(SESSION_PROPAGATOR_NAME, null), null);
     allowedCachedSessionReuse = Boolean.parseBoolean(getPropertySecured(REUSE_CONCURRENT_SESSION, null));
     interceptListeners = Boolean.parseBoolean(getPropertySecured(INTERCEPT_LISTENERS, null));
     forceDistributable = Boolean.parseBoolean(getPropertySecured(FORCE_DISTRIBUTABLE, null));
@@ -364,6 +364,21 @@ public class SessionConfiguration implements Serializable {
     }
     node = initNode();
     setEncryptionKey(getPropertySecured(SESSION_ENCRYPTION_KEY, null));
+  }
+
+  /**
+   * Parses value as comma-separated list of session propagators. Used to
+   * specify several propagator in order of priority.
+   * @param value
+   *          the value to parse
+   * @param defaultValue 
+   *          the default value if value is null 
+   */
+  private String[] parsePropagators(String value, String[] defaultValue) {
+    if (value == null) {
+      return defaultValue;
+    }
+    return value.split(",");
   }
 
   /**
@@ -397,7 +412,7 @@ public class SessionConfiguration implements Serializable {
     timestampSufix = read(SESSION_TIMESTAMP, timestampSufix);
     interceptListeners = read(INTERCEPT_LISTENERS, interceptListeners);
     allowedCachedSessionReuse = read(REUSE_CONCURRENT_SESSION, allowedCachedSessionReuse);
-    sessionTracking = read(SESSION_PROPAGATOR_NAME, sessionTracking);
+    sessionTracking = parsePropagators(read(SESSION_PROPAGATOR_NAME, null), sessionTracking);
     sessionIdName = read(SESSION_ID_NAME, sessionIdName);
     repositoryFactory = read(REPOSITORY_FACTORY_NAME, repositoryFactory);
     providerConfiguration = read(PROVIDER_CONFIGURATION, providerConfiguration);
@@ -720,7 +735,7 @@ public class SessionConfiguration implements Serializable {
    *
    * @return the name of the session tracking class
    */
-  public String getSessionTracking() {
+  public String[] getSessionTracking() {
     return sessionTracking;
   }
 
@@ -731,7 +746,7 @@ public class SessionConfiguration implements Serializable {
    * @param sessionTracking
    *          the unique id or name of the session tracking class
    */
-  public void setSessionTracking(String sessionTracking) {
+  public void setSessionTracking(String...sessionTracking) {
     this.sessionTracking = sessionTracking;
   }
 

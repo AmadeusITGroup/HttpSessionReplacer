@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.amadeus.session.RequestWithSession;
 import com.amadeus.session.SessionManager;
+import com.amadeus.session.SessionTracking;
 
 /**
  * Wrapper for {@link HttpServletRequest} that implements storing of sessions in
@@ -135,9 +136,9 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
     }
   }
 
-  private String getEmbededdSessionId() {
+  private SessionTracking.IdAndSource getEmbededdSessionId() {
     if (embeddedRequest != null && embeddedRequest.session != null && embeddedRequest.session.isValid()) {
-      return embeddedRequest.session.getId();
+      return new SessionTracking.IdAndSource(embeddedRequest.session.getId(), embeddedRequest.isRetrievedIdFromCookie);
     }
     return null;
   }
