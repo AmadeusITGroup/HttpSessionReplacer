@@ -153,6 +153,7 @@ public final class SessionHelpers {
       SessionNotifier notifier = new HttpSessionNotifier(scd);
       SessionFactory factory = new HttpSessionFactory(servletContext);
       SessionConfiguration conf = initConf(servletContext);
+      logger.info("{}", conf);
       SessionRepository repository = repository(servletContext, conf);
       SessionTracking tracking = getTracking(servletContext, conf);
 
@@ -216,19 +217,30 @@ public final class SessionHelpers {
    * @return configured session tracking
    */
   static SessionTracking getTracking(ServletContext servletContext, SessionConfiguration sessionConfiguration) {
-    String sessionTracking = sessionConfiguration.getSessionTracking();
+    String[] sessionTracking = sessionConfiguration.getSessionTracking();
     try {
-      SessionTracking instance;
-      if (sessionTracking == null) {
-        instance = SessionPropagation.DEFAULT.get();
+      SessionTracking first = null;
+      if (sessionTracking == null || sessionTracking.length == 0) {
+        first = SessionPropagation.DEFAULT.get();
+        first.configure(sessionConfiguration);
       } else {
-        instance = trackingFromEnum(sessionTracking);
-        if (instance == null) {
-          instance = (SessionTracking)newInstance(servletContext, sessionTracking);
+        SessionTracking prevInstance = null;
+        for (String t : sessionTracking) {
+          SessionTracking instance = trackingFromEnum(t);
+          if (instance == null) {
+            instance = (SessionTracking)newInstance(servletContext, t);
+          }
+          if (first == null) {
+            first = instance;
+          }
+          if (prevInstance != null) {
+            prevInstance.nextSessionTracking(instance);
+          }
+          prevInstance = instance;
+          instance.configure(sessionConfiguration);
         }
       }
-      instance.configure(sessionConfiguration);
-      return instance;
+      return first;
     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
       throw new IllegalArgumentException("Unable to load or instantiate SessionTracking class " + sessionTracking, e);
     }

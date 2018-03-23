@@ -30,17 +30,24 @@ public class UrlSessionTracking extends BaseSessionTracking implements SessionTr
   public void configure(SessionConfiguration configuration) {
     super.configure(configuration);
 
-    sessionIdPathItem = ";" + idName + '=';
+    sessionIdPathItem = ";" + idName.toLowerCase() + '=';
   }
 
   @Override
-  public String retrieveId(RequestWithSession request) {
+  public IdAndSource retrieveId(RequestWithSession request) {
     String requestUri = ((HttpServletRequest)request).getRequestURI();
-    int sessionIdStart = requestUri.lastIndexOf(sessionIdPathItem);
+    int sessionIdStart = requestUri.toLowerCase().lastIndexOf(sessionIdPathItem);
     if (sessionIdStart > -1) {
       sessionIdStart += sessionIdPathItem.length();
-      String sessionId = requestUri.substring(sessionIdStart);
-      return clean(sessionId);
+      String sessionId = clean(requestUri.substring(sessionIdStart));
+      if (sessionId != null) {
+        return new IdAndSource(sessionId, isCookieTracking());
+      } else {
+        return null;
+      }
+    }
+    if (this.nextSessionTracking != null) {
+      return this.nextSessionTracking.retrieveId(request);
     }
     return null;
   }

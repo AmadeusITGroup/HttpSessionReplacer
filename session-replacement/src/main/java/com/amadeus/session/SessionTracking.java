@@ -18,9 +18,9 @@ public interface SessionTracking {
    *
    * @param request
    *          the current request object
-   * @return session id or null if id is present in the request
+   * @return session id and source type or null if id is not present in the request
    */
-  String retrieveId(RequestWithSession request);
+  IdAndSource retrieveId(RequestWithSession request);
 
   /**
    * Propagates session to client. Implementation must allow multiple idempotent
@@ -57,4 +57,30 @@ public interface SessionTracking {
    * @return true if tracking is done with cookies, false if it is done using URL rewrite
    */
   boolean isCookieTracking();
+
+  /**
+   * If there are multiple ways of session tracking, sets next session tracking implementation
+   * in the chain of responsibilities. 
+   * 
+   * @param next
+   *          sets next session tracking implementation in chain of responsabilities 
+   */
+  void nextSessionTracking(SessionTracking next);
+
+  /**
+   * Represtents session id and source type;
+   */  
+  public static class IdAndSource {
+    public final String id;
+    public final boolean cookie;
+    
+    public IdAndSource(String id, boolean cookie) {
+      this.id = id;
+      this.cookie = cookie;
+    }
+
+    public String toString() {
+      return "IdAndSource [id="+id+"; cookie="+cookie+"]";
+    }
+  }
 }

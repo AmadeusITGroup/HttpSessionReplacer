@@ -3,6 +3,7 @@ package com.amadeus.session.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.util.ArrayList;
 
 import javax.servlet.ServletContext;
 import javax.xml.parsers.DocumentBuilder;
@@ -10,10 +11,12 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -138,16 +141,41 @@ final class WebXmlParser {
     if (isNonEmpty(secure)) {
       sessionConfiguration.setAttribute(CookieSessionTracking.SECURE_COOKIE_PARAMETER, secure);
     }
-    String trackingMode = xpath.evaluate("/web-app/session-config/tracking-mode/text()", document);
-    if (isNonEmpty(trackingMode)) {
-      sessionConfiguration.setSessionTracking(sessionTracking(trackingMode));
-    }
+    lookForTrackingMode(sessionConfiguration, document, xpath);
     String path = xpath.evaluate("/web-app/session-config/cookie-config/path/text()", document);
     if (isNonEmpty(path)) {
       sessionConfiguration.setAttribute(CookieSessionTracking.COOKIE_CONTEXT_PATH_PARAMETER, path);
     }
   }
 
+  /**
+   * Extract tracking mode configuration from web.xml. For Servlet
+   * 3.1 see
+   * http://download.oracle.com/otndocs/jcp/servlet-3_1-fr-spec/index.html for
+   * details.
+   *
+   * @param sessionConfiguration
+   * @param document
+   * @param xpath
+   * @throws XPathExpressionException
+   */
+  private static void lookForTrackingMode(SessionConfiguration sessionConfiguration, Document document, XPath xpath)
+      throws XPathExpressionException {
+    XPathExpression pathToTracking = xpath.compile("/web-app/session-config/tracking-mode/text()");
+    Object trackingModeNodes = pathToTracking.evaluate(document, XPathConstants.NODESET);
+    if (trackingModeNodes != null) {
+      NodeList nodes = (NodeList)trackingModeNodes;
+      ArrayList<String> trackingModesList = new ArrayList<>();
+      for (int i = 0; i < nodes.getLength(); i++) {
+        String trackingMode = nodes.item(i).getNodeValue(); 
+        if (isNonEmpty(trackingMode)) {
+          trackingModesList.add(sessionTracking(trackingMode));
+        }
+      }
+      sessionConfiguration.setSessionTracking(trackingModesList.toArray(new String[]{}));
+    }
+  }
+  
   /**
    * Maps web.xml tracking modes to internal tracking modes. Only COOKIE and URL
    * are supported.

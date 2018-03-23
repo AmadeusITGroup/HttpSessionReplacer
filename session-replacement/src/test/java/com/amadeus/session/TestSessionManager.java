@@ -57,7 +57,7 @@ public class TestSessionManager {
     when(repository.getSessionData("1")).thenReturn(sessionData);
     when(factory.build(sessionData)).thenReturn(session);
     RequestWithSession request = mock(RequestWithSession.class);
-    when(tracking.retrieveId(request)).thenReturn("1");
+    when(tracking.retrieveId(request)).thenReturn(new SessionTracking.IdAndSource("1", false));
     RepositoryBackedSession retrievedSession = sessionManager.getSession(request, false, null);
     verify(request).setRequestedSessionId("1", false);
     assertEquals("Session id in Logging MDC is wrong", "1", MDC.get(configuration.getLoggingMdcKey()));
@@ -83,7 +83,7 @@ public class TestSessionManager {
     when(repository.getSessionData("1")).thenReturn(sessionData);
     when(factory.build(sessionData)).thenReturn(session);
     RequestWithSession request = mock(RequestWithSession.class);
-    when(tracking.retrieveId(request)).thenReturn("1");
+    when(tracking.retrieveId(request)).thenReturn(new SessionTracking.IdAndSource("1", false));
     sessionManager.getSession(request, false, null);
     assertNull("Logging MDC should remain null", MDC.get(configuration.getLoggingMdcKey()));    
     MDC.put(configuration.getLoggingMdcKey(), "something");

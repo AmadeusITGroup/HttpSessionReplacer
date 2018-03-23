@@ -1,6 +1,7 @@
 package com.amadeus.session.servlet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,7 @@ import org.junit.Test;
 import com.amadeus.session.RepositoryBackedSession;
 import com.amadeus.session.RequestWithSession;
 import com.amadeus.session.SessionConfiguration;
+import com.amadeus.session.SessionTracking;
 
 @SuppressWarnings("javadoc")
 public class TestUrlSessionTracking {
@@ -60,8 +62,15 @@ public class TestUrlSessionTracking {
     HttpServletRequest hsr = (HttpServletRequest)request;
     UUID uuid = UUID.randomUUID();
     when(hsr.getRequestURI()).thenReturn("/url;somesession="+uuid);
-    String id = urlSessionTracking.retrieveId(request);
-    assertEquals(uuid.toString(), id);
+    SessionTracking.IdAndSource id = urlSessionTracking.retrieveId(request);
+    assertNotNull(id);
+    assertEquals(uuid.toString(), id.id);
+    
+    // Also test case in-sensitivity
+    when(hsr.getRequestURI()).thenReturn("/url;SomeSession="+uuid);
+    id = urlSessionTracking.retrieveId(request);
+    assertNotNull("URL parameter case sensitivity test", id);
+    assertEquals("URL parameter case sensitivity test", uuid.toString(), id.id);
 
     String sessionIdWithTimestamp = uuid.toString() + BaseSessionTracking.SESSION_ID_TIMESTAMP_SEPARATOR + System.currentTimeMillis();
     String invalidSessionIdWithTimestamp = uuid.toString() + "-abcdefgh" + BaseSessionTracking.SESSION_ID_TIMESTAMP_SEPARATOR + System.currentTimeMillis();
@@ -72,7 +81,7 @@ public class TestUrlSessionTracking {
     assertNull(urlSessionTracking.retrieveId(request));
     when(hsr.getPathInfo()).thenReturn(";somesession="+sessionIdWithoutTimestamp);
     when(hsr.getRequestURI()).thenReturn("/url;somesession="+sessionIdWithoutTimestamp);
-    assertEquals(sessionIdWithoutTimestamp, urlSessionTracking.retrieveId(request));
+    assertEquals(sessionIdWithoutTimestamp, urlSessionTracking.retrieveId(request).id);
     when(hsr.getPathInfo()).thenReturn(";somesession="+invalidSessionIdWithTimestamp);
     when(hsr.getRequestURI()).thenReturn("/url;somesession="+invalidSessionIdWithTimestamp);
     assertNull(urlSessionTracking.retrieveId(request));
@@ -81,10 +90,10 @@ public class TestUrlSessionTracking {
     urlSessionTracking.configure(sc);
     when(hsr.getPathInfo()).thenReturn(";somesession="+sessionIdWithTimestamp);
     when(hsr.getRequestURI()).thenReturn("/url;somesession="+sessionIdWithTimestamp);
-    assertEquals(sessionIdWithTimestamp, urlSessionTracking.retrieveId(request));
+    assertEquals(sessionIdWithTimestamp, urlSessionTracking.retrieveId(request).id);
     when(hsr.getPathInfo()).thenReturn(";somesession="+sessionIdWithoutTimestamp);
     when(hsr.getRequestURI()).thenReturn("/url;somesession="+sessionIdWithoutTimestamp);
-    assertEquals(sessionIdWithoutTimestamp, urlSessionTracking.retrieveId(request));
+    assertEquals(sessionIdWithoutTimestamp, urlSessionTracking.retrieveId(request).id);
     when(hsr.getPathInfo()).thenReturn(";somesession="+invalidSessionIdWithTimestamp);
     when(hsr.getRequestURI()).thenReturn("/url;somesession="+invalidSessionIdWithTimestamp);
     assertNull(urlSessionTracking.retrieveId(request));
@@ -98,7 +107,7 @@ public class TestUrlSessionTracking {
     RequestWithSession request = mock(RequestWithSession.class, withSettings().extraInterfaces(HttpServletRequest.class));
     HttpServletRequest hsr = (HttpServletRequest)request;
     when(hsr.getRequestURI()).thenReturn("/url;somesession=");
-    String id = urlSessionTracking.retrieveId(request);
+    SessionTracking.IdAndSource id = urlSessionTracking.retrieveId(request);
     assertNull(id);
   }
 

@@ -101,7 +101,7 @@ public class ArqITSessionWithSecureCookie extends AbstractITSession {
   @RunAsClient
   @Test
   @OperateOnDeployment(SECURE_COOKIE_ON_SECURED_REQUEST_WEBAPP)
-  public void testCookieSecureOnSecuredREquest(@ArquillianResource URL baseURL) throws IOException {
+  public void testCookieSecureOnSecuredRequest(@ArquillianResource URL baseURL) throws IOException {
     URL urlTest = url(baseURL, "TestServlet", "testSessionPropagated");
     String originalCookie = callWebapp(urlTest);
     HttpURLConnection connection = (HttpURLConnection) urlTest.openConnection();

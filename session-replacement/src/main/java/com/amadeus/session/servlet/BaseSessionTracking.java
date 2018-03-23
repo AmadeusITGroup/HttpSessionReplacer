@@ -23,6 +23,8 @@ public abstract class BaseSessionTracking implements SessionTracking {
 
   protected static final char SESSION_ID_TIMESTAMP_SEPARATOR = '!';
 
+  protected SessionTracking nextSessionTracking;
+
   @Override
   public void configure(SessionConfiguration configuration) {
     // Read standard configuration
@@ -76,4 +78,8 @@ public abstract class BaseSessionTracking implements SessionTracking {
     return cleanValue != null ? cleanValue + timeStamp : cleanValue;
   }
 
+  @Override
+  public void nextSessionTracking(SessionTracking next) {
+    nextSessionTracking = next;
+  }
 }
