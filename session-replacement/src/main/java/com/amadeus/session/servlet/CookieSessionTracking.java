@@ -54,6 +54,10 @@ class CookieSessionTracking extends BaseSessionTracking implements SessionTracki
    */
   static final String SECURE_COOKIE_PARAMETER = "com.amadeus.session.cookie.secure";
   /**
+   * Cookie should be marked as secure only if incoming request is over secure connection.
+   */
+  static final String SECURE_COOKIE_ON_SECURED_REQUEST_PARAMETER = "com.amadeus.session.cookie.secure.on.secured.request";
+  /**
    * Used to specify that cookie should be marked as HttpOnly. Those cookies are not available
    * to javascript.
    */
@@ -61,16 +65,25 @@ class CookieSessionTracking extends BaseSessionTracking implements SessionTracki
   private boolean httpOnly = true;
   private String contextPath;
   private Boolean secure;
+  private Boolean secureOnlyOnSecuredRequest;
 
   @Override
-  public String retrieveId(RequestWithSession request) {
+  public IdAndSource retrieveId(RequestWithSession request) {
     Cookie[] cookies = ((HttpServletRequest)request).getCookies();
     if (cookies != null) {
       for (Cookie cookie : cookies) {
         if (idName.equals(cookie.getName())) {
-          return clean(cookie.getValue());
+          String id = clean(cookie.getValue());
+          if (id != null) {
+            return new IdAndSource(id, isCookieTracking());
+          } else {
+            return null;
+          }
         }
       }
+    }
+    if (this.nextSessionTracking != null) {
+      return this.nextSessionTracking.retrieveId(request);
     }
     return null;
   }
@@ -92,13 +105,13 @@ class CookieSessionTracking extends BaseSessionTracking implements SessionTracki
     }
     HttpServletRequest httpRequest = (HttpServletRequest)request;
     if (secure) {
-      cookie.setSecure(httpRequest.isSecure());
+      cookie.setSecure(secureOnlyOnSecuredRequest ? httpRequest.isSecure() : true);
     }
-    cookie.setPath(cookiePath(httpRequest));
+    cookie.setPath(cookiePath());
     ((HttpServletResponse)response).addCookie(cookie);
   }
 
-  private String cookiePath(HttpServletRequest request) {
+  private String cookiePath() {
     if (contextPath != null) {
       return contextPath;
     }
@@ -110,6 +123,12 @@ class CookieSessionTracking extends BaseSessionTracking implements SessionTracki
     super.configure(conf);
     httpOnly = Boolean.valueOf(conf.getAttribute(COOKIE_HTTP_ONLY_PARAMETER, "true"));
     secure = Boolean.valueOf(conf.getAttribute(SECURE_COOKIE_PARAMETER, "false"));
+    secureOnlyOnSecuredRequest = Boolean.valueOf(conf.getAttribute(SECURE_COOKIE_ON_SECURED_REQUEST_PARAMETER, "false"));
     contextPath = conf.getAttribute(COOKIE_CONTEXT_PATH_PARAMETER, null);
+  }
+
+  @Override
+  public boolean isCookieTracking() {
+    return true;
   }
 }

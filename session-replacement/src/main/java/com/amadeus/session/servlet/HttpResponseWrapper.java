@@ -89,10 +89,9 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
    * Wraps output stream into one that is capable of tracking when we need to write headers and commit session.
    *
    * @param servletOutputStream
-   * @return
-   * @throws IOException
+   * @return wrapped output stream
    */
-  protected SaveSessionServletOutputStream wrapOutputStream(ServletOutputStream servletOutputStream) throws IOException {
+  protected SaveSessionServletOutputStream wrapOutputStream(ServletOutputStream servletOutputStream) {
     return new SaveSessionServletOutputStream(servletOutputStream);
   }
 
@@ -266,59 +265,67 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
       return delegate.equals(obj);
     }
 
-    public void print(boolean b) throws IOException {
-      super.print(b);
-    }
-
+    @Override
     public void print(char c) throws IOException {
       print(String.valueOf(c));
     }
 
+    @Override
     public void print(int i) throws IOException {
       print(String.valueOf(i));
     }
 
+    @Override
     public void print(long l) throws IOException {
       print(String.valueOf(l));
     }
 
+    @Override
     public void print(float f) throws IOException {
       print(String.valueOf(f));
     }
 
+    @Override
     public void print(double d) throws IOException {
       print(String.valueOf(d));
     }
 
+    @Override
     public void println() throws IOException {
       write(CRLF);
     }
 
+    @Override
     public void println(String s) throws IOException {
       print(s);
       println();
     }
 
+    @Override
     public void println(boolean b) throws IOException {
       print(b);
       println();
     }
 
+    @Override
     public void println(char c) throws IOException {
       print(c);
       println();
     }
 
+    @Override
     public void println(int i) throws IOException {
       print(i);
       println();
     }
 
+    @Override
     public void println(long l) throws IOException {
       print(l);
       println();
     }
 
+    @Override
     public void println(float f) throws IOException {
       print(f);
       println();
@@ -446,42 +453,52 @@ class HttpResponseWrapper extends HttpServletResponseWrapper implements Response
       delegate.write(s, off, len);
     }
 
+    @Override
     public void write(final String s) {
       write(s, 0, s.length());
     }
 
+    @Override
     public void print(final boolean b) {
       write(Boolean.toString(b));
     }
 
+    @Override
     public void print(final char c) {
       write(Character.toString(c));
     }
 
+    @Override
     public void print(final int i) {
       write(Integer.toString(i));
     }
 
+    @Override
     public void print(final long l) {
       write(Long.toString(l));
     }
 
+    @Override
     public void print(final float f) {
       write(Float.toString(f));
     }
 
+    @Override
     public void print(final double d) {
       write(Double.toString(d));
     }
 
+    @Override
     public void print(final char[] s) {
       write(s);
     }
 
+    @Override
     public void print(final String s) {
       write(s == null ? "null" : s);
     }
 
+    @Override
     public void print(final Object obj) {
       write(obj == null ? "null" : obj.toString());
     }

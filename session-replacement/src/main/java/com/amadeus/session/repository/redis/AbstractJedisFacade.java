@@ -50,24 +50,28 @@ abstract class AbstractJedisFacade implements RedisFacade {
     if (version == null) {
       String info = info("server");
       if (info != null) {
-        int start = info.indexOf(REDIS_VERSION_LABEL);
-        if (start >= 0) {
-          start += REDIS_VERSION_LABEL.length();
-          // In RESP different parts of the protocol are always terminated with
-          // "\r\n" (CRLF).
-          int end = info.indexOf(CRLF, start);
-          if (end < 0) {
-            end = info.length();
-          }
-          String[] coordiantes = info.substring(start, end).split("\\.");
-          version = new ArrayList<>();
-          for (String coordinate : coordiantes) {
-            version.add(Integer.parseInt(coordinate));
-          }
-        }
+        parseVersion(info);
       }
       if (version == null) {
         version = Collections.singletonList(0);
+      }
+    }
+  }
+
+  private void parseVersion(String info) {
+    int start = info.indexOf(REDIS_VERSION_LABEL);
+    if (start >= 0) {
+      start += REDIS_VERSION_LABEL.length();
+      // In RESP different parts of the protocol are always terminated with
+      // "\r\n" (CRLF).
+      int end = info.indexOf(CRLF, start);
+      if (end < 0) {
+        end = info.length();
+      }
+      String[] coordiantes = info.substring(start, end).split("\\.");
+      version = new ArrayList<>();
+      for (String coordinate : coordiantes) {
+        version.add(Integer.parseInt(coordinate));
       }
     }
   }

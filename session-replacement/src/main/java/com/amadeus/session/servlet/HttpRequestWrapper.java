@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.amadeus.session.RequestWithSession;
 import com.amadeus.session.SessionManager;
+import com.amadeus.session.SessionTracking;
 
 /**
  * Wrapper for {@link HttpServletRequest} that implements storing of sessions in
@@ -30,6 +31,7 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
   private boolean propagated;
   private boolean idRetrieved;
   private String retrievedId;
+  private boolean isRetrievedIdFromCookie;
   private boolean repositoryChecked;
 
   /**
@@ -88,6 +90,7 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
 
   /**
    * Sets response associated to this request
+   *
    * @param response
    */
   public void setResponse(HttpResponseWrapper response) {
@@ -96,6 +99,7 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
 
   /**
    * Callback to propagate session to response.
+   *
    * @return returns <code>true</code> if session was stored
    */
   boolean propagateSession() {
@@ -132,9 +136,9 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
     }
   }
 
-  private String getEmbededdSessionId() {
+  private SessionTracking.IdAndSource getEmbededdSessionId() {
     if (embeddedRequest != null && embeddedRequest.session != null && embeddedRequest.session.isValid()) {
-      return embeddedRequest.session.getId();
+      return new SessionTracking.IdAndSource(embeddedRequest.session.getId(), embeddedRequest.isRetrievedIdFromCookie);
     }
     return null;
   }
@@ -202,6 +206,7 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
    * Get wrapped request if it is an {@link HttpRequestWrapper}.
    * Returns <code>null</code> if wrapped wrapped request was
    * not HttpRequestWrapper.
+   *
    * @return
    */
   public HttpRequestWrapper getEmbeddedRequest() {
@@ -210,6 +215,7 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
 
   /**
    * Returns <code>true</code> if session should be propagated on create.
+   *
    * @return
    */
   public boolean isPropagateOnCreate() {
@@ -220,10 +226,11 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
    * Controls if session should be propagated on create. Session should be
    * propagated on request if {@link #propagateSession()} method was called
    * (i.e. if there an event occurred that requires session propagation).
+   *
    * @param propagate
    */
   public void setPropagateOnCreate(boolean propagate) {
-    this.propagateOnCreate = propagate;
+    propagateOnCreate = propagate;
     if (embeddedRequest != null) {
       embeddedRequest.setPropagateOnCreate(true);
     }
@@ -235,17 +242,45 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
   }
 
   @Override
-  public void setRequestedSessionId(String id) {
+  public void setRequestedSessionId(String id, boolean isFromCookie) {
     idRetrieved = true;
     retrievedId = id;
+    isRetrievedIdFromCookie = isFromCookie;
   }
 
   @Override
   public String getRequestedSessionId() {
+    retrieveSessionId();
+    return retrievedId;
+  }
+
+  private void retrieveSessionId() {
     if (!idRetrieved) {
       getSession(false);
     }
-    return retrievedId;
+  }
+
+  @Override
+  public boolean isRequestedSessionIdFromCookie() {
+    retrieveSessionId();
+    return retrievedId != null && isRetrievedIdFromCookie;
+  }
+
+  @Override
+  public boolean isRequestedSessionIdFromURL() {
+    retrieveSessionId();
+    return retrievedId != null && !isRetrievedIdFromCookie;
+  }
+
+  @Override
+  public boolean isRequestedSessionIdFromUrl() {
+    return isRequestedSessionIdFromURL();
+  }
+
+  @Override
+  public boolean isRequestedSessionIdValid() {
+    retrieveSessionId();
+    return retrievedId != null && isRepositoryChecked();
   }
 
   @Override

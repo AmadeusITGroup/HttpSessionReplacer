@@ -63,14 +63,14 @@ public class TestCookieSessionTracking {
     UUID uuidUrl = UUID.randomUUID();
     when(hsr.getRequestURI()).thenReturn("/url;somesession=" + uuidUrl);
     when(hsr.getCookies()).thenReturn(new Cookie[] { new Cookie("somesession", uuid.toString()) });
-    assertEquals(uuid.toString(), cookieSessionTracking.retrieveId(request));
+    assertEquals(uuid.toString(), cookieSessionTracking.retrieveId(request).id);
     when(hsr.getCookies()).thenReturn(new Cookie[] { new Cookie("notused", uuid.toString()) });
     assertNull(cookieSessionTracking.retrieveId(request));
     when(hsr.getCookies()).thenReturn(new Cookie[] {
         new Cookie("othercookie", "ABC"),
         new Cookie("somesession", uuid.toString())
         });
-    assertEquals(uuid.toString(), cookieSessionTracking.retrieveId(request));
+    assertEquals(uuid.toString(), cookieSessionTracking.retrieveId(request).id);
 
     String sessionIdWithTimestamp = uuid.toString() + BaseSessionTracking.SESSION_ID_TIMESTAMP_SEPARATOR + System.currentTimeMillis();
     String invalidSessionIdWithTimestamp = uuid.toString() + "-abcdefgh" + BaseSessionTracking.SESSION_ID_TIMESTAMP_SEPARATOR + System.currentTimeMillis();
@@ -79,15 +79,15 @@ public class TestCookieSessionTracking {
     when(hsr.getCookies()).thenReturn(new Cookie[] { new Cookie("somesession", sessionIdWithTimestamp)});
     assertNull(cookieSessionTracking.retrieveId(request));
     when(hsr.getCookies()).thenReturn(new Cookie[] { new Cookie("somesession", sessionIdWithoutTimestamp)});
-    assertEquals(sessionIdWithoutTimestamp, cookieSessionTracking.retrieveId(request));
+    assertEquals(sessionIdWithoutTimestamp, cookieSessionTracking.retrieveId(request).id);
 
     sc.setTimestampSufix(true);
     cookieSessionTracking.configure(sc);
 
     when(hsr.getCookies()).thenReturn(new Cookie[] { new Cookie("somesession", sessionIdWithTimestamp)});
-    assertEquals(sessionIdWithTimestamp, cookieSessionTracking.retrieveId(request));
+    assertEquals(sessionIdWithTimestamp, cookieSessionTracking.retrieveId(request).id);
     when(hsr.getCookies()).thenReturn(new Cookie[] { new Cookie("somesession", sessionIdWithoutTimestamp)});
-    assertEquals(sessionIdWithoutTimestamp, cookieSessionTracking.retrieveId(request));
+    assertEquals(sessionIdWithoutTimestamp, cookieSessionTracking.retrieveId(request).id);
     when(hsr.getCookies()).thenReturn(new Cookie[] { new Cookie("somesession", invalidSessionIdWithTimestamp)});
     assertNull(cookieSessionTracking.retrieveId(request));
   }

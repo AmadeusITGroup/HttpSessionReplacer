@@ -6,9 +6,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -265,10 +264,10 @@ public class TestRedisSessionRepository {
     }
   }
 
-  public static Matcher<byte[]> matchesArray(final byte[] arr) {
+  public static ArgumentMatcher<byte[]> matchesArray(final byte[] arr) {
     return new ArgumentMatcher<byte[]>() {
       @Override
-      public boolean matches(Object arg) {
+      public boolean matches(byte[] arg) {
         if (arg instanceof byte[]) {
           return Arrays.equals(arr, (byte[]) arg);
         }

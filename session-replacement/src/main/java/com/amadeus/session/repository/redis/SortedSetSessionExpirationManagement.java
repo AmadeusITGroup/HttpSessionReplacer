@@ -80,10 +80,8 @@ class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
 
   @Override
   public void sessionDeleted(SessionData session) {
-    if (sticky) {
-      if (session.getPreviousOwner() != null && !owner.equals(session.getPreviousOwner())) {
-        redis.zrem(sessionToExpireKey, encode(session.getId() + ":" + session.getPreviousOwner()));
-      }
+    if (sticky && session.getPreviousOwner() != null && !owner.equals(session.getPreviousOwner())) {
+      redis.zrem(sessionToExpireKey, encode(session.getId() + ":" + session.getPreviousOwner()));
     } 
     redis.zrem(sessionToExpireKey, sortedSetElem(session.getId()));
   }
@@ -181,29 +179,32 @@ class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
         }
       }      
     }
-  }
 
-  /**
-   * Extracts session id from byte array stripping owner node if it
-   * was present.
-   * 
-   * @param session
-   *          byte array containing session
-   * @return session id as string
-   */
-  private String extractSessionId(byte[] session) {
-    if (sticky) {
-      for (int i=0; i<session.length; i++) {
-        if (session[i] == ':') {
-          return encode(session, 0, i);
+    /**
+     * Extracts session id from byte array stripping owner node if it
+     * was present.
+     * 
+     * @param session
+     *          byte array containing session
+     * @return session id as string
+     */
+    private String extractSessionId(byte[] session) {
+      if (sticky) {
+        for (int i=0; i<session.length; i++) {
+          if (session[i] == ':') {
+            return encode(session, 0, i);
+          }
         }
+        if (logger.isWarnEnabled()) {
+          logger.warn("Unable to retrieve session id from expire key {}", encode(session));
+        }
+        // Missing session owner, assume whole array is session id
       }
-      logger.warn("Unable to retrieve session id from expire key {}", encode(session));
-      // Missing session owner, assume whole array is session id
+      return encode(session);    
     }
-    return encode(session);
     
   }
+
   /**
    * Checks if passed message belongs to this node.
    *
