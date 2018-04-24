@@ -220,7 +220,7 @@ public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
    */
   @Override
   public void uncaughtException(Thread t, Throwable e) {
-    logger.error("Uncaught exeception occured while execting thread " + t, e);
+    logger.error("Uncaught exeception occured while execting thread ", t, e);
     if (e instanceof Error) {
       throw (Error)e;
     }

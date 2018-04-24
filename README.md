@@ -1,6 +1,6 @@
 # HTTP Session Replacement
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amadeus/session/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/com.amadeus/session)
+[![Maven Central](https://img.shields.io/maven-central/v/com.amadeus/session.svg?style=flat-square)](https://search.maven.org/#search%7Cga%7C1%7Ccom.amadeus.session)
 [![Javadocs](http://www.javadoc.io/badge/com.amadeus/session-replacement.svg?style=flat-square)](http://www.javadoc.io/doc/com.amadeus/session-replacement)
 [![Travis](https://img.shields.io/travis/AmadeusITGroup/HttpSessionReplacer.svg?style=flat-square)](http://travis-ci.org/AmadeusITGroup/HttpSessionReplacer)
 [![license](https://img.shields.io/github/license/AmadeusITGroup/HttpSessionReplacer.svg?style=flat-square)](LICENSE)
@@ -255,7 +255,17 @@ The cookie name is one of the following by descending order of priority:
 
 In case of HTTPS requests, cookies can be marked as secure.
 This can be configured by setting the `com.amadeus.session.cookie.secure`
-initialization parameter or system property to `true`.
+initialization parameter or system property to `true`.  
+To apply this behavior only when the request is over secured channel
+(i.e. HTTPS), set `com.amadeus.session.cookie.secure.on.secured.request`
+to `true`. In this case if request comes over insecure channel (i.e. HTTP),
+the cookie will not be marked as secure. Reason for this behavior is that
+application servers are often behind a load balancer or a TLS offloader 
+which calls them via HTTP, so even though the exchange with client is over HTTPS, application server is not aware of it. In those cases we want to force cookie to
+be marked as secure. When application server is either directly exposed
+to secured requests or are aware if request is secured via headers injected
+by TLS offloaders, this additional property allows using that capability to
+select whether cookie should be marked or not.
 
 For Servlet 3.x and later containers, cookies can be marked as HTTP only.
 This can be configured by setting `com.amadeus.session.cookie.httpOnly`

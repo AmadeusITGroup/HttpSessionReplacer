@@ -4,7 +4,7 @@ import org.junit.Assume;
 import org.junit.Before;
 
 @SuppressWarnings("javadoc")
-public class AbstractITSession {
+public abstract class AbstractITSession {
 
   @Before
   public void shouldTestsRun() {

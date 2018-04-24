@@ -58,6 +58,13 @@ public class TestWebXmlParser {
       + "<session-config><cookie-config><secure>false</secure><http-only>true</http-only><path>/test</path></cookie-config>"
       + "<tracking-mode>COOKIE</tracking-mode></session-config>"
       + "</web-app>";
+  static final String withMultipleTrackingModes = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
+      + "<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" "
+      + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+      + "version=\"3.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd\">"
+      + "<session-config><cookie-config><secure>false</secure><http-only>true</http-only><path>/test</path></cookie-config>"
+      + "<tracking-mode>COOKIE</tracking-mode><tracking-mode>URL</tracking-mode></session-config>"
+      + "</web-app>";
 
   @Test
   public void testExternalEntity() throws IOException {
@@ -160,7 +167,19 @@ public class TestWebXmlParser {
     try (ByteArrayInputStream bais = new ByteArrayInputStream(withInvalidTrackingMode.getBytes("UTF-8"))) {
       SessionConfiguration sessionConfiguration = new SessionConfiguration();
       WebXmlParser.parseStream(sessionConfiguration, bais);
-      assertEquals("DEFAULT", sessionConfiguration.getSessionTracking());
+      assertEquals(1, sessionConfiguration.getSessionTracking().length);
+      assertEquals("DEFAULT", sessionConfiguration.getSessionTracking()[0]);
+    }
+  }
+
+  @Test
+  public void testMultipleTrackingModes() throws IOException {
+    try (ByteArrayInputStream bais = new ByteArrayInputStream(withMultipleTrackingModes.getBytes("UTF-8"))) {
+      SessionConfiguration sessionConfiguration = new SessionConfiguration();
+      WebXmlParser.parseStream(sessionConfiguration, bais);
+      assertEquals(2, sessionConfiguration.getSessionTracking().length);
+      assertEquals("COOKIE", sessionConfiguration.getSessionTracking()[0]);
+      assertEquals("URL", sessionConfiguration.getSessionTracking()[1]);
     }
   }
 
@@ -169,7 +188,7 @@ public class TestWebXmlParser {
     try (ByteArrayInputStream bais = new ByteArrayInputStream(withSessionConfig.getBytes("UTF-8"))) {
       SessionConfiguration sessionConfiguration = new SessionConfiguration();
       WebXmlParser.parseStream(sessionConfiguration, bais);
-      assertEquals("COOKIE", sessionConfiguration.getSessionTracking());
+      assertEquals("COOKIE", sessionConfiguration.getSessionTracking()[0]);
       assertEquals("true", sessionConfiguration.getAttribute(CookieSessionTracking.COOKIE_HTTP_ONLY_PARAMETER, null));
       assertEquals("false", sessionConfiguration.getAttribute(CookieSessionTracking.SECURE_COOKIE_PARAMETER, null));
       assertEquals("/test", sessionConfiguration.getAttribute(CookieSessionTracking.COOKIE_CONTEXT_PATH_PARAMETER, null));
@@ -181,7 +200,8 @@ public class TestWebXmlParser {
     try (ByteArrayInputStream bais = new ByteArrayInputStream(withUrlTrackingMode.getBytes("UTF-8"))) {
       SessionConfiguration sessionConfiguration = new SessionConfiguration();
       WebXmlParser.parseStream(sessionConfiguration, bais);
-      assertEquals("URL", sessionConfiguration.getSessionTracking());
+      assertEquals(1, sessionConfiguration.getSessionTracking().length);
+      assertEquals("URL", sessionConfiguration.getSessionTracking()[0]);
     }
   }
 
@@ -192,7 +212,8 @@ public class TestWebXmlParser {
       ServletContext context = mock(ServletContext.class);
       when(context.getResourceAsStream("/WEB-INF/web.xml")).thenReturn(bais);
       WebXmlParser.parseWebXml(sessionConfiguration, context);
-      assertEquals("URL", sessionConfiguration.getSessionTracking());
+      assertEquals(1, sessionConfiguration.getSessionTracking().length);
+      assertEquals("URL", sessionConfiguration.getSessionTracking()[0]);
     }
   }
 }

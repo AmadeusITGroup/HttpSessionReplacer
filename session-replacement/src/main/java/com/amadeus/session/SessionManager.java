@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.pool2.TrackedUse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -251,27 +252,35 @@ public class SessionManager implements Closeable {
    * @param create
    *          <code>true</code> if session should be created
    * @param forceId
-   *          forces usage of this session id.
+   *          forces usage of this session id
    *
    * @return existing or new session
    */
-  public RepositoryBackedSession getSession(RequestWithSession request, boolean create, String forceId) {
-    String id = retrieveId(request, forceId);
-    putIdInLoggingMdc(id);
-    request.setRequestedSessionId(id);
+  public RepositoryBackedSession getSession(RequestWithSession request, boolean create, SessionTracking.IdAndSource forceId) {
+    SessionTracking.IdAndSource id = retrieveId(request, forceId);
     RepositoryBackedSession session = null;
-    if (id != null) {
-      session = fetchSession(id, true);
+    if (id != null && id.id != null) {
+      putIdInLoggingMdc(id.id);
+      request.setRequestedSessionId(id.id, id.cookie);
+      session = fetchSession(id.id, true);
       if (session == null && !request.isRepositoryChecked()) {
         logger.info("Session with sessionId: '{}' but it was not in repository!", id);
         request.repositoryChecked();
       }
+    } else {
+      // Session is null, assume default tracking 
+      putIdInLoggingMdc(null);
+      request.setRequestedSessionId(null, tracking.isCookieTracking());      
     }
     if (session == null && create) {
-      id = forceId != null ? forceId : tracking.newId();
-      putIdInLoggingMdc(id);
+      if (forceId == null) {
+        id = new SessionTracking.IdAndSource(tracking.newId(), tracking.isCookieTracking());
+      } else {
+        id = forceId;
+      }
+      putIdInLoggingMdc(id.id);
       logger.info("Creating new session with sessionId: '{}'", id);
-      session = newSession(id);
+      session = newSession(id.id);
     }
     if (session != null) {
       session.checkUsedAndLock();
@@ -306,12 +315,12 @@ public class SessionManager implements Closeable {
    *          it provided, this will be used as id
    * @return the session id or <code>null</code>
    */
-  private String retrieveId(RequestWithSession request, String forceId) {
+  private SessionTracking.IdAndSource retrieveId(RequestWithSession request, SessionTracking.IdAndSource forceId) {
     if (forceId != null) {
       return forceId;
     }
     if (request.isIdRetrieved()) {
-      return request.getRequestedSessionId();
+      return new SessionTracking.IdAndSource(request.getRequestedSessionId(), request.isRequestedSessionIdFromCookie());
     }
     return tracking.retrieveId(request);
   }
