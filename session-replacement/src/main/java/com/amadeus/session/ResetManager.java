@@ -8,45 +8,49 @@ import com.codahale.metrics.MetricRegistry;
 
 public class ResetManager {
   private final MetricRegistry monitoring;
-  private JmxReporter reporter; 
-  private final ErrorTracker errorTracker ;
-  
-   
-  private final Meter create_metrics ;
-  private final Meter notConnected_metrics ; 
-  private final Meter connected_metrics ;
-  
-  
+
+  private JmxReporter reporter;
+
+  private final ErrorTracker errorTracker;
+
+  private final Meter create_meter;
+
+  private final Meter notConnected_meter;
+
+  private final Meter connected_meter;
+
   private final SessionConfiguration configuration;
+
   protected final ExecutorFacade executors;
 
-  public ResetManager(ExecutorFacade executors , SessionConfiguration configuration ) {
+  final String SESSIONS_METRIC_MANAGER_PREFIX = "com.amadeus.session.manager";
+
+  final String RESETMANAGER_CREATED_METRIC = name(SESSIONS_METRIC_MANAGER_PREFIX, "initialized");
+
+  final String RESETMANAGER_NOTCONNECTED_METRIC = name(SESSIONS_METRIC_MANAGER_PREFIX, "notConnected");
+
+  final String RESETMANAGER_CONNECTED_METRIC = name(SESSIONS_METRIC_MANAGER_PREFIX, "connected");
+
+  public ResetManager(ExecutorFacade executors, SessionConfiguration configuration) {
     this.executors = executors;
 
-    monitoring = new MetricRegistry ();
-    
-    String SESSIONS_METRIC_MANAGER_PREFIX = "com.amadeus.session.manager";
-    String ResetManager_created_METRIC = name(SESSIONS_METRIC_MANAGER_PREFIX, "initialized");
-    
-    String ResetManager_notConnected_METRIC = name(SESSIONS_METRIC_MANAGER_PREFIX, "notConnected");
-    String ResetManager_Connected_METRIC = name(SESSIONS_METRIC_MANAGER_PREFIX, "connected");
-    
-    this.configuration = configuration;  
-     
-    create_metrics = monitoring.meter(ResetManager_created_METRIC);
-    notConnected_metrics = monitoring.meter(ResetManager_notConnected_METRIC);
-    connected_metrics = monitoring.meter(ResetManager_Connected_METRIC);
-    
-    errorTracker = new ErrorTracker  ( configuration.getTrackerInterval() , configuration.getTrackerLimits() );
-    
+    monitoring = new MetricRegistry();
+
+    this.configuration = configuration;
+
+    create_meter = monitoring.meter(RESETMANAGER_CREATED_METRIC);
+    notConnected_meter = monitoring.meter(RESETMANAGER_NOTCONNECTED_METRIC);
+    connected_meter = monitoring.meter(RESETMANAGER_CONNECTED_METRIC);
+
+    errorTracker = new ErrorTracker(configuration.getTrackerInterval(), configuration.getTrackerLimits());
+
     startMonitoring();
-    
-    create_metrics.mark();
-  }  
-  
+
+    create_meter.mark();
+  }
+
   /**
-   * Starts monitoring this session manager. The method will expose all metrics
-   * through JMX.
+   * Starts monitoring this session manager. The method will expose all metrics through JMX.
    */
   private void startMonitoring() {
     executors.startMetrics(monitoring);
@@ -69,16 +73,15 @@ public class ResetManager {
 
   public void reset() {
     errorTracker.reset();
-    create_metrics.mark();    
+    create_meter.mark();
   }
 
   public void connected() {
-    connected_metrics.mark();        
+    connected_meter.mark();
   }
 
   public void notConnected() {
-    notConnected_metrics.mark();    
+    notConnected_meter.mark();
   }
-  
-  
+
 }

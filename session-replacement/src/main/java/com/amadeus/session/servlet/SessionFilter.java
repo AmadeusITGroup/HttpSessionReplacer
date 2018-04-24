@@ -97,7 +97,7 @@ public class SessionFilter implements Filter {
     		commitRequest(request, originalRequest, servletContext);
     	}    	
     	catch ( Exception e ) {
-    		logger.error("Error into doFilter" );
+    		logger.error("Error into doFilter" , e );
     		if ( e instanceof JedisException || (e.getClass().getName().indexOf("jedis.exceptions") != -1 )) {
         		synchronized (this) {
               
@@ -110,10 +110,8 @@ public class SessionFilter implements Filter {
                   if ( errorTracker.reachLimits() ) {
                     if (sessionManagercurrent != null) {
                       sessionManagercurrent.reset();
-                    }       
-                    logger.warn("Reinitialization of the filter Begin" );
-                    initSessionManagementReset(servletContext,true);
-                    logger.warn("Reinitialization of the filter End" );
+                    }                           
+                    initSessionManagementReset(servletContext,true);                    
                   } else {
                     logger.warn("Error into redis but the limits is not reach:" + errorTracker.size() );
                   }

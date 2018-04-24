@@ -26,6 +26,8 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 
+import redis.clients.jedis.exceptions.JedisException;
+
 /**
  * Main class for implementing Redis repository logic.
  */
@@ -33,8 +35,7 @@ public class RedisSessionRepository implements SessionRepository {
   private static final Logger logger = LoggerFactory.getLogger(RedisSessionRepository.class);
 
   /**
-   * The default prefix for each key and channel in Redis used by Session
-   * management
+   * The default prefix for each key and channel in Redis used by Session management
    */
   static final String DEFAULT_SESSION_PREFIX = "com.amadeus.session:";
 
@@ -42,23 +43,27 @@ public class RedisSessionRepository implements SessionRepository {
    * Meta attribute for timestamp (Unix time) of last access to session.
    */
   static final byte[] LAST_ACCESSED = encode("#:lastAccessed");
+
   /**
    * Meta attribute for maximum inactive interval of the session (in seconds).
    */
   static final byte[] MAX_INACTIVE_INTERVAL = encode("#:maxInactiveInterval");
+
   /**
    * Meta attribute for timestamp (Unix time) of the session creation.
    */
   static final byte[] CREATION_TIME = encode("#:creationTime");
+
   /**
-   * Meta attribute that contains mark if the session is invalid (being deleted
-   * or marked as invalid via API).
+   * Meta attribute that contains mark if the session is invalid (being deleted or marked as invalid via API).
    */
   static final byte[] INVALID_SESSION = encode("#:invalidSession");
+
   /**
    * Meta attribute for the node owning the session.
    */
   static final byte[] OWNER_NODE = encode("#:owner");
+
   /**
    * Representation of true value
    */
@@ -70,8 +75,11 @@ public class RedisSessionRepository implements SessionRepository {
   private static final byte[] INTERNAL_PREFIX = new byte[] { '#', ':' };
 
   private static final int CREATION_TIME_INDEX = 2;
+
   private static final int INVALID_SESSION_INDEX = 3;
+
   private static final int OWNER_NODE_INDEX = 4;
+
   private static final RedisFacade.ResponseFacade<String> OK_RESULT = new RedisFacade.ResponseFacade<String>() {
     @Override
     public String get() {
@@ -80,21 +88,30 @@ public class RedisSessionRepository implements SessionRepository {
   };
 
   /**
-   * Number of bits in byte. Used to allocate byte buffers to store Long and
-   * Integer values.
+   * Number of bits in byte. Used to allocate byte buffers to store Long and Integer values.
    */
   private static final int BITS_IN_BYTE = 8;
 
   private final String owner;
+
   private final byte[] ownerByteArray;
+
   private final String keyPrefix;
+
   private final byte[] keyPrefixByteArray;
+
   private byte[] redirectionsChannel;
+
   private final RedisFacade redis;
+
   final RedisExpirationStrategy expirationManager;
+
   private SessionManager sessionManager;
+
   private Meter failoverMetrics;
+
   private boolean sticky;
+
   private final String namespace;
 
   public RedisSessionRepository(RedisFacade redis, String namespace, String owner, ExpirationStrategy strategy,
@@ -120,8 +137,7 @@ public class RedisSessionRepository implements SessionRepository {
   }
 
   /**
-   * This method starts a separate thread that listens to key expirations
-   * events.
+   * This method starts a separate thread that listens to key expirations events.
    *
    * @param sessionManager
    */
@@ -147,12 +163,10 @@ public class RedisSessionRepository implements SessionRepository {
   }
 
   /**
-   * This method retrieves session data from repository. The data retrieved from
-   * repository contains meta attributes such as: last accessed time, creation
-   * time, maximum inactive interval, flag if session is invalid (session
-   * becomes invalid when it is deleted or marked invalid), and if session
-   * stickiness is active, previous owner node id. All meta attributes start
-   * with following characters <code>#:</code>
+   * This method retrieves session data from repository. The data retrieved from repository contains meta attributes
+   * such as: last accessed time, creation time, maximum inactive interval, flag if session is invalid (session becomes
+   * invalid when it is deleted or marked invalid), and if session stickiness is active, previous owner node id. All
+   * meta attributes start with following characters <code>#:</code>
    *
    * @param id
    *          session id
@@ -190,8 +204,7 @@ public class RedisSessionRepository implements SessionRepository {
   }
 
   /**
-   * Verifies if values retrieved from redis are consistent. Basically just
-   * sanity checks.
+   * Verifies if values retrieved from redis are consistent. Basically just sanity checks.
    *
    * @param sessionId
    * @param values
@@ -264,18 +277,19 @@ public class RedisSessionRepository implements SessionRepository {
   }
 
   /**
-   * This class implements transaction that is executed at session commit time.
-   * The transaction will store added/modified session attribute keys using
-   * single HMSET redis command and it will also delete removed session
-   * attribute keys using HDEL command. It uses underlying {@link RedisFacade}
-   * support for transactions on the session key (redis MULTI command), and
-   * executes those those commands in atomic way. The meta-attribute for
-   * transactions are also updated.
+   * This class implements transaction that is executed at session commit time. The transaction will store
+   * added/modified session attribute keys using single HMSET redis command and it will also delete removed session
+   * attribute keys using HDEL command. It uses underlying {@link RedisFacade} support for transactions on the session
+   * key (redis MULTI command), and executes those those commands in atomic way. The meta-attribute for transactions are
+   * also updated.
    */
   class RedisSessionTransaction implements SessionRepository.CommitTransaction, RedisFacade.TransactionRunner<String> {
     private Map<byte[], byte[]> attributes = new HashMap<>();
+
     private List<byte[]> toRemove = new ArrayList<>();
+
     private byte[] key;
+
     private SessionData session;
 
     RedisSessionTransaction(SessionData session) {
@@ -294,9 +308,8 @@ public class RedisSessionRepository implements SessionRepository {
     }
 
     /**
-     * During commit, we add meta/attributes. See
-     * {@link RedisSessionRepository#getSessionData(String)}. for list of meta
-     * attributes.
+     * During commit, we add meta/attributes. See {@link RedisSessionRepository#getSessionData(String)}. for list of
+     * meta attributes.
      */
     @Override
     public void commit() {
@@ -435,8 +448,7 @@ public class RedisSessionRepository implements SessionRepository {
   }
 
   /**
-   * The method stores session metadata in redis and marks session as accessed
-   * (resets session expire instant).
+   * The method stores session metadata in redis and marks session as accessed (resets session expire instant).
    */
   @Override
   public void storeSessionData(SessionData sessionData) {
@@ -484,12 +496,12 @@ public class RedisSessionRepository implements SessionRepository {
   public void close() {
     redis.close();
     expirationManager.close();
-    
+
   }
 
   @Override
   public void reset() {
-    try {      
+    try {
       redis.close();
     } catch (Exception e) {
       logger.warn("redis reset generated problems:", e);
@@ -502,8 +514,7 @@ public class RedisSessionRepository implements SessionRepository {
   }
 
   /**
-   * This method extracts session id from session key used in Redis. Session
-   * keys is located between braces ({}).
+   * This method extracts session id from session key used in Redis. Session keys is located between braces ({}).
    *
    * @param body
    *          string containing session key
@@ -530,8 +541,7 @@ public class RedisSessionRepository implements SessionRepository {
   }
 
   /**
-   * Changes session id. This renames key in redis and publishes the redis event
-   * if other nodes need to be notified.
+   * Changes session id. This renames key in redis and publishes the redis event if other nodes need to be notified.
    *
    * @param sessionData
    */
@@ -547,12 +557,9 @@ public class RedisSessionRepository implements SessionRepository {
     try {
       redis.info("server");
       return true;
-    }
-    catch ( Exception e ) {
+    } catch (JedisException e) {
       return false;
-    } 
+    }
   }
-  
-  
-  
+
 }
