@@ -484,6 +484,17 @@ public class RedisSessionRepository implements SessionRepository {
   public void close() {
     redis.close();
     expirationManager.close();
+    
+  }
+
+  @Override
+  public void reset() {
+    try {      
+      redis.close();
+    } catch (Exception e) {
+      logger.warn("redis reset generated problems:", e);
+    }
+    expirationManager.reset();
   }
 
   RedisFacade getRedis() {
@@ -530,4 +541,18 @@ public class RedisSessionRepository implements SessionRepository {
     redis.publish(redirectionsChannel, encode(sessionData.getOldSessionId() + ':' + sessionData.getId()));
     expirationManager.sessionIdChange(sessionData);
   }
+
+  @Override
+  public boolean isConnected() {
+    try {
+      redis.info("server");
+      return true;
+    }
+    catch ( Exception e ) {
+      return false;
+    } 
+  }
+  
+  
+  
 }

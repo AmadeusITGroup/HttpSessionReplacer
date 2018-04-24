@@ -54,7 +54,10 @@ public class SessionManager implements Closeable {
   private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
 
   static final String SESSIONS_METRIC_PREFIX = "com.amadeus.session";
+  
 
+  
+  
   private static final String COMMIT_TIMER_METRIC = name(SESSIONS_METRIC_PREFIX, "timer", "commit");
   private static final String FETCH_TIMER_METRIC = name(SESSIONS_METRIC_PREFIX, "timer", "fetch");
   private static final String CREATED_SESSIONS_METRIC = name(SESSIONS_METRIC_PREFIX, "created");
@@ -114,7 +117,7 @@ public class SessionManager implements Closeable {
    *          the class loader to use
    */
   public SessionManager(ExecutorFacade executors, SessionFactory factory, SessionRepository repository,
-      SessionTracking tracking, SessionNotifier notifier, SessionConfiguration configuration, ClassLoader classLoader) {
+      SessionTracking tracking, SessionNotifier notifier, SessionConfiguration configuration, ClassLoader classLoader ) {
 
     this.repository = repository;
     this.tracking = tracking;
@@ -125,6 +128,7 @@ public class SessionManager implements Closeable {
     this.classLoader = classLoader;
 
     monitoring = new MetricRegistry();
+    
     createdSessions = monitoring.meter(CREATED_SESSIONS_METRIC);
     deletedSessions = monitoring.meter(DELETED_SESSIONS_METRIC);
     retrievedSessions = monitoring.meter(RETRIEVED_SESSIONS_METRIC);
@@ -133,7 +137,7 @@ public class SessionManager implements Closeable {
     invalidationExpiryErrors = monitoring.meter(INVALIDATION_ON_EXPIRY_ERRORS_METRIC);
     commitTimer = monitoring.timer(COMMIT_TIMER_METRIC);
     fetchTimer = monitoring.timer(FETCH_TIMER_METRIC);
-
+    
     serializerDeserializer = configuration.isUsingEncryption() ?
         new EncryptingSerializerDeserializer() :
         new JdkSerializerDeserializer();
@@ -561,6 +565,21 @@ public class SessionManager implements Closeable {
     return tracking.encodeUrl(request, url);
   }
 
+ 
+  
+  /**
+   * Called to shutdown the session manager and perform needed cleanup.
+   */
+  
+  public void reset() {
+	  if (reporter != null) {
+		  reporter.stop();
+		  reporter.close();
+	  }
+	  
+	  repository.reset();	  
+	  executors.shutdown();
+  }  
   /**
    * Called to shutdown the session manager and perform needed cleanup.
    */
@@ -628,4 +647,9 @@ public class SessionManager implements Closeable {
     markSessionDeletion( sessionData.getId() );
     getRepository().remove(sessionData);
   }
+  
+  public boolean isConnected(){
+    return this.repository.isConnected();
+  }
+  
 }

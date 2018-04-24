@@ -140,6 +140,11 @@ public interface SessionRepository extends Closeable {
   Collection<String> getOwnedSessionIds();
 
   /**
+   * Called to reset the repository and release resources.
+   */
+  public void reset() ;
+  
+  /**
    * Called to shutdown the repository and release resources.
    */
   @Override
@@ -210,6 +215,11 @@ public interface SessionRepository extends Closeable {
      *         data being distributed to remote store.
      */
     boolean isDistributing();
+    
+   
+    
   }
+
+  boolean isConnected();
 
 }

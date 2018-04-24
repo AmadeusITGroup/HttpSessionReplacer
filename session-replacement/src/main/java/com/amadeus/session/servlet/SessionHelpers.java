@@ -1,7 +1,9 @@
 package com.amadeus.session.servlet;
 
+import static com.codahale.metrics.MetricRegistry.name;
 import static java.lang.invoke.MethodType.methodType;
 
+import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -26,7 +28,9 @@ import javax.servlet.http.HttpSessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amadeus.session.ErrorTracker;
 import com.amadeus.session.ExecutorFacade;
+import com.amadeus.session.ResetManager;
 import com.amadeus.session.SessionConfiguration;
 import com.amadeus.session.SessionFactory;
 import com.amadeus.session.SessionManager;
@@ -35,6 +39,11 @@ import com.amadeus.session.SessionRepository;
 import com.amadeus.session.SessionRepositoryFactory;
 import com.amadeus.session.SessionTracking;
 import com.amadeus.session.repository.inmemory.InMemoryRepository;
+import com.codahale.metrics.JmxReporter;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+
+import redis.clients.jedis.exceptions.JedisNoReachableClusterNodeException;
 
 /**
  * This class contains various methods that are called either from session
@@ -141,15 +150,48 @@ public final class SessionHelpers {
    * @return list of method handles for publicly accessible methods
    *
    */
-  public MethodHandle[] initSessionManagement(ServletContext servletContext) {
+  public MethodHandle[] initSessionManagement(ServletContext servletContext ) {
+	  return initSessionManagement( servletContext , false );
+  }
+  
+  /**
+   * This method initializes session management for a given
+   * {@link ServletContext}. This method is called from
+   * {@link SessionFilter#init(javax.servlet.FilterConfig)}. The method will
+   * create and configure {@link SessionManager} if needed.
+   *
+   * @param servletContext
+   *          the active servlet context
+   * @param reset
+   *          if true the methods is keep and reset
+   * @return list of method handles for publicly accessible methods
+   *
+   */
+  public MethodHandle[] initSessionManagement(ServletContext servletContext , boolean reset) {
+    
+    ResetManager resetManager = (ResetManager)servletContext.getAttribute(Attributes.ResetManager);
+    if (  resetManager == null ) {
+      SessionConfiguration conf = initConf(servletContext);
+      ExecutorFacade executors = new ExecutorFacade(conf);
+      resetManager = new  ResetManager (executors,conf); 
+      servletContext.setAttribute(Attributes.ResetManager, resetManager);
+    } else {
+      resetManager.reset();
+    }
+    
+    
+    
+    
     MethodHandle[] methods = (MethodHandle[])servletContext.getAttribute(SESSION_HELPER_METHODS);
-    if (methods == null) {
+    if (methods == null || reset ) {
       synchronized (this) {
         methods = prepareMethodCalls(servletContext);
       }
       servletContext.setAttribute(SESSION_HELPERS, this);
       ServletContextDescriptor scd = getDescriptor(servletContext);
-      setupContext(servletContext);
+      if ( !reset ) {
+        setupContext(servletContext);
+      }
       SessionNotifier notifier = new HttpSessionNotifier(scd);
       SessionFactory factory = new HttpSessionFactory(servletContext);
       SessionConfiguration conf = initConf(servletContext);
@@ -157,12 +199,22 @@ public final class SessionHelpers {
       SessionTracking tracking = getTracking(servletContext, conf);
 
       ExecutorFacade executors = new ExecutorFacade(conf);
-
+      
       ClassLoader classLoader = classLoader(servletContext);
       SessionManager sessionManagement = new SessionManager(executors, factory, repository, tracking, notifier, conf,
           classLoader);
       interceptListeners = conf.isInterceptListeners();
       servletContext.setAttribute(Attributes.SESSION_MANAGER, sessionManagement);
+      if ( sessionManagement.isConnected() ) {
+        logger.warn("The connection to redis is ok."); 
+        resetManager.connected();
+      } else {
+        logger.warn("The connection to redis is ko.");
+        resetManager.notConnected();
+      }
+       
+      
+      
     }
     return methods;
   }
@@ -388,8 +440,8 @@ public final class SessionHelpers {
    * @param oldRequest
    *          original request received by filter
    */
-  public void commitRequest(ServletRequest request, ServletRequest oldRequest) {
-    // we are looking for identity below
+  public void commitRequest(ServletRequest request, ServletRequest oldRequest) throws IOException {	
+    // we are looking for identity below  
     if (request != oldRequest && request instanceof HttpRequestWrapper) { // NOSONAR
       HttpRequestWrapper httpRequestWrapper = (HttpRequestWrapper)request;
       try {
@@ -400,6 +452,7 @@ public final class SessionHelpers {
       } catch (Exception e) { // NOSONAR
         // Recover from any exception and log it
         logger.error("An exception occured while commiting the session.", e);
+        throw e;
       } finally {
         request.setAttribute(REQUEST_WRAPPED_ATTRIBUTE, httpRequestWrapper.getEmbeddedRequest());
       }

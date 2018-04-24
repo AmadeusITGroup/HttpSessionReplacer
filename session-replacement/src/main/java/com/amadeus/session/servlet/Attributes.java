@@ -41,6 +41,9 @@ final class Attributes {
    */
   static final String PROVIDERS = "com.amadeus.session.providers";
 
+  static final String ResetManager = "com.amadeus.session.ResetManager";
+  
+  
   // Hide constructor
   private Attributes() {
   }

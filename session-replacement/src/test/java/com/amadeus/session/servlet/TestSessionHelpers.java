@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import java.io.IOException;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
@@ -191,7 +192,7 @@ public class TestSessionHelpers {
   }
 
   @Test
-  public void testCommitRequest() {
+  public void testCommitRequest() throws IOException {
     HttpRequestWrapper request = mock(HttpRequestWrapper.class);
     when(request.getServletContext()).thenReturn(servletContext);
     ServletRequest oldRequest = mock(ServletRequest.class);
@@ -199,7 +200,7 @@ public class TestSessionHelpers {
     verify(request).commit();
   }
   @Test
-  public void testDontCommitNonReWrappedRequest() {
+  public void testDontCommitNonReWrappedRequest() throws IOException {
     HttpRequestWrapper request = mock(HttpRequestWrapper.class);
     when(request.getServletContext()).thenReturn(servletContext);
     SessionHelpersFacade.commitRequest(request, request, null);
@@ -207,7 +208,7 @@ public class TestSessionHelpers {
   }
 
   @Test
-  public void testCommitReWrappedRequest() {
+  public void testCommitReWrappedRequest() throws IOException  {
     HttpRequestWrapper oldRequest = mock(HttpRequestWrapper.class);
     HttpRequestWrapper request = mock(HttpRequestWrapper.class);
     when(request.getServletContext()).thenReturn(servletContext);
@@ -217,7 +218,7 @@ public class TestSessionHelpers {
   }
 
   @Test
-  public void testDontCommitNonWrappped() {
+  public void testDontCommitNonWrappped() throws IOException {
     ServletRequest request = mock(ServletRequest.class);
     when(request.getServletContext()).thenReturn(servletContext);
     HttpRequestWrapper oldRequest = mock(HttpRequestWrapper.class);

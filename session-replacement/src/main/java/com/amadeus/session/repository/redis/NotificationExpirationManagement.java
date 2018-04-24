@@ -524,6 +524,36 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
     }
   }
 
+  public void reset() {
+		if (expirationListener != null) {
+
+			try {
+				expirationListener.close(redis);
+				expirationListener = null;
+			} catch (Exception e) {
+			  //Nothing to do because we make a reset when is down so it generate error for nothing
+			}
+
+		}
+		if (cleanupFuture != null) {
+			try {
+				cleanupFuture.cancel(true);
+			} catch (Exception e) {
+        //Nothing to do because we make a reset when is down so it generate error for nothing
+			}
+			cleanupFuture = null;
+		}
+		if (forceCleanupFuture != null) {
+			try {
+				forceCleanupFuture.cancel(true);
+			} catch (Exception e) {
+        //Nothing to do because we make a reset when is down so it generate error for nothing
+			}
+			forceCleanupFuture = null;
+		}
+	}
+  
+  
   @Override
   public void sessionIdChange(SessionData session) {
     redis.rename(getSessionExpireKey(session.getOldSessionId()), getSessionExpireKey(session.getId()));

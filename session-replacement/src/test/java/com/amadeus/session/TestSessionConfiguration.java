@@ -36,8 +36,30 @@ public class TestSessionConfiguration {
     assertEquals(SessionConfiguration.DEFAULT_REPLICATION_TRIGGER, sc.getReplicationTrigger());
     assertEquals(SessionConfiguration.DEFAULT_SESSION_TIMEOUT_VALUE_NUM, sc.getMaxInactiveInterval());
     assertNull(sc.getNonCacheable());
+    
+    assertEquals(SessionConfiguration.DEFAULT_TRACKER_ERROR_INTERVAL_MILLISECONDS_NUM, sc.getTrackerInterval());
+    assertEquals(SessionConfiguration.DEFAULT_TRACKER_ERROR_LIMITS_NUMBER, sc.getTrackerLimits());
+    
   }
 
+  @Test
+  public void testTrackerInterval() {
+    System.setProperty(SessionConfiguration.TRACKER_ERROR_INTERVAL_MILLISECONDS_KEY, "1");
+    SessionConfiguration sc = new SessionConfiguration();
+    assertEquals(1, sc.getTrackerInterval());
+    System.getProperties().remove(SessionConfiguration.TRACKER_ERROR_INTERVAL_MILLISECONDS_KEY);
+  }
+
+  
+  @Test
+  public void testTrackerLimits() {
+    System.setProperty(SessionConfiguration.TRACKER_ERROR_LIMITS_NUMBER_KEY, "1");
+    SessionConfiguration sc = new SessionConfiguration();
+    assertEquals(1, sc.getTrackerLimits());
+    System.getProperties().remove(SessionConfiguration.TRACKER_ERROR_LIMITS_NUMBER_KEY);
+  }
+  
+  
   @Test
   public void testNonCacheable() {
     System.setProperty(SessionConfiguration.NON_CACHEABLE_ATTRIBUTES, "a,b,c");
@@ -100,6 +122,10 @@ public class TestSessionConfiguration {
     Mockito.when(provider.getAttribute(SessionConfiguration.SESSION_REPLICATION_TRIGGER)).thenReturn("SET");
     Mockito.when(provider.getAttribute(SessionConfiguration.SESSION_ID_NAME)).thenReturn("SOMEID");
     Mockito.when(provider.getAttribute(SessionConfiguration.LOG_MDC_SESSION_NAME)).thenReturn("");
+    Mockito.when(provider.getAttribute(SessionConfiguration.TRACKER_ERROR_INTERVAL_MILLISECONDS_KEY)).thenReturn("5");
+    Mockito.when(provider.getAttribute(SessionConfiguration.TRACKER_ERROR_LIMITS_NUMBER_KEY)).thenReturn("50");
+    
+    
     assertTrue(sc.isDistributable());
     sc.initializeFrom(provider);
     assertFalse(sc.isDistributable());
@@ -108,6 +134,10 @@ public class TestSessionConfiguration {
     assertEquals(ReplicationTrigger.SET, sc.getReplicationTrigger());
     assertEquals("SOMEID", sc.getSessionIdName());
     assertEquals(SessionConfiguration.LOGGING_MDC_DEFAULT_KEY, sc.getLoggingMdcKey());
+    
+    assertEquals(sc.getTrackerInterval(), 5);
+    assertEquals(sc.getTrackerLimits(), 50);    
+    
   }
 
   @Test
