@@ -1,5 +1,6 @@
 package com.amadeus.session.servlet;
 
+import java.io.IOException;
 import java.util.EventListener;
 
 import javax.servlet.Filter;
@@ -81,14 +82,29 @@ public final class SessionHelpersFacade {
    * {@link ServletContext}. This method is called from
    * {@link SessionFilter#init(javax.servlet.FilterConfig)}.
    *
+   * @param reset
+   *          the method can reset or create all from scratch
+   * @param servletContext
+   *          the servlet context where filter is registered
+   *
+   */
+  public static void initSessionManagementReset(ServletContext servletContext,boolean reset) {
+    helpers(servletContext).initSessionManagement(servletContext,reset);
+  }
+
+  /**
+   * This method initializes session management for a given
+   * {@link ServletContext}. This method is called from
+   * {@link SessionFilter#init(javax.servlet.FilterConfig)}.
+   *
    * @param servletContext
    *          the servlet context where filter is registered
    *
    */
   public static void initSessionManagement(ServletContext servletContext) {
-    helpers(servletContext).initSessionManagement(servletContext);
-  }
-
+	    helpers(servletContext).initSessionManagement(servletContext,false);
+	  }
+  
   /**
    * Commits request and stores session in repository. This method is called
    * from the filter. The commit is only done if the filter is the one that
@@ -105,7 +121,7 @@ public final class SessionHelpersFacade {
    * @param filterContext
    *          servlet context of the filter
    */
-  public static void commitRequest(ServletRequest request, ServletRequest oldRequest, ServletContext filterContext) {
+  public static void commitRequest(ServletRequest request, ServletRequest oldRequest, ServletContext filterContext) throws IOException {
     helpers(context(request, filterContext)).commitRequest(request, oldRequest);
   }
 

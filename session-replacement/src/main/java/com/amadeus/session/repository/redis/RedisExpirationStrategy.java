@@ -37,6 +37,11 @@ interface RedisExpirationStrategy {
    * Shuts down expiration management.
    */
   void close();
+  
+  /**
+   * reset expiration management.
+   */
+  void reset();
 
   /**
    * Called to notify expiry mechanism that session id has changed.

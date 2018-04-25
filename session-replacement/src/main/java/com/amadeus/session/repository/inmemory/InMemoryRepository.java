@@ -158,7 +158,7 @@ public class InMemoryRepository implements SessionRepository {
     Transaction(SessionData session) {
       this.session = session;
     }
-
+    
     @Override
     public void addAttribute(String key, Object value) {
       if (value == null) {
@@ -263,6 +263,11 @@ public class InMemoryRepository implements SessionRepository {
   }
 
   @Override
+  public void reset() {
+	  close();
+  }
+
+  @Override
   public void sessionIdChange(SessionData sessionData) {
     String id = id(sessionData.getId());
     String oldId = id(sessionData.getOriginalId());
@@ -277,5 +282,10 @@ public class InMemoryRepository implements SessionRepository {
       sessionAttributeCache.put(id, attributes);
       sessionAttributeCache.remove(oldId);
     }
+  }
+
+  @Override
+  public boolean isConnected() {
+    return true;
   }
 }

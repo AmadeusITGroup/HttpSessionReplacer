@@ -237,6 +237,11 @@ class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
       cleanupFuture = null;
     }
   }
+  
+  @Override
+  public void reset() {
+	  close();
+  }
 
   @Override
   public void sessionIdChange(SessionData sessionData) {

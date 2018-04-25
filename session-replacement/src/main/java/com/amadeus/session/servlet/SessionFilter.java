@@ -2,6 +2,7 @@ package com.amadeus.session.servlet;
 
 import static com.amadeus.session.servlet.SessionHelpersFacade.commitRequest;
 import static com.amadeus.session.servlet.SessionHelpersFacade.initSessionManagement;
+import static com.amadeus.session.servlet.SessionHelpersFacade.initSessionManagementReset;
 import static com.amadeus.session.servlet.SessionHelpersFacade.prepareRequest;
 import static com.amadeus.session.servlet.SessionHelpersFacade.prepareResponse;
 
@@ -16,6 +17,16 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.amadeus.session.ErrorTracker;
+import com.amadeus.session.ResetManager;
+import com.amadeus.session.SessionManager;
+
+import redis.clients.jedis.exceptions.JedisException;
+import redis.clients.jedis.exceptions.JedisNoReachableClusterNodeException;
+
 /**
  * Filter that wraps the httpRequest to enable Http Session caching.
  *
@@ -26,7 +37,7 @@ import javax.servlet.ServletResponse;
  */
 public class SessionFilter implements Filter {
   ServletContext servletContext;
-
+  private static final Logger logger = LoggerFactory.getLogger(SessionFilter.class);
   /**
    * Initializes session management based on repository for current servlet
    * context.
@@ -49,7 +60,7 @@ public class SessionFilter implements Filter {
   public void initForSession(FilterConfig config) {
     if (servletContext == null) {
       servletContext = config.getServletContext();
-      initSessionManagement(servletContext);
+      initSessionManagement(servletContext);           
     }
   }
 
@@ -73,14 +84,44 @@ public class SessionFilter implements Filter {
       throws IOException, ServletException {
     ServletRequest request = prepareRequest(originalRequest, originalResponse, servletContext);
     ServletResponse response = prepareResponse(request, originalResponse, servletContext);
-
+    SessionManager sessionManager = (SessionManager)servletContext.getAttribute(Attributes.SESSION_MANAGER);
+    
+    
     try {
       // Call next filter in chain
       chain.doFilter(request, response);
     } finally {
       // Commit the session. Implementation expects that request has been
       // wrapped and that originalRequest is not an OffloadSessionHttpServletRequest
-      commitRequest(request, originalRequest, servletContext);
+    	try{
+    		commitRequest(request, originalRequest, servletContext);
+    	}    	
+    	catch ( Exception e ) {
+    		logger.error("Error into doFilter" , e );
+    		if ( e instanceof JedisException || (e.getClass().getName().indexOf("jedis.exceptions") != -1 )) {
+        		synchronized (this) {
+              
+        			SessionManager sessionManagercurrent = (SessionManager)servletContext.getAttribute(Attributes.SESSION_MANAGER);
+        			if ( sessionManagercurrent == sessionManager ) {
+        			  
+        			  ResetManager resetManager = (ResetManager)servletContext.getAttribute(Attributes.ResetManager);
+        			  ErrorTracker errorTracker = resetManager.getErrorTracker();
+                  errorTracker.addError( System.currentTimeMillis() );
+                  if ( errorTracker.reachLimits() ) {
+                    if (sessionManagercurrent != null) {
+                      sessionManagercurrent.reset();
+                    }                           
+                    initSessionManagementReset(servletContext,true);                    
+                  } else {
+                    logger.warn("Error into redis but the limits is not reach:" + errorTracker.size() );
+                  }
+                  
+        			}				
+    			}
+    		}
+    		throw e;
+    	}
+      
     }
   }
 

@@ -130,6 +130,22 @@ public class SessionConfiguration implements Serializable {
     Object source();
   }
 
+  
+  
+  
+  
+  
+  /**
+   * Indicates the interval when error are count.
+   */
+  public static final int DEFAULT_TRACKER_ERROR_INTERVAL_MILLISECONDS_NUM = 60000;
+  public static final String TRACKER_ERROR_INTERVAL_MILLISECONDS_KEY = "com.amadeus.session.tracker.interval" ;
+  /**
+   * Indicates the maximun number of errors before request the reset of redis connection.
+   */
+  public static final int DEFAULT_TRACKER_ERROR_LIMITS_NUMBER = 50;
+  public static final String  TRACKER_ERROR_LIMITS_NUMBER_KEY = "com.amadeus.session.tracker.limits" ;
+  
   /**
    * Indicates if sessions can be distributed or not.
    */
@@ -303,6 +319,8 @@ public class SessionConfiguration implements Serializable {
    */
   public static final String DELEGATE_WRITER = "com.amadeus.session.delegate.writer";
 
+  private int trackerInterval;
+  private int trackerLimits;
   private int maxInactiveInterval;
   private boolean distributable;
   private boolean sticky;
@@ -362,8 +380,29 @@ public class SessionConfiguration implements Serializable {
       logger.error("`{}` system property was not an integer: {}, using default {}", DEFAULT_SESSION_TIMEOUT,
           inactiveValue, maxInactiveInterval);
     }
+    
+    trackerInterval  = init(TRACKER_ERROR_INTERVAL_MILLISECONDS_KEY,DEFAULT_TRACKER_ERROR_INTERVAL_MILLISECONDS_NUM);
+    trackerLimits  = init(TRACKER_ERROR_LIMITS_NUMBER_KEY,DEFAULT_TRACKER_ERROR_LIMITS_NUMBER);
+    logger.error("trackerInterval:" + trackerInterval );
+    logger.error("trackerLimits  :" + trackerLimits );
+    
+    
     node = initNode();
     setEncryptionKey(getPropertySecured(SESSION_ENCRYPTION_KEY, null));
+  }
+
+  private int init( String key , int def) {
+    int intVal = def;
+    String strVal = getPropertySecured(key , String.valueOf(def));
+    try {
+      if (nonEmpty(strVal)) {
+        intVal = Integer.parseInt(strVal);
+      }
+    } catch (NumberFormatException e) {
+      logger.error("`{}` system property was not an integer: {}, using default {}", key,
+          strVal, intVal);
+    }
+    return intVal ;
   }
 
   /**
@@ -435,19 +474,26 @@ public class SessionConfiguration implements Serializable {
     if (nonEmpty(value)) {
       setNonCacheable(value);
     }
-    initMaxInactiveInterval(provider);
+    maxInactiveInterval = initInt(provider,DEFAULT_SESSION_TIMEOUT,maxInactiveInterval);
+    trackerLimits = initInt(provider,TRACKER_ERROR_LIMITS_NUMBER_KEY ,trackerLimits);
+    trackerInterval = initInt(provider,TRACKER_ERROR_INTERVAL_MILLISECONDS_KEY,trackerInterval);
+    
+    logger.error("trackerInterval:" + trackerInterval );
+    logger.error("trackerLimits  :" + trackerLimits );
+    
   }
 
-  private void initMaxInactiveInterval(AttributeProvider provider) {
-    String val = provider.getAttribute(DEFAULT_SESSION_TIMEOUT);
+  private int initInt(AttributeProvider provider , String name , int maxInactiveInterval) {
+    String val = provider.getAttribute(name);
     if (nonEmpty(val)) {
       try {
-        maxInactiveInterval = Integer.parseInt(val);
+        return Integer.parseInt(val);
       } catch (NumberFormatException e) {
-        logger.warn("`{}` configuration attribute was not an integer: {} for source {}", DEFAULT_SESSION_TIMEOUT, val,
+        logger.warn("`{}` configuration attribute was not an integer: {} for source {}", name, val,
             provider.source());
       }
     }
+    return maxInactiveInterval; 
   }
 
   private boolean read(String key, boolean defaultValue) {
@@ -1045,5 +1091,21 @@ public class SessionConfiguration implements Serializable {
            .append(replicationTrigger).append(", attributes=").append(attributes).append(", commitOnAllConcurrent=")
            .append(commitOnAllConcurrent).append(", timestamp=").append(timestampSufix).append("]");
     return builder.toString();
+  }
+
+  public int getTrackerInterval() {
+    return trackerInterval;
+  }
+
+  public void setTrackerInterval(int trackerInterval) {
+    this.trackerInterval = trackerInterval;
+  }
+
+  public int getTrackerLimits() {
+    return trackerLimits;
+  }
+
+  public void setTrackerLimits(int trackerLimits) {
+    this.trackerLimits = trackerLimits;
   }
 }
