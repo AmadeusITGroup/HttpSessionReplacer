@@ -451,6 +451,8 @@ public final class SessionHelpers {
    *          potentially wrapped request
    * @param oldRequest
    *          original request received by filter
+   * @throws IOException
+   *         blale
    */
   public void commitRequest(ServletRequest request, ServletRequest oldRequest) throws IOException {	
     // we are looking for identity below  
