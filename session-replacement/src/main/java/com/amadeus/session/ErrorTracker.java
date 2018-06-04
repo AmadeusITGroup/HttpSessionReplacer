@@ -21,8 +21,15 @@ import org.slf4j.LoggerFactory;
  */
 
 public class ErrorTracker {
+  /**
+   * Standard constructor
+   * 
+   * @param period
+   *          Time in milliseconds while items are kept
+   * @param max
+   *          If the number of items is more than the max value the Tracker is considered in error
+   */
   public ErrorTracker(int period, int max) {
-    super();
     this.period = period;
     this.max = max;
   }
