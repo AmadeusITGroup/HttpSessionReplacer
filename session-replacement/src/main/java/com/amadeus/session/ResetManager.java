@@ -2,12 +2,17 @@ package com.amadeus.session;
 
 import static com.codahale.metrics.MetricRegistry.name;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 
 public class ResetManager {
   private final MetricRegistry monitoring;
+
+  private Lock lock = new ReentrantLock();
 
   private JmxReporter reporter;
 
@@ -82,6 +87,14 @@ public class ResetManager {
 
   public void notConnected() {
     notConnected_meter.mark();
+  }
+
+  public boolean tryLock() {
+    return lock.tryLock();
+  }
+
+  public void unlock() {
+    lock.unlock();
   }
 
 }
