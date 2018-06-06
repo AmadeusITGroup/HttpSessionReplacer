@@ -47,7 +47,7 @@ public class ErrorTracker {
    * now - oldevent superior to period will be removed
    * 
    * @param now
-   *          oldevent superior to period will be 
+   *          current instance
    */
 
   public void addError(long now) {
