@@ -97,7 +97,6 @@ public class SessionFilter implements Filter {
         throw e;
       }
     }
-
   }
 
   private void ext(SessionManager sessionManager, Exception e) {
@@ -114,27 +113,20 @@ public class SessionFilter implements Filter {
           boolean lock = resetManager.tryLock();
           if (lock) {
             try {
-
               if (sessionManagercurrent != null) {
                 sessionManagercurrent.reset();
               }
               initSessionManagementReset(servletContext, true);
-
             } finally {
               resetManager.unlock();
             }
-
           } else {
             logger.warn("already lokked");
           }
         } else {
           logger.warn("Error into redis but the limits is not reach:" + errorTracker.size());
         }
-
-      } else {
-
       }
-
     }
   }
 
