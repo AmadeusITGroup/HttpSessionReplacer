@@ -8,15 +8,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The class is used to determine if the application is in error or not
  * 
- * If the number of error stored during the delay reach the max , the application is in error
- * 
- * period
- * 
- * Time in milliseconds while items are kept
- * 
- * max
- * 
- * If the number of items is more than the max value the Tracker is considered in error
+ * If the number of error stored during the delay reach the max, the application is in error
+ * period.
  *
  */
 
