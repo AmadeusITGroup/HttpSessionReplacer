@@ -42,14 +42,12 @@ public class ErrorTracker {
   final int max;
 
   /**
-   * The parameter is a time with the format millisecond from 1900 ( System.currentTimeMillis() ) This method add an
-   * event into the Tracker and remove all the old event with the followinf criteria
-   * 
-   * now - oldevent superior to period will be
-   * 
-   * removed
+   * The parameter is a time with the format millisecond from 1900 ( System.currentTimeMillis() ). This method add an
+   * event into the Tracker and remove all the old event with the following criteria:
+   * now - oldevent superior to period will be removed
    * 
    * @param now
+   *          oldevent superior to period will be 
    */
 
   public void addError(long now) {
