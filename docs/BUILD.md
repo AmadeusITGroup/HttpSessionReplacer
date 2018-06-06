@@ -151,5 +151,5 @@ mvn versions:set -DnewVersion=0.4-SNAPSHOT
 
 ### Post-publishing steps
 
-Goto https://oss.sonatype.org/, sign with your oss credentials
-
+Goto https://oss.sonatype.org/, sign with your oss credentials and follow steps
+from <https://central.sonatype.org/pages/ossrh-guide.html>.
