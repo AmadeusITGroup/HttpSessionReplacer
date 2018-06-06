@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class contains various methods that are called either from session
- * enabled filters, or from code injected by <code>SessionAgent</code>.
+ * This class contains various methods that are called either from session enabled filters, or from code injected by
+ * <code>SessionAgent</code>.
  */
 public final class SessionHelpersFacade {
 
@@ -31,12 +31,10 @@ public final class SessionHelpersFacade {
   }
 
   /**
-   * This method is called from {@link SessionFilter} or from {@link Filter}
-   * implementations modified by SessionAgent. The method wraps
-   * {@link ServletRequest} in {@link HttpRequestWrapper}.
+   * This method is called from {@link SessionFilter} or from {@link Filter} implementations modified by SessionAgent.
+   * The method wraps {@link ServletRequest} in {@link HttpRequestWrapper}.
    * <p>
-   * The method will wrap request at most once per request and will only wrap
-   * instances of {@link HttpServletRequest}.
+   * The method will wrap request at most once per request and will only wrap instances of {@link HttpServletRequest}.
    *
    * @param request
    *          request received by filter
@@ -60,9 +58,8 @@ public final class SessionHelpersFacade {
   }
 
   /**
-   * This method is called from {@link SessionFilter} or from {@link Filter}
-   * implementations modified by SessionAgent. The method retrieves response
-   * stored in {@link HttpRequestWrapper}.
+   * This method is called from {@link SessionFilter} or from {@link Filter} implementations modified by SessionAgent.
+   * The method retrieves response stored in {@link HttpRequestWrapper}.
    *
    * @param request
    *          request received by filter
@@ -78,8 +75,7 @@ public final class SessionHelpersFacade {
   }
 
   /**
-   * This method initializes session management for a given
-   * {@link ServletContext}. This method is called from
+   * This method initializes session management for a given {@link ServletContext}. This method is called from
    * {@link SessionFilter#init(javax.servlet.FilterConfig)}.
    *
    * @param reset
@@ -88,13 +84,12 @@ public final class SessionHelpersFacade {
    *          the servlet context where filter is registered
    *
    */
-  public static void initSessionManagementReset(ServletContext servletContext,boolean reset) {
-    helpers(servletContext).initSessionManagement(servletContext,reset);
+  public static void initSessionManagementReset(ServletContext servletContext, boolean reset) {
+    helpers(servletContext).initSessionManagement(servletContext, reset);
   }
 
   /**
-   * This method initializes session management for a given
-   * {@link ServletContext}. This method is called from
+   * This method initializes session management for a given {@link ServletContext}. This method is called from
    * {@link SessionFilter#init(javax.servlet.FilterConfig)}.
    *
    * @param servletContext
@@ -102,17 +97,15 @@ public final class SessionHelpersFacade {
    *
    */
   public static void initSessionManagement(ServletContext servletContext) {
-	    helpers(servletContext).initSessionManagement(servletContext,false);
-	  }
-  
+    helpers(servletContext).initSessionManagement(servletContext, false);
+  }
+
   /**
-   * Commits request and stores session in repository. This method is called
-   * from the filter. The commit is only done if the filter is the one that
-   * wrapped the request into HttpRequestWrapper.
+   * Commits request and stores session in repository. This method is called from the filter. The commit is only done if
+   * the filter is the one that wrapped the request into HttpRequestWrapper.
    * <p>
-   * The logic to check if the caller filter is the one that wrapped request is
-   * based on requirement that original request and the one used by filter are
-   * different and that original request is not {@link HttpRequestWrapper}.
+   * The logic to check if the caller filter is the one that wrapped request is based on requirement that original
+   * request and the one used by filter are different and that original request is not {@link HttpRequestWrapper}.
    *
    * @param request
    *          potentially wrapped request
@@ -120,16 +113,18 @@ public final class SessionHelpersFacade {
    *          original request received by filter
    * @param filterContext
    *          servlet context of the filter
+   * @throws IOException
+   *           exception when connection redis failed
    */
-  public static void commitRequest(ServletRequest request, ServletRequest oldRequest, ServletContext filterContext) throws IOException {
+  public static void commitRequest(ServletRequest request, ServletRequest oldRequest, ServletContext filterContext)
+      throws IOException {
     helpers(context(request, filterContext)).commitRequest(request, oldRequest);
   }
 
   /**
-   * Call to this method is injected by agent into implementations of
-   * {@link HttpSessionAttributeListener} and {@link HttpSessionListener} inside
-   * Servlet 2.5 containers. It's roll is to collect session listeners so they
-   * can be invoked by the library when it manages sessions.
+   * Call to this method is injected by agent into implementations of {@link HttpSessionAttributeListener} and
+   * {@link HttpSessionListener} inside Servlet 2.5 containers. It's roll is to collect session listeners so they can be
+   * invoked by the library when it manages sessions.
    *
    * @param listener
    *          listener where event was received
@@ -145,11 +140,10 @@ public final class SessionHelpersFacade {
   }
 
   /**
-   * This method is used by injected code to register listeners for
-   * {@link ServletContext}. If object argument is a {@link ServletContext} and
-   * listener argument contains {@link HttpSessionListener} or
-   * {@link HttpSessionAttributeListener}, the method will add them to list of
-   * known listeners associated to {@link ServletContext}
+   * This method is used by injected code to register listeners for {@link ServletContext}. If object argument is a
+   * {@link ServletContext} and listener argument contains {@link HttpSessionListener} or
+   * {@link HttpSessionAttributeListener}, the method will add them to list of known listeners associated to
+   * {@link ServletContext}
    *
    * @param object
    *          the object that should be servlet context
@@ -166,8 +160,7 @@ public final class SessionHelpersFacade {
   }
 
   /**
-   * This method retrieves or creates session helpers associated to servlet
-   * context {@link SessionHelpers}.
+   * This method retrieves or creates session helpers associated to servlet context {@link SessionHelpers}.
    *
    * @param servletContext
    *          the active servlet context

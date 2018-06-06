@@ -14,24 +14,35 @@ import com.amadeus.session.SessionManager;
 import com.amadeus.session.SessionTracking;
 
 /**
- * Wrapper for {@link HttpServletRequest} that implements storing of sessions in
- * repository. This class implements following commit logic: propagate session
- * to response, store session in repository, perform cleanups as request
+ * Wrapper for {@link HttpServletRequest} that implements storing of sessions in repository. This class implements
+ * following commit logic: propagate session to response, store session in repository, perform cleanups as request
  * processing has finished.
  */
 class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWithSession {
   private static final Logger logger = LoggerFactory.getLogger(HttpRequestWrapper.class);
+
   RepositoryBackedHttpSession session;
+
   boolean committed;
+
   private HttpResponseWrapper response;
+
   private final HttpRequestWrapper embeddedRequest;
+
   private final SessionManager manager;
+
   private final ServletContext servletContext;
+
   private boolean propagateOnCreate;
+
   private boolean propagated;
+
   private boolean idRetrieved;
+
   private String retrievedId;
+
   private boolean isRetrievedIdFromCookie;
+
   private boolean repositoryChecked;
 
   /**
@@ -154,15 +165,19 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
    * Implementation of commit.
    */
   void doCommit() {
-    if (committed) {
-      return;
+    try {
+
+      if (committed) {
+        return;
+      }
+      // we propagate the session, and that will trigger storage
+      if (!propagateSession()) {
+        storeSession();
+      }
+    } finally {
+      committed = true;
+      manager.requestFinished();
     }
-    // we propagate the session, and that will trigger storage
-    if (!propagateSession()) {
-      storeSession();
-    }
-    committed = true;
-    manager.requestFinished();
   }
 
   /**
@@ -176,6 +191,7 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
         session.commit();
       } catch (Exception e) { // NOSONAR - some error occured, log it
         logger.warn("cannot store session: {}", session, e);
+        throw e;
       }
     } else {
       logger.debug("session was null, nothing to commit");
@@ -203,9 +219,8 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
   }
 
   /**
-   * Get wrapped request if it is an {@link HttpRequestWrapper}.
-   * Returns <code>null</code> if wrapped wrapped request was
-   * not HttpRequestWrapper.
+   * Get wrapped request if it is an {@link HttpRequestWrapper}. Returns <code>null</code> if wrapped wrapped request
+   * was not HttpRequestWrapper.
    *
    * @return
    */
@@ -223,9 +238,8 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
   }
 
   /**
-   * Controls if session should be propagated on create. Session should be
-   * propagated on request if {@link #propagateSession()} method was called
-   * (i.e. if there an event occurred that requires session propagation).
+   * Controls if session should be propagated on create. Session should be propagated on request if
+   * {@link #propagateSession()} method was called (i.e. if there an event occurred that requires session propagation).
    *
    * @param propagate
    */
@@ -295,6 +309,7 @@ class HttpRequestWrapper extends HttpServletRequestWrapper implements RequestWit
 
   /**
    * Called to encode URL. This is used when URL session propagation is used.
+   * 
    * @param url
    * @return
    */

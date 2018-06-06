@@ -2,10 +2,15 @@ package com.amadeus.session;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The class is used to determine if the application is in error or not
  * 
- * If the number of error stored during the delay reach the max , the application is in error
+ * If the number of error stored during the delay reach the max, the application is in error
+ * period.
+ *
  */
 
 public class ErrorTracker {
@@ -22,6 +27,8 @@ public class ErrorTracker {
     this.max = max;
   }
 
+  private static final Logger logger = LoggerFactory.getLogger(ErrorTracker.class);
+
   private ConcurrentLinkedQueue<Long> list = new ConcurrentLinkedQueue<Long>();
 
   /**
@@ -35,11 +42,12 @@ public class ErrorTracker {
   final int max;
 
   /**
-   * The parameter is a time with the format millisecond from 1900 (<code>System.currentTimeMillis()</code>). This 
-   * method adds an event into the Tracker and remove all the old events with the following criteria
-   * <code>now - oldevent &gt; period</code> will be removed
+   * The parameter is a time with the format millisecond from 1900 ( System.currentTimeMillis() ). This method add an
+   * event into the Tracker and remove all the old event with the following criteria:
+   * now - oldevent superior to period will be removed
    * 
    * @param now
+   *          current instance
    */
 
   public void addError(long now) {
@@ -64,6 +72,7 @@ public class ErrorTracker {
   }
 
   public void reset() {
+    logger.debug("reset of the ErrorTracker");
     list.clear();
   }
 }

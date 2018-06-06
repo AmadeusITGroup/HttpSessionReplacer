@@ -26,8 +26,6 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 
-import redis.clients.jedis.exceptions.JedisException;
-
 /**
  * Main class for implementing Redis repository logic.
  */
@@ -544,6 +542,7 @@ public class RedisSessionRepository implements SessionRepository {
    * Changes session id. This renames key in redis and publishes the redis event if other nodes need to be notified.
    *
    * @param sessionData
+   *          content of the session
    */
   @Override
   public void sessionIdChange(SessionData sessionData) {
@@ -557,7 +556,7 @@ public class RedisSessionRepository implements SessionRepository {
     try {
       redis.info("server");
       return true;
-    } catch (JedisException e) {
+    } catch (Exception e) {
       return false;
     }
   }

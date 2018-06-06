@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.pool2.TrackedUse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -22,48 +21,42 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
 /**
- * Main class responsible for managing sessions. The class offers strategy for
- * retrieving, creating, propagating and deleting session. It also offers
- * services for scheduling and executing task asynchronously.
+ * Main class responsible for managing sessions. The class offers strategy for retrieving, creating, propagating and
+ * deleting session. It also offers services for scheduling and executing task asynchronously.
  * <p>
- * In case of servlet engines, one session manager will be created per
- * {@link ServletContext}.
+ * In case of servlet engines, one session manager will be created per {@link ServletContext}.
  * <p>
  * The manager provides following metrics:
  * <ul>
- * <li>`com.amadeus.session.created` measures total number of created sessions
- * as well as rate of sessions created in last 1, 5 and 15 minutes
- * <li>`com.amadeus.session.deleted` measures total number of deleted sessions
- * as well as rate of sessions measures rate of sessions deleted in last 1, 5
- * and 15 minutes
- * <li>`com.amadeus.session.missing` measures total number of session which were
- * not found in repository, as measures rate of such occurrences in last 1, 5 and
- * 15 minutes
- * <li>`com.amadeus.session.retrieved` measures total number of session
- * retrievals as well as measures rate of sessions retrieval from store in last
- * 1, 5 and 15 minutes
- * <li>`com.amadeus.session.timers.commit` measures histogram (distribution) of
- * elapsed time during commit as well as total number of commits and rate of
- * commits over last 1, 5 and 15 minutes
- * <li>`com.amadeus.session.timers.fetch` measures histogram (distribution) of
- * elapsed time during fetch of session data from repository as well as total
- * number of fetch requests and rate of fetch requests over last 1, 5 and 15
- * minutes
+ * <li>`com.amadeus.session.created` measures total number of created sessions as well as rate of sessions created in
+ * last 1, 5 and 15 minutes
+ * <li>`com.amadeus.session.deleted` measures total number of deleted sessions as well as rate of sessions measures rate
+ * of sessions deleted in last 1, 5 and 15 minutes
+ * <li>`com.amadeus.session.missing` measures total number of session which were not found in repository, as measures
+ * rate of such occurrences in last 1, 5 and 15 minutes
+ * <li>`com.amadeus.session.retrieved` measures total number of session retrievals as well as measures rate of sessions
+ * retrieval from store in last 1, 5 and 15 minutes
+ * <li>`com.amadeus.session.timers.commit` measures histogram (distribution) of elapsed time during commit as well as
+ * total number of commits and rate of commits over last 1, 5 and 15 minutes
+ * <li>`com.amadeus.session.timers.fetch` measures histogram (distribution) of elapsed time during fetch of session data
+ * from repository as well as total number of fetch requests and rate of fetch requests over last 1, 5 and 15 minutes
  * </ul>
  */
 public class SessionManager implements Closeable {
   private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
 
   static final String SESSIONS_METRIC_PREFIX = "com.amadeus.session";
-  
 
-  
-  
   private static final String COMMIT_TIMER_METRIC = name(SESSIONS_METRIC_PREFIX, "timer", "commit");
+
   private static final String FETCH_TIMER_METRIC = name(SESSIONS_METRIC_PREFIX, "timer", "fetch");
+
   private static final String CREATED_SESSIONS_METRIC = name(SESSIONS_METRIC_PREFIX, "created");
+
   private static final String DELETED_SESSIONS_METRIC = name(SESSIONS_METRIC_PREFIX, "deleted");
+
   private static final String MISSING_SESSIONS_METRIC = name(SESSIONS_METRIC_PREFIX, "missing");
+
   private static final String RETRIEVED_SESSIONS_METRIC = name(SESSIONS_METRIC_PREFIX, "retrieved");
 
   static final String INVALIDATION_ON_EXPIRY_ERRORS_METRIC = name(SESSIONS_METRIC_PREFIX, "invalidation", "errors",
@@ -74,20 +67,33 @@ public class SessionManager implements Closeable {
   static final String SESSION_PROPAGATED = "com.amadeus.session.sessionPropagated";
 
   protected final SessionRepository repository;
+
   protected final SessionNotifier notifier;
+
   protected final SessionTracking tracking;
+
   protected final SessionFactory factory;
+
   protected final ExecutorFacade executors;
+
   protected final SessionConfiguration configuration;
+
   protected final SerializerDeserializer serializerDeserializer;
 
   private final Meter createdSessions;
+
   private final Meter deletedSessions;
+
   private final Meter retrievedSessions;
+
   private final Meter invalidationErrors;
+
   private final Meter invalidationExpiryErrors;
+
   private final Meter missingSessions;
+
   private final Timer commitTimer;
+
   private final Timer fetchTimer;
 
   private final MetricRegistry monitoring;
@@ -104,10 +110,9 @@ public class SessionManager implements Closeable {
    * @param factory
    *          creates memory representation of session
    * @param repository
-   *          repository should be namespace aware - if two
-   *          {@link SessionManager} from different namespaces request access to
-   *          session with same id, repository should give different sessions
-   *          (unless a special configuration overrides this).
+   *          repository should be namespace aware - if two {@link SessionManager} from different namespaces request
+   *          access to session with same id, repository should give different sessions (unless a special configuration
+   *          overrides this).
    * @param tracking
    *          propagates session information to clients
    * @param notifier
@@ -118,7 +123,7 @@ public class SessionManager implements Closeable {
    *          the class loader to use
    */
   public SessionManager(ExecutorFacade executors, SessionFactory factory, SessionRepository repository,
-      SessionTracking tracking, SessionNotifier notifier, SessionConfiguration configuration, ClassLoader classLoader ) {
+      SessionTracking tracking, SessionNotifier notifier, SessionConfiguration configuration, ClassLoader classLoader) {
 
     this.repository = repository;
     this.tracking = tracking;
@@ -129,7 +134,7 @@ public class SessionManager implements Closeable {
     this.classLoader = classLoader;
 
     monitoring = new MetricRegistry();
-    
+
     createdSessions = monitoring.meter(CREATED_SESSIONS_METRIC);
     deletedSessions = monitoring.meter(DELETED_SESSIONS_METRIC);
     retrievedSessions = monitoring.meter(RETRIEVED_SESSIONS_METRIC);
@@ -138,10 +143,9 @@ public class SessionManager implements Closeable {
     invalidationExpiryErrors = monitoring.meter(INVALIDATION_ON_EXPIRY_ERRORS_METRIC);
     commitTimer = monitoring.timer(COMMIT_TIMER_METRIC);
     fetchTimer = monitoring.timer(FETCH_TIMER_METRIC);
-    
-    serializerDeserializer = configuration.isUsingEncryption() ?
-        new EncryptingSerializerDeserializer() :
-        new JdkSerializerDeserializer();
+
+    serializerDeserializer = configuration.isUsingEncryption() ? new EncryptingSerializerDeserializer()
+        : new JdkSerializerDeserializer();
     serializerDeserializer.setSessionManager(this);
 
     factory.setSessionManager(this);
@@ -150,8 +154,7 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Starts monitoring this session manager. The method will expose all metrics
-   * through JMX.
+   * Starts monitoring this session manager. The method will expose all metrics through JMX.
    */
   private void startMonitoring() {
     executors.startMetrics(monitoring);
@@ -169,14 +172,13 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Fetch the session from the repository. If session was with given id
-   * retrieved, but has expired, it will be cleaned up.
+   * Fetch the session from the repository. If session was with given id retrieved, but has expired, it will be cleaned
+   * up.
    *
    * @param sessionId
    *          session id
    * @param updateTimestamp
-   *          <code>true</code> if the session timestamp should be updated
-   *          (usually at the start of request)
+   *          <code>true</code> if the session timestamp should be updated (usually at the start of request)
    * @return session or <code>null</code> if session is not in repository.
    */
   private RepositoryBackedSession fetchSession(String sessionId, boolean updateTimestamp) {
@@ -237,15 +239,13 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Builds or retrieves session. If session is found in repository, it is
-   * retrieved, if not, and create parameter is set to <code>true</code>, then a
-   * new session is created. Session id is generated according to
+   * Builds or retrieves session. If session is found in repository, it is retrieved, if not, and create parameter is
+   * set to <code>true</code>, then a new session is created. Session id is generated according to
    * {@link SessionTracking} implementation.
    * <p>
-   * In some cases, in servlet engine, request can be forwarded from one web
-   * application to another one. In this case, the first web application that
-   * received request, is responsible for managing session id, and other web
-   * application down the chain will reuse this id.
+   * In some cases, in servlet engine, request can be forwarded from one web application to another one. In this case,
+   * the first web application that received request, is responsible for managing session id, and other web application
+   * down the chain will reuse this id.
    *
    * @param request
    *          the request being servet
@@ -256,7 +256,8 @@ public class SessionManager implements Closeable {
    *
    * @return existing or new session
    */
-  public RepositoryBackedSession getSession(RequestWithSession request, boolean create, SessionTracking.IdAndSource forceId) {
+  public RepositoryBackedSession getSession(RequestWithSession request, boolean create,
+      SessionTracking.IdAndSource forceId) {
     SessionTracking.IdAndSource id = retrieveId(request, forceId);
     RepositoryBackedSession session = null;
     if (id != null && id.id != null) {
@@ -268,9 +269,9 @@ public class SessionManager implements Closeable {
         request.repositoryChecked();
       }
     } else {
-      // Session is null, assume default tracking 
+      // Session is null, assume default tracking
       putIdInLoggingMdc(null);
-      request.setRequestedSessionId(null, tracking.isCookieTracking());      
+      request.setRequestedSessionId(null, tracking.isCookieTracking());
     }
     if (session == null && create) {
       if (forceId == null) {
@@ -289,8 +290,7 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Changes session id of the passed session. Session id can change only once
-   * per request.
+   * Changes session id of the passed session. Session id can change only once per request.
    *
    * @param session
    *          the session whose id needs to change
@@ -306,8 +306,8 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Retrieves id from request. The forceId parameter is used to force usage of
-   * certain id (e.g. when forwarding request from one web app to another).
+   * Retrieves id from request. The forceId parameter is used to force usage of certain id (e.g. when forwarding request
+   * from one web app to another).
    *
    * @param request
    *          the request that contains session id
@@ -326,8 +326,7 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Propagates the session id to the response. The propagation is done once per
-   * request.
+   * Propagates the session id to the response. The propagation is done once per request.
    *
    * @param request
    *          the current request
@@ -342,8 +341,8 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Deletes session from repository and performs orderly cleanup. Called when
-   * session expires or when application closes
+   * Deletes session from repository and performs orderly cleanup. Called when session expires or when application
+   * closes
    *
    * @param sessionId
    *          the id of the session to delete
@@ -361,11 +360,10 @@ public class SessionManager implements Closeable {
   }
 
   private void markSessionDeletion(String sessionId) {
-    logger.info("deleting session with sessionId: '{}'", sessionId );
+    logger.info("deleting session with sessionId: '{}'", sessionId);
     deletedSessions.mark();
   }
 
-  
   /**
    * Called when request has been finished. Notifies repository of that fact.
    */
@@ -374,12 +372,10 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Executes task in separate thread. This is used to launch blocking or
-   * long-running tasks.
+   * Executes task in separate thread. This is used to launch blocking or long-running tasks.
    *
    * @param timer
-   *          if not null, the time to execute task will be measured and stored
-   *          under timer with given name
+   *          if not null, the time to execute task will be measured and stored under timer with given name
    * @param task
    *          the task to run
    * @return the future for the runnable. Note that runnable has no result.
@@ -393,18 +389,15 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Schedules the tasks to execute with a {@link ScheduledExecutorService} with
-   * the specified period.
+   * Schedules the tasks to execute with a {@link ScheduledExecutorService} with the specified period.
    *
    * @param timer
-   *          if not null, the time to execute task will be measured and stored
-   *          under timer with given name
+   *          if not null, the time to execute task will be measured and stored under timer with given name
    * @param task
    *          the task to run
    * @param period
    *          period between invocations in seconds
-   * @return the scheduled future for the task. Note that runnable has no
-   *         result.
+   * @return the scheduled future for the task. Note that runnable has no result.
    */
   public ScheduledFuture<?> schedule(String timer, Runnable task, long period) {
     if (timer != null) {
@@ -454,8 +447,7 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Calls {@link Committer} for the passed {@link RepositoryBackedSession} and
-   * measures time of execution.
+   * Calls {@link Committer} for the passed {@link RepositoryBackedSession} and measures time of execution.
    *
    * @param session
    *          the session to commit
@@ -468,6 +460,7 @@ public class SessionManager implements Closeable {
       session.getCommitter().run(); // NOSONAR we use run intentionally
     } catch (Exception e) { // NOSONAR Any exception can occur here
       logger.error("Exception occured while commiting sessionId: '" + session.getId() + "'", e);
+      throw e;
     }
   }
 
@@ -490,8 +483,7 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Serialiazer/deserializer to use when storing to repository. Serialaizer and
-   * deserializers can be configured.
+   * Serialiazer/deserializer to use when storing to repository. Serialaizer and deserializers can be configured.
    *
    * @return serialiazer/deserializer to use
    */
@@ -504,11 +496,11 @@ public class SessionManager implements Closeable {
    */
   final class RunnableWithTimer implements Runnable {
     final Runnable task;
+
     final Timer timer;
 
     /**
-     * Helper {@link Runnable} class used to measure the execution time of
-     * passed task and stores it in metrics.
+     * Helper {@link Runnable} class used to measure the execution time of passed task and stores it in metrics.
      *
      * @param timerName
      *          name of the timer where the processing time is stored
@@ -533,9 +525,8 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Called by {@link RepositoryBackedSession} when a conflict occurs during
-   * invalidation of session. Conflict may be due to fact that session is stil
-   * used.
+   * Called by {@link RepositoryBackedSession} when a conflict occurs during invalidation of session. Conflict may be
+   * due to fact that session is stil used.
    *
    * @param session
    *          the session to remove
@@ -574,21 +565,20 @@ public class SessionManager implements Closeable {
     return tracking.encodeUrl(request, url);
   }
 
- 
-  
   /**
    * Called to shutdown the session manager and perform needed cleanup.
    */
-  
+
   public void reset() {
-	  if (reporter != null) {
-		  reporter.stop();
-		  reporter.close();
-	  }
-	  
-	  repository.reset();	  
-	  executors.shutdown();
-  }  
+    if (reporter != null) {
+      reporter.stop();
+      reporter.close();
+    }
+
+    repository.reset();
+    executors.shutdown();
+  }
+
   /**
    * Called to shutdown the session manager and perform needed cleanup.
    */
@@ -610,8 +600,7 @@ public class SessionManager implements Closeable {
   }
 
   /**
-   * Changes session id of the passed session. Session id can change only once
-   * per request.
+   * Changes session id of the passed session. Session id can change only once per request.
    *
    * @param session
    *          the session whose id needs to change
@@ -653,12 +642,12 @@ public class SessionManager implements Closeable {
   }
 
   public void remove(SessionData sessionData) {
-    markSessionDeletion( sessionData.getId() );
+    markSessionDeletion(sessionData.getId());
     getRepository().remove(sessionData);
   }
-  
-  public boolean isConnected(){
+
+  public boolean isConnected() {
     return this.repository.isConnected();
   }
-  
+
 }

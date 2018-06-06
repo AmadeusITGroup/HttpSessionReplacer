@@ -1,6 +1,5 @@
 package com.amadeus.session.servlet;
 
-import static com.codahale.metrics.MetricRegistry.name;
 import static java.lang.invoke.MethodType.methodType;
 
 import java.io.IOException;
@@ -28,7 +27,6 @@ import javax.servlet.http.HttpSessionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amadeus.session.ErrorTracker;
 import com.amadeus.session.ExecutorFacade;
 import com.amadeus.session.ResetManager;
 import com.amadeus.session.SessionConfiguration;
@@ -39,36 +37,35 @@ import com.amadeus.session.SessionRepository;
 import com.amadeus.session.SessionRepositoryFactory;
 import com.amadeus.session.SessionTracking;
 import com.amadeus.session.repository.inmemory.InMemoryRepository;
-import com.codahale.metrics.JmxReporter;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
-
-import redis.clients.jedis.exceptions.JedisNoReachableClusterNodeException;
 
 /**
- * This class contains various methods that are called either from session
- * enabled filters, or from code injected by <code>SessionAgent</code>.
+ * This class contains various methods that are called either from session enabled filters, or from code injected by
+ * <code>SessionAgent</code>.
  */
 public final class SessionHelpers {
   private static final Logger logger = LoggerFactory.getLogger(SessionHelpers.class);
 
   static final String DUMMY_ATTRIBUTE = "com.amadeus.session.dummy";
+
   static final String SESSION_HELPER_METHODS = "com.amadeus.session.servlet.SessionHelpers.methods";
+
   static final String DEFAULT_REPOSITORY_FACTORY = "com.amadeus.session.repository.inmemory.InMemoryRepositoryFactory";
+
   static final String INTROSPECTING_LISTENERS = "com.amadeus.session.introspected.listeners";
+
   static final String REQUEST_WRAPPED_ATTRIBUTE = HttpRequestWrapper.class.getName();
+
   static final String SESSION_CONFIGURATION = SessionConfiguration.class.getName();
+
   static final String SESSION_HELPERS = SessionHelpers.class.getName();
 
   private boolean interceptListeners;
 
   /**
-   * This method is called from {@link SessionFilter} or from {@link Filter}
-   * implementations modified by SessionAgent. The method wraps
-   * {@link ServletRequest} in {@link HttpRequestWrapper}.
+   * This method is called from {@link SessionFilter} or from {@link Filter} implementations modified by SessionAgent.
+   * The method wraps {@link ServletRequest} in {@link HttpRequestWrapper}.
    * <p>
-   * The method will wrap request at most once per request and will only wrap
-   * instances of {@link HttpServletRequest}.
+   * The method will wrap request at most once per request and will only wrap instances of {@link HttpServletRequest}.
    *
    * @param request
    *          request received by filter
@@ -122,9 +119,8 @@ public final class SessionHelpers {
   }
 
   /**
-   * This method is called from {@link SessionFilter} or from {@link Filter}
-   * implementations modified by SessionAgent. The method retrieves response
-   * stored in {@link HttpRequestWrapper}.
+   * This method is called from {@link SessionFilter} or from {@link Filter} implementations modified by SessionAgent.
+   * The method retrieves response stored in {@link HttpRequestWrapper}.
    *
    * @param request
    *          request received by filter
@@ -140,25 +136,23 @@ public final class SessionHelpers {
   }
 
   /**
-   * This method initializes session management for a given
-   * {@link ServletContext}. This method is called from
-   * {@link SessionFilter#init(javax.servlet.FilterConfig)}. The method will
-   * create and configure {@link SessionManager} if needed.
+   * This method initializes session management for a given {@link ServletContext}. This method is called from
+   * {@link SessionFilter#init(javax.servlet.FilterConfig)}. The method will create and configure {@link SessionManager}
+   * if needed.
    *
    * @param servletContext
    *          the active servlet context
    * @return list of method handles for publicly accessible methods
    *
    */
-  public MethodHandle[] initSessionManagement(ServletContext servletContext ) {
-	  return initSessionManagement( servletContext , false );
+  public MethodHandle[] initSessionManagement(ServletContext servletContext) {
+    return initSessionManagement(servletContext, false);
   }
-  
+
   /**
-   * This method initializes session management for a given
-   * {@link ServletContext}. This method is called from
-   * {@link SessionFilter#init(javax.servlet.FilterConfig)}. The method will
-   * create and configure {@link SessionManager} if needed.
+   * This method initializes session management for a given {@link ServletContext}. This method is called from
+   * {@link SessionFilter#init(javax.servlet.FilterConfig)}. The method will create and configure {@link SessionManager}
+   * if needed.
    *
    * @param servletContext
    *          the active servlet context
@@ -167,29 +161,26 @@ public final class SessionHelpers {
    * @return list of method handles for publicly accessible methods
    *
    */
-  public MethodHandle[] initSessionManagement(ServletContext servletContext , boolean reset) {
-    
+  public MethodHandle[] initSessionManagement(ServletContext servletContext, boolean reset) {
+    logger.warn("initSessionManagement start.");
     ResetManager resetManager = (ResetManager)servletContext.getAttribute(Attributes.ResetManager);
-    if (  resetManager == null ) {
+    if (resetManager == null) {
       SessionConfiguration conf = initConf(servletContext);
       ExecutorFacade executors = new ExecutorFacade(conf);
-      resetManager = new  ResetManager (executors,conf); 
+      resetManager = new ResetManager(executors, conf);
       servletContext.setAttribute(Attributes.ResetManager, resetManager);
     } else {
       resetManager.reset();
     }
-    
-    
-    
-    
+
     MethodHandle[] methods = (MethodHandle[])servletContext.getAttribute(SESSION_HELPER_METHODS);
-    if (methods == null || reset ) {
+    if (methods == null || reset) {
       synchronized (this) {
         methods = prepareMethodCalls(servletContext);
       }
       servletContext.setAttribute(SESSION_HELPERS, this);
       ServletContextDescriptor scd = getDescriptor(servletContext);
-      if ( !reset ) {
+      if (!reset) {
         setupContext(servletContext);
       }
       SessionNotifier notifier = new HttpSessionNotifier(scd);
@@ -200,30 +191,29 @@ public final class SessionHelpers {
       SessionTracking tracking = getTracking(servletContext, conf);
 
       ExecutorFacade executors = new ExecutorFacade(conf);
-      
+
       ClassLoader classLoader = classLoader(servletContext);
       SessionManager sessionManagement = new SessionManager(executors, factory, repository, tracking, notifier, conf,
           classLoader);
       interceptListeners = conf.isInterceptListeners();
-      servletContext.setAttribute(Attributes.SESSION_MANAGER, sessionManagement);
-      if ( sessionManagement.isConnected() ) {
-        logger.warn("The connection to redis is ok."); 
+
+      if (sessionManagement.isConnected()) {
+        servletContext.setAttribute(Attributes.SESSION_MANAGER, sessionManagement);
+        logger.warn("The connection to redis is ok.");
         resetManager.connected();
       } else {
         logger.warn("The connection to redis is ko.");
         resetManager.notConnected();
       }
-       
-      
-      
+
     }
+    logger.warn("initSessionManagement end.");
     return methods;
   }
 
   /**
-   * This method introspects this class and records {@link MethodHandle} of
-   * public methods. This allows direct invocation of said methods from
-   * instrumented classes.
+   * This method introspects this class and records {@link MethodHandle} of public methods. This allows direct
+   * invocation of said methods from instrumented classes.
    *
    * @param servletContext
    *          the active servlet context
@@ -258,9 +248,8 @@ public final class SessionHelpers {
   }
 
   /**
-   * Obtains {@link SessionTracking} from {@link SessionConfiguration}. It can
-   * be configured either as the element of the {@link SessionPropagation}
-   * enumeration or as fully qualified class name of the implementation.
+   * Obtains {@link SessionTracking} from {@link SessionConfiguration}. It can be configured either as the element of
+   * the {@link SessionPropagation} enumeration or as fully qualified class name of the implementation.
    *
    * @param servletContext
    *          used to initialize tracking
@@ -387,8 +376,7 @@ public final class SessionHelpers {
   }
 
   /**
-   * Retrieves class loader from servlet context if it is servlet 3.x or from
-   * current thread otherwise
+   * Retrieves class loader from servlet context if it is servlet 3.x or from current thread otherwise
    *
    * @param servletContext
    *          active servlet context
@@ -405,8 +393,7 @@ public final class SessionHelpers {
   }
 
   /**
-   * Initializes session configuration if it has not already been done for the
-   * current servlet context
+   * Initializes session configuration if it has not already been done for the current servlet context
    *
    * @param context
    *          active servlet context
@@ -439,23 +426,22 @@ public final class SessionHelpers {
   }
 
   /**
-   * Commits request and stores session in repository. This method is called
-   * from the filter. The commit is only done if the filter is the one that
-   * wrapped the request into HttpRequestWrapper.
+   * Commits request and stores session in repository. This method is called from the filter. The commit is only done if
+   * the filter is the one that wrapped the request into HttpRequestWrapper.
    * <p>
-   * The logic to check if the caller filter is the one that wrapped request is
-   * based on requirement that original request and the one used by filter are
-   * different and that original request is not {@link HttpRequestWrapper}.
+   * The logic to check if the caller filter is the one that wrapped request is based on requirement that original
+   * request and the one used by filter are different and that original request is not {@link HttpRequestWrapper}.
    *
    * @param request
    *          potentially wrapped request
    * @param oldRequest
    *          original request received by filter
    * @throws IOException
-   *         blale
+   *           in case on redis connection failure
    */
-  public void commitRequest(ServletRequest request, ServletRequest oldRequest) throws IOException {	
-    // we are looking for identity below  
+  
+  public void commitRequest(ServletRequest request, ServletRequest oldRequest) throws IOException {
+    // we are looking for identity below
     if (request != oldRequest && request instanceof HttpRequestWrapper) { // NOSONAR
       HttpRequestWrapper httpRequestWrapper = (HttpRequestWrapper)request;
       try {
@@ -474,8 +460,7 @@ public final class SessionHelpers {
   }
 
   /**
-   * This method is called inside Servlet 2.5 containers to collect information
-   * about existing HttpServletListeners.
+   * This method is called inside Servlet 2.5 containers to collect information about existing HttpServletListeners.
    *
    * @param context
    *          current servlet context
@@ -505,10 +490,9 @@ public final class SessionHelpers {
   }
 
   /**
-   * Call to this method is injected by agent into implementations of
-   * {@link HttpSessionAttributeListener} and {@link HttpSessionListener} inside
-   * Servlet 2.5 containers. It's roll is to collect session listeners so they
-   * can be invoked by the library when it manages sessions.
+   * Call to this method is injected by agent into implementations of {@link HttpSessionAttributeListener} and
+   * {@link HttpSessionListener} inside Servlet 2.5 containers. It's roll is to collect session listeners so they can be
+   * invoked by the library when it manages sessions.
    *
    * @param caller
    *          listener where event was received
@@ -528,10 +512,8 @@ public final class SessionHelpers {
   }
 
   /**
-   * This method retrieves {@link ServletContextDescriptor} for a
-   * {@link ServletContext} from registry, or if it {@link ServletContext} isn't
-   * registered, adds it to the registry with empty
-   * {@link ServletContextDescriptor}
+   * This method retrieves {@link ServletContextDescriptor} for a {@link ServletContext} from registry, or if it
+   * {@link ServletContext} isn't registered, adds it to the registry with empty {@link ServletContextDescriptor}
    *
    * @param servletContext
    *          the active servlet context
@@ -549,11 +531,10 @@ public final class SessionHelpers {
   }
 
   /**
-   * This method is used by injected code to register listeners for
-   * {@link ServletContext}. If object argument is a {@link ServletContext} and
-   * listener argument contains {@link HttpSessionListener} or
-   * {@link HttpSessionAttributeListener}, the method will add them to list of
-   * known listeners associated to {@link ServletContext}
+   * This method is used by injected code to register listeners for {@link ServletContext}. If object argument is a
+   * {@link ServletContext} and listener argument contains {@link HttpSessionListener} or
+   * {@link HttpSessionAttributeListener}, the method will add them to list of known listeners associated to
+   * {@link ServletContext}
    *
    * @param servletContext
    *          the active servlet context
@@ -582,8 +563,7 @@ public final class SessionHelpers {
   }
 
   /**
-   * Sets up servlet context - registers {@link SessionFilter} and
-   * {@link ShutdownListener}.
+   * Sets up servlet context - registers {@link SessionFilter} and {@link ShutdownListener}.
    *
    * @param context
    *          servlet context to set up
