@@ -445,6 +445,7 @@ public final class SessionHelpers {
    * @throws IOException
    *           in case on redis connection failure
    */
+  
   public void commitRequest(ServletRequest request, ServletRequest oldRequest) throws IOException {
     // we are looking for identity below
     if (request != oldRequest && request instanceof HttpRequestWrapper) { // NOSONAR

@@ -8,21 +8,21 @@ import org.slf4j.LoggerFactory;
 /**
  * The class is used to determine if the application is in error or not
  * 
- * If the number of error stored during the delay reach the max , the application is in error
- * 
- * period
- * 
- * Time in milliseconds while items are kept
- * 
- * max
- * 
- * If the number of items is more than the max value the Tracker is considered in error
+ * If the number of error stored during the delay reach the max, the application is in error
+ * period.
  *
  */
 
 public class ErrorTracker {
+  /**
+   * Standard constructor
+   * 
+   * @param period
+   *          Time in milliseconds while items are kept
+   * @param max
+   *          If the number of items is more than the max value the Tracker is considered in error
+   */
   public ErrorTracker(int period, int max) {
-    super();
     this.period = period;
     this.max = max;
   }
@@ -42,14 +42,12 @@ public class ErrorTracker {
   final int max;
 
   /**
-   * The parameter is a time with the format millisecond from 1900 ( System.currentTimeMillis() ) This method add an
-   * event into the Tracker and remove all the old event with the followinf criteria
-   * 
-   * now - oldevent superior to period will be
-   * 
-   * removed
+   * The parameter is a time with the format millisecond from 1900 ( System.currentTimeMillis() ). This method add an
+   * event into the Tracker and remove all the old event with the following criteria:
+   * now - oldevent superior to period will be removed
    * 
    * @param now
+   *          current instance
    */
 
   public void addError(long now) {
