@@ -190,7 +190,6 @@ public final class SessionHelpers {
       SessionRepository repository = repository(servletContext, conf);
       if (repository.isConnected()) {
         SessionTracking tracking = getTracking(servletContext, conf);
-
         ExecutorFacade executors = new ExecutorFacade(conf);
 
         ClassLoader classLoader = classLoader(servletContext);

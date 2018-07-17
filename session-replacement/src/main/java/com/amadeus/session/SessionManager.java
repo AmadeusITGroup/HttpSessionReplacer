@@ -574,9 +574,7 @@ public class SessionManager implements Closeable {
    */
 
   public void reset() {
-
     logger.info("reset of SessionManager");
-
     if (reporter != null) {
       reporter.stop();
       reporter.close();
