@@ -43,6 +43,7 @@ import com.codahale.metrics.Timer;
  * </ul>
  */
 public class SessionManager implements Closeable {
+
   private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
 
   static final String SESSIONS_METRIC_PREFIX = "com.amadeus.session";
@@ -124,6 +125,8 @@ public class SessionManager implements Closeable {
    */
   public SessionManager(ExecutorFacade executors, SessionFactory factory, SessionRepository repository,
       SessionTracking tracking, SessionNotifier notifier, SessionConfiguration configuration, ClassLoader classLoader) {
+
+    logger.info("creation of SessionManager");
 
     this.repository = repository;
     this.tracking = tracking;
@@ -404,6 +407,7 @@ public class SessionManager implements Closeable {
       return executors.scheduleAtFixedRate(new RunnableWithTimer(timer, task), period, period, TimeUnit.SECONDS);
     }
     return executors.scheduleAtFixedRate(task, period, period, TimeUnit.SECONDS);
+
   }
 
   /**
@@ -570,6 +574,9 @@ public class SessionManager implements Closeable {
    */
 
   public void reset() {
+
+    logger.info("reset of SessionManager");
+
     if (reporter != null) {
       reporter.stop();
       reporter.close();
@@ -584,6 +591,9 @@ public class SessionManager implements Closeable {
    */
   @Override
   public void close() {
+
+    logger.info("close of SessionManager");
+
     if (reporter != null) {
       reporter.close();
     }
