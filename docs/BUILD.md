@@ -116,7 +116,7 @@ Verify that builds and test pass.
 Set new version for the release.
 
 ```sh
-mvn versions:set -DnewVersion=0.4.11
+mvn versions:set -DnewVersion=0.4.12
 ```
 
 Perform build with release profile to add sources and javadoc. Perform deploy to OSS Sonatype Nexus:
@@ -131,8 +131,8 @@ If release is successful, commit the version and commit and tag changes in git.
 ```sh
 mvn versions:commit
 git add *
-git commit -m "version 0.4.11"
-git tag -a v0.4.11 -m "version 0.4.11"
+git commit -m "version 0.4.12"
+git tag -a v0.4.12 -m "version 0.4.12"
 git push origin --tags
 ```
 
@@ -142,3 +142,14 @@ Set version back to snapshot and commit changes.
 mvn versions:set -DnewVersion=0.4-SNAPSHOT
 ```
 
+### Prerequisites to be able to publish release
+
+* Have an account on following Jira https://issues.sonatype.org
+* Have permissions to publish to com.amadeus project (see https://issues.sonatype.org/browse/OSSRH-26599)
+* Setup local necessary keys to have artifact signing enabled (see <https://central.sonatype.org/pages/ossrh-guide.html>, <https://central.sonatype.org/pages/working-with-pgp-signatures.html>, and <http://maven.apache.org/plugins/maven-gpg-plugin/usage.html> )
+
+
+### Post-publishing steps
+
+Goto https://oss.sonatype.org/, sign with your oss credentials and follow steps
+from <https://central.sonatype.org/pages/ossrh-guide.html>.

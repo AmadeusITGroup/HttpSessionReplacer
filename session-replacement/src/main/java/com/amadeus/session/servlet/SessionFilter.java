@@ -146,7 +146,7 @@ public class SessionFilter implements Filter {
               resetManager.unlock();
             }
           } else {
-            logger.warn("already locked");
+            logger.warn("already lokked");
           }
         } else {
           logger.warn("Error into redis but the limits is not reach:" + errorTracker.size());
