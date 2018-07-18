@@ -116,7 +116,7 @@ public class SessionFilter implements Filter {
       try {
         commitRequest(request, originalRequest, servletContext);
       } catch (Exception e) {
-        logger.error("Error in sessionFiler finally catch", e);
+        logger.error("Error in sessionFilter finally catch", e);
         ext(sessionManager, e);
         throw e;
       }
