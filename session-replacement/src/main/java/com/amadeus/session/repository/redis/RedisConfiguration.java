@@ -15,9 +15,8 @@ import org.slf4j.LoggerFactory;
 import com.amadeus.session.SessionConfiguration;
 
 /**
- * This class encapsulates configuration of Redis servers. It provides helper
- * methods to read configuratin, resolve server/sentinel/cluster member names,
- * and configure JedisPool.
+ * This class encapsulates configuration of Redis servers. It provides helper methods to read configuratin, resolve
+ * server/sentinel/cluster member names, and configure JedisPool.
  */
 public class RedisConfiguration {
   /**
@@ -26,62 +25,65 @@ public class RedisConfiguration {
   public static final String METRIC_PREFIX = "com.amadeus.session";
 
   /**
-   * System or configuration property that specifies that redis server(s) are
-   * identified using IPv4 addresses. It is recommended that only one of the
-   * {@link #REDIS_USE_IPV4} and {@link #REDIS_USE_IPV6} properties are set to
+   * System or configuration property that specifies that redis server(s) are identified using IPv4 addresses. It is
+   * recommended that only one of the {@link #REDIS_USE_IPV4} and {@link #REDIS_USE_IPV6} properties are set to
    * <code>true</code>. Default behavior is to use IPv4 addresses.
    */
   public static final String REDIS_USE_IPV4 = "com.amadeus.session.redis.ipv4";
+
   /**
-   * System or configuration property that specifies that redis server(s) are
-   * identified using IPv6 addresses. It is recommended that only one of the
-   * {@link #REDIS_USE_IPV4} and {@link #REDIS_USE_IPV6} properties are set to
+   * System or configuration property that specifies that redis server(s) are identified using IPv6 addresses. It is
+   * recommended that only one of the {@link #REDIS_USE_IPV4} and {@link #REDIS_USE_IPV6} properties are set to
    * <code>true</code>. Default behavior is to use IPv4 addresses.
    */
   public static final String REDIS_USE_IPV6 = "com.amadeus.session.redis.ipv6";
+
   /**
-   * System or configuration property that specifies expiration strategy used by
-   * redis.
+   * System or configuration property that specifies expiration strategy used by redis.
    */
   public static final String REDIS_EXPIRATION_STRATEGY = "com.amadeus.session.redis.expiration";
+
   /**
-   * System or configuration property that specifies connection and socket
-   * timeout used by redis.
+   * System or configuration property that specifies connection and socket timeout used by redis.
    */
   public static final String REDIS_TIMEOUT = "com.amadeus.session.redis.timeout";
+
   /**
    * Default redis timeout.
    */
   public static final String DEFAULT_REDIS_TIMEOUT = "2000";
+
   /**
-   * System or configuration property that specifies port of redis server(s) or
-   * sentinel(s).
+   * System or configuration property that specifies port of redis server(s) or sentinel(s).
    */
   public static final String REDIS_PORT = "com.amadeus.session.redis.port";
+
   /**
-   * System or configuration property that specifies the address(es) and
-   * optionally port(s) of redis servers or sentinels.
+   * System or configuration property that specifies the address(es) and optionally port(s) of redis servers or
+   * sentinels.
    */
   public static final String REDIS_HOST = "com.amadeus.session.redis.host";
+
   /**
-   * System or configuration property that specifies the size of the pool of
-   * redis connections.
+   * System or configuration property that specifies the size of the pool of redis connections.
    */
   public static final String REDIS_POOL_SIZE = "com.amadeus.session.redis.pool";
+
   /**
    * Default size of the redis pool.
    */
   public static final String DEFAULT_REDIS_POOL_SIZE = "100";
+
   /**
-   * System or configuration property that specifies the redis clustering mode.
-   * Can be SINGLE, SENTINEL or CLUSTER.
+   * System or configuration property that specifies the redis clustering mode. Can be SINGLE, SENTINEL or CLUSTER.
    */
   public static final String REDIS_CLUSTER_MODE = "com.amadeus.session.redis.mode";
+
   /**
-   * System or configuration property that specifies the name of redis master
-   * when using sentinel mode.
+   * System or configuration property that specifies the name of redis master when using sentinel mode.
    */
   public static final String REDIS_MASTER_NAME = "com.amadeus.session.redis.master";
+
   /**
    * Default name for redis master when using sentinel mode.
    */
@@ -90,21 +92,35 @@ public class RedisConfiguration {
   static final Logger logger = LoggerFactory.getLogger(RedisConfiguration.class);
 
   static final String POOL_SIZE_PROPERTY = "pool=";
+
   static final String CLUSTER_MODE_PROPERTY = "mode=";
+
   static final String MASTER_NAME_PROPERTY = "master=";
+
   static final String HOST_PROPERTY = "host=";
+
   static final String REDIS_PORT_PROPERTY = "port=";
+
   static final String EXPIRATION_PROPERTY = "expiration=";
+
   static final String TIMEOUT_PROPERTY = "timeout=";
 
   String clusterMode;
+
   String masterName;
+
   String server;
+
   String port;
+
   String poolSize;
+
   ExpirationStrategy strategy;
+
   Boolean supportIpV6;
+
   Boolean supportIpV4;
+
   Integer timeout = null;
 
   public ExpirationStrategy getStrategy() {
@@ -160,8 +176,7 @@ public class RedisConfiguration {
   }
 
   /**
-   * Reads IP address support configuration. Implementation may support IPv4 and
-   * IPv6.
+   * Reads IP address support configuration. Implementation may support IPv4 and IPv6.
    */
   private void ipSupport(SessionConfiguration conf) {
     if (supportIpV4 == null) {
@@ -206,20 +221,19 @@ public class RedisConfiguration {
   }
 
   /**
-   * Utility method to extract host and port from configuration. Used for Redis
-   * cluster name resolution.
+   * Utility method to extract host and port from configuration. Used for Redis cluster name resolution.
    *
    * @return set containing host ip addresses and ports.
    */
   public List<HostAndPort> hostsAndPorts() {
-    List<HostAndPort> hostAndPort = new ArrayList<>();
+    List<HostAndPort> hostAndPorts = new ArrayList<>();
     int defaultPort = Integer.parseInt(this.port);
     try {
       String[] servers = server.split("[/;]");
       for (String aServer : servers) {
         String[] serverAndPort = aServer.split(":");
         int portToUse = portToUse(serverAndPort, defaultPort);
-        collectHosts(hostAndPort, serverAndPort, portToUse);
+        collectHosts(hostAndPorts, serverAndPort, portToUse);
       }
     } catch (UnknownHostException e) {
       throw new IllegalArgumentException("Unable to resolve cluster host for configuration " + this, e);
@@ -227,8 +241,13 @@ public class RedisConfiguration {
       throw new IllegalArgumentException(
           "Port paramter was in server configuration. Expecting numeric values, but it was not: " + this);
     }
-    logger.debug("Resolved hosts from '{}':{} are {}", server, port, hostAndPort);
-    return hostAndPort;
+
+    for (HostAndPort hostAndPort : hostAndPorts) {
+      logger.info("hostAndPort Host:" + hostAndPort.getHost() + "hostAndPort Port:" + hostAndPort.getPort());
+    }
+
+    logger.debug("Resolved hosts from '{}':{} are {}", server, port, hostAndPorts);
+    return hostAndPorts;
   }
 
   private void collectHosts(List<HostAndPort> hostAndPort, String[] serverAndPort, int portToUse)
@@ -259,8 +278,7 @@ public class RedisConfiguration {
   }
 
   /**
-   * Resolves server DNS name if needed. Retrieves all IP addresses associated
-   * with DNS name.
+   * Resolves server DNS name if needed. Retrieves all IP addresses associated with DNS name.
    *
    * @param serverName
    *          DNS name or IP address
@@ -277,8 +295,7 @@ public class RedisConfiguration {
   }
 
   /**
-   * Check if IP address is allowed: e.g. is address IPv6 or IPv4 and is that
-   * type of IP addresses allowed).
+   * Check if IP address is allowed: e.g. is address IPv6 or IPv4 and is that type of IP addresses allowed).
    *
    * @param host
    *          IP address of the host
@@ -317,6 +334,7 @@ public class RedisConfiguration {
 
   public static class HostAndPort {
     final String host;
+
     final int port;
 
     HostAndPort(String host, int port) {

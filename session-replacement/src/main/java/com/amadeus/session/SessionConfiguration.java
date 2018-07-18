@@ -18,33 +18,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Main configuration parameters for the session management. This includes
- * information if session can be distributed and default timeout.
+ * Main configuration parameters for the session management. This includes information if session can be distributed and
+ * default timeout.
  * <p>
  * The parameters are configured using following system properties:
  * <p>
- * <code>com.amadeus.session.distributable</code> set to true enables session to
- * be stored in distributed storage.
+ * <code>com.amadeus.session.distributable</code> set to true enables session to be stored in distributed storage.
  * <p>
- * <code>com.amadeus.session.timeout</code> specifies default session inactivity
- * timeout in seconds. Default value is 1800 seconds.
+ * <code>com.amadeus.session.timeout</code> specifies default session inactivity timeout in seconds. Default value is
+ * 1800 seconds.
  * <p>
- * <code>com.amadeus.session.non-cachable</code> specifies comma-separated list
- * of session attributes that must be synchronized with repository. By default,
- * this list is empty. <code>com.amadeus.session.replication-trigger</code>
- * specifies repository behavior when accessing attributes. See
- * {@link ReplicationTrigger} enumeration for details. Default value is
- * {@link ReplicationTrigger#SET_AND_NON_PRIMITIVE_GET}.
+ * <code>com.amadeus.session.non-cachable</code> specifies comma-separated list of session attributes that must be
+ * synchronized with repository. By default, this list is empty. <code>com.amadeus.session.replication-trigger</code>
+ * specifies repository behavior when accessing attributes. See {@link ReplicationTrigger} enumeration for details.
+ * Default value is {@link ReplicationTrigger#SET_AND_NON_PRIMITIVE_GET}.
  * <p>
- * <code>com.amadeus.session.logging.mdc.enabled</code> activates adding current
- * session id to logging systems Mapped Diagnostic Context (MDC).
+ * <code>com.amadeus.session.logging.mdc.enabled</code> activates adding current session id to logging systems Mapped
+ * Diagnostic Context (MDC).
  * <p>
- * <code>com.amadeus.session.logging.mdc.name</code> specifies key used to store
- * current session id to logging systems Mapped Diagnostic Context (MDC).
+ * <code>com.amadeus.session.logging.mdc.name</code> specifies key used to store current session id to logging systems
+ * Mapped Diagnostic Context (MDC).
  *
  */
 public class SessionConfiguration implements Serializable {
   private static final long serialVersionUID = -4538053252686416412L;
+
   private static final Logger logger = LoggerFactory.getLogger(SessionConfiguration.class);
 
   /**
@@ -52,20 +50,16 @@ public class SessionConfiguration implements Serializable {
    */
   public enum ReplicationTrigger {
     /**
-     * Session data is replicated on set of the attribute and when an attribute
-     * retrieved via Attribute contains a non-primitive type. This means that
-     * the get of an attribute of the well-known Java type such as Boolean,
-     * Character, Number (Double, Float, Integer, Long), doesn't trigger
-     * replication to repository, but getAttribute operation for other types of
-     * attribute will trigger update in the repository.
+     * Session data is replicated on set of the attribute and when an attribute retrieved via Attribute contains a
+     * non-primitive type. This means that the get of an attribute of the well-known Java type such as Boolean,
+     * Character, Number (Double, Float, Integer, Long), doesn't trigger replication to repository, but getAttribute
+     * operation for other types of attribute will trigger update in the repository.
      */
     SET_AND_NON_PRIMITIVE_GET(true),
     /**
-     * This option assumes that the application will explicitly call
-     * setAttribute on the session when the data needs to be replicated. It
-     * prevents unnecessary replication and can benefit overall performance, but
-     * is inherently unsafe as attributes that were changed after the get, but
-     * where never
+     * This option assumes that the application will explicitly call setAttribute on the session when the data needs to
+     * be replicated. It prevents unnecessary replication and can benefit overall performance, but is inherently unsafe
+     * as attributes that were changed after the get, but where never
      */
     SET(false);
 
@@ -76,8 +70,7 @@ public class SessionConfiguration implements Serializable {
     }
 
     /**
-     * Returns <code>true</code> if session should be replicated on getAttribute
-     * operation
+     * Returns <code>true</code> if session should be replicated on getAttribute operation
      *
      * @return <code>true</code> if session should be replicated on get
      */
@@ -86,8 +79,8 @@ public class SessionConfiguration implements Serializable {
     }
 
     /**
-     * Checks passed value against allowed values in enumeration. If it is not
-     * valid, returns default value and logs error.
+     * Checks passed value against allowed values in enumeration. If it is not valid, returns default value and logs
+     * error.
      *
      * @param replicationValue
      *          value to check
@@ -108,8 +101,7 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Attribute provider can be used via call to
-   * {@link SessionConfiguration#initializeFrom(AttributeProvider)} to set up
+   * Attribute provider can be used via call to {@link SessionConfiguration#initializeFrom(AttributeProvider)} to set up
    * SessionConfiguration.
    */
   public interface AttributeProvider {
@@ -130,45 +122,45 @@ public class SessionConfiguration implements Serializable {
     Object source();
   }
 
-  
-  
-  
-  
-  
   /**
    * Indicates the interval when error are count.
    */
   public static final int DEFAULT_TRACKER_ERROR_INTERVAL_MILLISECONDS_NUM = 60000;
-  public static final String TRACKER_ERROR_INTERVAL_MILLISECONDS_KEY = "com.amadeus.session.tracker.interval" ;
+
+  public static final String TRACKER_ERROR_INTERVAL_MILLISECONDS_KEY = "com.amadeus.session.tracker.interval";
+
   /**
    * Indicates the maximun number of errors before request the reset of redis connection.
    */
   public static final int DEFAULT_TRACKER_ERROR_LIMITS_NUMBER = 50;
-  public static final String  TRACKER_ERROR_LIMITS_NUMBER_KEY = "com.amadeus.session.tracker.limits" ;
-  
+
+  public static final String TRACKER_ERROR_LIMITS_NUMBER_KEY = "com.amadeus.session.tracker.limits";
+
   /**
    * Indicates if sessions can be distributed or not.
    */
   public static final String DISTRIBUTABLE_SESSION = "com.amadeus.session.distributable";
+
   /**
-   * Non-distributable web apps will be treated as distributable if this
-   * parameter is set to <code>true</code>.
+   * Non-distributable web apps will be treated as distributable if this parameter is set to <code>true</code>.
    */
   public static final String FORCE_DISTRIBUTABLE = "com.amadeus.session.distributable.force";
+
   /**
    * Default session timeout in seconds.
    */
   public static final String DEFAULT_SESSION_TIMEOUT = "com.amadeus.session.timeout";
+
   /**
-   * List of attributes that must be retrieved from repository (i.e. they can't
-   * be cached locally).
+   * List of attributes that must be retrieved from repository (i.e. they can't be cached locally).
    */
   public static final String NON_CACHEABLE_ATTRIBUTES = "com.amadeus.session.non-cacheable";
+
   /**
-   * Strategy for for triggering replication. See {@link ReplicationTrigger}
-   * enumeration.
+   * Strategy for for triggering replication. See {@link ReplicationTrigger} enumeration.
    */
   public static final String SESSION_REPLICATION_TRIGGER = "com.amadeus.session.replication-trigger";
+
   /**
    * Default strategy for detecting that attribute changed.
    */
@@ -178,35 +170,36 @@ public class SessionConfiguration implements Serializable {
    * Is session id stored in logging MDC.
    */
   public static final String LOG_MDC_SESSION_ENABLED = "com.amadeus.session.logging.mdc.enabled";
+
   /**
    * The name of the logging MDC attribute where session id is stored.
    */
   public static final String LOG_MDC_SESSION_NAME = "com.amadeus.session.logging.mdc.name";
+
   /**
    * Default key used to store session id in logging system's MDC.
    */
   public static final String LOGGING_MDC_DEFAULT_KEY = "JSESSIONID";
 
   /**
-   * Activates sticky session strategy. When activated, implementation should
-   * try to handle all session activity on the last node that processed client
-   * request that impacts the session.
+   * Activates sticky session strategy. When activated, implementation should try to handle all session activity on the
+   * last node that processed client request that impacts the session.
    */
   public static final String STICKY_SESSIONS = "com.amadeus.session.sticky";
+
   /**
    * By default, sessions are sticky.
    */
   public static final String DEFAULT_STICKY_SESSIONS = "true";
 
   /**
-   * The namespace for sessions. It is best practice to have sessions in
-   * different applications or webapps should having different namespaces. If
-   * applications want to share sessions, then they can use same namespace. In
-   * case of webapps, namespace can be defined using servlet init parameter, or
-   * if not present, the context name of the webapp is used as namespace.
+   * The namespace for sessions. It is best practice to have sessions in different applications or webapps should having
+   * different namespaces. If applications want to share sessions, then they can use same namespace. In case of webapps,
+   * namespace can be defined using servlet init parameter, or if not present, the context name of the webapp is used as
+   * namespace.
    */
   public static final String SESSION_NAMESPACE = "com.amadeus.session.namespace";
-  
+
   /**
    * Default session namespace is <code>default</code>
    */
@@ -216,46 +209,48 @@ public class SessionConfiguration implements Serializable {
    * Indicate if generated session prefixed with!Timestamp.
    */
   public static final String SESSION_TIMESTAMP = "com.amadeus.session.timestamp";
-  
+
   /**
    * Default session timestamp is <code>false</code>
    */
   public static final String DEFAULT_SESSION_TIMESTAMP = "false";
-  
+
   /**
    * Default session timeout is 30 minutes.
    */
   public static final int DEFAULT_SESSION_TIMEOUT_VALUE_NUM = 1800;
+
   // String version of default session timeout
   private static final String DEFAULT_SESSION_TIMEOUT_VALUE = String.valueOf(DEFAULT_SESSION_TIMEOUT_VALUE_NUM);
 
   /**
-   * Enables overriding the name of the host. By default it is retrieved from
-   * environment. See {@link #initNode()} for details.
+   * Enables overriding the name of the host. By default it is retrieved from environment. See {@link #initNode()} for
+   * details.
    */
   public static final String SESSION_HOST = "com.amadeus.session.host";
+
   /**
-   * ServletContext parameter or system property containing the configuration
-   * for the {@link SessionRepository}. See each implementation for detailed
-   * format. By convention, items in the format are separated by commas.
+   * ServletContext parameter or system property containing the configuration for the {@link SessionRepository}. See
+   * each implementation for detailed format. By convention, items in the format are separated by commas.
    */
   public static final String PROVIDER_CONFIGURATION = "com.amadeus.session.repository.conf";
+
   /**
-   * ServletContext parameter or system property containing the name of
-   * {@link SessionRepositoryFactory} implementation. The value is either name
-   * of the class or registered repository name such as <code>redis</code>,
+   * ServletContext parameter or system property containing the name of {@link SessionRepositoryFactory} implementation.
+   * The value is either name of the class or registered repository name such as <code>redis</code>,
    * <code>in-memory</code>
    */
   public static final String REPOSITORY_FACTORY_NAME = "com.amadeus.session.repository.factory";
+
   /**
-   * ServletContext parameter or system property containing comma delimited list 
-   * of the names of  {@link SessionTracking} implementations or values from
-   * <code>com.amadeus.session.servlet.SessionPropagation</code> enumeration.
+   * ServletContext parameter or system property containing comma delimited list of the names of {@link SessionTracking}
+   * implementations or values from <code>com.amadeus.session.servlet.SessionPropagation</code> enumeration.
    */
   public static final String SESSION_PROPAGATOR_NAME = "com.amadeus.session.tracking";
+
   /**
-   * ServletContext parameter or system property containing the name of the
-   * cookie or URL element for propagating session.
+   * ServletContext parameter or system property containing the name of the cookie or URL element for propagating
+   * session.
    *
    * @see #DEFAULT_SESSION_ID_NAME
    */
@@ -277,19 +272,20 @@ public class SessionConfiguration implements Serializable {
    * ServletContext parameter or system property disabled session management.
    */
   public static final String DISABLED_SESSION = "com.amadeus.session.disabled";
+
   /**
-   * ServletContext parameter or system property activating sharing of instances
-   * of session during concurrent requests.
+   * ServletContext parameter or system property activating sharing of instances of session during concurrent requests.
    */
   public static final String REUSE_CONCURRENT_SESSION = "com.amadeus.session.reuse.concurrent";
+
   /**
-   * ServletContext parameter or system property indicating what provider
-   * generates session ids.
+   * ServletContext parameter or system property indicating what provider generates session ids.
    */
   public static final String SESSION_ID_PROVIDER = "com.amadeus.session.id";
+
   /**
-   * ServletContext parameter or system property specifying the length of the
-   * generates session ids. Used in {@link RandomIdProvider}.
+   * ServletContext parameter or system property specifying the length of the generates session ids. Used in
+   * {@link RandomIdProvider}.
    */
   public static final String SESSION_ID_LENGTH = "com.amadeus.session.id.length";
 
@@ -299,20 +295,21 @@ public class SessionConfiguration implements Serializable {
   public static final String DEFAULT_SESSION_ID_LENGTH = "30";
 
   /**
-   * Specifies if listeners should be discovered using interception of native
-   * session.
+   * Specifies if listeners should be discovered using interception of native session.
    */
   public static final String INTERCEPT_LISTENERS = "com.amadeus.session.intercept.listeners";
+
   /**
    * Specifies if commit should be done on all concurrent requests to session.
    */
   public static final String COMMIT_ON_ALL_CONCURRENT = "com.amadeus.session.commit.concurrent";
+
   /**
-   * Specifies key to be used for encryption. When present activates encryption
-   * automatically. If key specifies a URL, key will be loaded from specified
-   * address. Otherwise it is treated literally.
+   * Specifies key to be used for encryption. When present activates encryption automatically. If key specifies a URL,
+   * key will be loaded from specified address. Otherwise it is treated literally.
    */
   public static final String SESSION_ENCRYPTION_KEY = "com.amadeus.session.encryption.key";
+
   /**
    * Set to <code>true</code> if session should delegate PrintWriter implementation to container. By default it is
    * <code>false</code> and session replacer provides it's own implementation.
@@ -320,30 +317,53 @@ public class SessionConfiguration implements Serializable {
   public static final String DELEGATE_WRITER = "com.amadeus.session.delegate.writer";
 
   private int trackerInterval;
+
   private int trackerLimits;
+
   private int maxInactiveInterval;
+
   private boolean distributable;
+
   private boolean sticky;
+
   private boolean timestampSufix;
+
   private boolean allowedCachedSessionReuse;
+
   private boolean interceptListeners;
+
   private boolean forceDistributable;
+
   private boolean loggingMdcActive;
+
   private boolean usingEncryption;
+
   private String loggingMdcKey;
+
   private String node;
+
   private String namespace;
+
   private String providerConfiguration;
+
   private String repositoryFactory;
+
   private String[] sessionTracking;
+
   private String sessionIdName;
+
   private String encryptionKey;
 
   private Set<String> nonCacheable;
+
   private ReplicationTrigger replicationTrigger;
+
   private Properties attributes;
+
   private transient AttributeProvider currentAttributeProvider;
+
   private boolean commitOnAllConcurrent;
+
   private boolean delegateWriter;
 
   /**
@@ -380,38 +400,37 @@ public class SessionConfiguration implements Serializable {
       logger.error("`{}` system property was not an integer: {}, using default {}", DEFAULT_SESSION_TIMEOUT,
           inactiveValue, maxInactiveInterval);
     }
-    
-    trackerInterval  = init(TRACKER_ERROR_INTERVAL_MILLISECONDS_KEY,DEFAULT_TRACKER_ERROR_INTERVAL_MILLISECONDS_NUM);
-    trackerLimits  = init(TRACKER_ERROR_LIMITS_NUMBER_KEY,DEFAULT_TRACKER_ERROR_LIMITS_NUMBER);
-    logger.error("trackerInterval:" + trackerInterval );
-    logger.error("trackerLimits  :" + trackerLimits );
-    
-    
+
+    trackerInterval = init(TRACKER_ERROR_INTERVAL_MILLISECONDS_KEY, DEFAULT_TRACKER_ERROR_INTERVAL_MILLISECONDS_NUM);
+    trackerLimits = init(TRACKER_ERROR_LIMITS_NUMBER_KEY, DEFAULT_TRACKER_ERROR_LIMITS_NUMBER);
+    logger.info("trackerInterval:" + trackerInterval);
+    logger.info("trackerLimits  :" + trackerLimits);
+
     node = initNode();
     setEncryptionKey(getPropertySecured(SESSION_ENCRYPTION_KEY, null));
   }
 
-  private int init( String key , int def) {
+  private int init(String key, int def) {
     int intVal = def;
-    String strVal = getPropertySecured(key , String.valueOf(def));
+    String strVal = getPropertySecured(key, String.valueOf(def));
     try {
       if (nonEmpty(strVal)) {
         intVal = Integer.parseInt(strVal);
       }
     } catch (NumberFormatException e) {
-      logger.error("`{}` system property was not an integer: {}, using default {}", key,
-          strVal, intVal);
+      logger.error("`{}` system property was not an integer: {}, using default {}", key, strVal, intVal);
     }
-    return intVal ;
+    return intVal;
   }
 
   /**
-   * Parses value as comma-separated list of session propagators. Used to
-   * specify several propagator in order of priority.
+   * Parses value as comma-separated list of session propagators. Used to specify several propagator in order of
+   * priority.
+   * 
    * @param value
    *          the value to parse
-   * @param defaultValue 
-   *          the default value if value is null 
+   * @param defaultValue
+   *          the default value if value is null
    */
   private String[] parsePropagators(String value, String[] defaultValue) {
     if (value == null) {
@@ -421,8 +440,7 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Sets encryption key to use. If key is <code>null</code>, encryption is
-   * deactivated.
+   * Sets encryption key to use. If key is <code>null</code>, encryption is deactivated.
    *
    * @param key
    *          encryption key to use or <code>null</code>
@@ -437,9 +455,8 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Allows setting up configuration from external source. It is expected that
-   * external source offers the same attributes as the ones read from system
-   * properties.
+   * Allows setting up configuration from external source. It is expected that external source offers the same
+   * attributes as the ones read from system properties.
    *
    * @param provider
    *          the external source for attributes
@@ -474,26 +491,25 @@ public class SessionConfiguration implements Serializable {
     if (nonEmpty(value)) {
       setNonCacheable(value);
     }
-    maxInactiveInterval = initInt(provider,DEFAULT_SESSION_TIMEOUT,maxInactiveInterval);
-    trackerLimits = initInt(provider,TRACKER_ERROR_LIMITS_NUMBER_KEY ,trackerLimits);
-    trackerInterval = initInt(provider,TRACKER_ERROR_INTERVAL_MILLISECONDS_KEY,trackerInterval);
-    
-    logger.error("trackerInterval:" + trackerInterval );
-    logger.error("trackerLimits  :" + trackerLimits );
-    
+    maxInactiveInterval = initInt(provider, DEFAULT_SESSION_TIMEOUT, maxInactiveInterval);
+    trackerLimits = initInt(provider, TRACKER_ERROR_LIMITS_NUMBER_KEY, trackerLimits);
+    trackerInterval = initInt(provider, TRACKER_ERROR_INTERVAL_MILLISECONDS_KEY, trackerInterval);
+
+    logger.info("trackerInterval:" + trackerInterval);
+    logger.info("trackerLimits  :" + trackerLimits);
+
   }
 
-  private int initInt(AttributeProvider provider , String name , int maxInactiveInterval) {
+  private int initInt(AttributeProvider provider, String name, int maxInactiveInterval) {
     String val = provider.getAttribute(name);
     if (nonEmpty(val)) {
       try {
         return Integer.parseInt(val);
       } catch (NumberFormatException e) {
-        logger.warn("`{}` configuration attribute was not an integer: {} for source {}", name, val,
-            provider.source());
+        logger.warn("`{}` configuration attribute was not an integer: {} for source {}", name, val, provider.source());
       }
     }
-    return maxInactiveInterval; 
+    return maxInactiveInterval;
   }
 
   private boolean read(String key, boolean defaultValue) {
@@ -574,8 +590,8 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Sets set of keys that should not be cached locally by extracting keys from
-   * comma-separated list provided as parameter.
+   * Sets set of keys that should not be cached locally by extracting keys from comma-separated list provided as
+   * parameter.
    *
    * @param nonCacheableAttributesCsv
    *          list of non cacheable attributes in comma-separated list
@@ -607,8 +623,8 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Returns <code>true</code> if session information should be stored in
-   * logging systems Mapped Diagnostic Context (MDC).
+   * Returns <code>true</code> if session information should be stored in logging systems Mapped Diagnostic Context
+   * (MDC).
    *
    * @return <code>true</code> if session information should be stored in MDC
    */
@@ -617,8 +633,7 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Sets whether session information should be stored in logging systems Mapped
-   * Diagnostic Context (MDC).
+   * Sets whether session information should be stored in logging systems Mapped Diagnostic Context (MDC).
    *
    * @param loggingMdcActive
    *          <code>true</code> if logging should add information to MDC
@@ -628,8 +643,7 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Returns key used to store current session id to logging system's Mapped
-   * Diagnostic Context (MDC).
+   * Returns key used to store current session id to logging system's Mapped Diagnostic Context (MDC).
    *
    * @return the key used for session id during logging
    */
@@ -638,20 +652,18 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Sets key used to store current session id to logging system's Mapped
-   * Diagnostic Context (MDC).
+   * Sets key used to store current session id to logging system's Mapped Diagnostic Context (MDC).
    *
    * @param loggingMdcKey
-   *          the key value to use. If value is null,
-   *          {@link #LOGGING_MDC_DEFAULT_KEY} is used as key
+   *          the key value to use. If value is null, {@link #LOGGING_MDC_DEFAULT_KEY} is used as key
    */
   public void setLoggingMdcKey(String loggingMdcKey) {
     this.loggingMdcKey = loggingMdcKey;
   }
 
   /**
-   * Returns <code>true</code> if sessions are sticky. Sticky sessions should be
-   * expired on the last node that used them.
+   * Returns <code>true</code> if sessions are sticky. Sticky sessions should be expired on the last node that used
+   * them.
    *
    * @return <code>true</code> if session is sticky
    */
@@ -687,7 +699,7 @@ public class SessionConfiguration implements Serializable {
   public void setTimestampSufix(boolean timestamp) {
     this.timestampSufix = timestamp;
   }
-  
+
   /**
    * Returns id of the current node
    *
@@ -708,8 +720,7 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Namespace for session. It will never be <code>null</code> (if null, value
-   * <code>default</code>).
+   * Namespace for session. It will never be <code>null</code> (if null, value <code>default</code>).
    *
    * @return namespace for session
    */
@@ -775,9 +786,8 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Returns class name or unique id of the session tracking.
-   * {@link SessionTracking} is the class responsible for reading and
-   * propagating session id.
+   * Returns class name or unique id of the session tracking. {@link SessionTracking} is the class responsible for
+   * reading and propagating session id.
    *
    * @return the name of the session tracking class
    */
@@ -786,19 +796,18 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Sets class name or unique id of the session tracking. See
-   * {@link #getSessionTracking()}.
+   * Sets class name or unique id of the session tracking. See {@link #getSessionTracking()}.
    *
    * @param sessionTracking
    *          the unique id or name of the session tracking class
    */
-  public void setSessionTracking(String...sessionTracking) {
+  public void setSessionTracking(String... sessionTracking) {
     this.sessionTracking = sessionTracking;
   }
 
   /**
-   * Returns name of identifier that is used to stored session id. E.g. this
-   * will be cookie name if session uses cookie propagation.
+   * Returns name of identifier that is used to stored session id. E.g. this will be cookie name if session uses cookie
+   * propagation.
    *
    * @return the session identifier
    */
@@ -817,8 +826,8 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Returns <code>true</code> if multiple concurrent threads that operate on
-   * same session can re-use session from local cache.
+   * Returns <code>true</code> if multiple concurrent threads that operate on same session can re-use session from local
+   * cache.
    *
    * @return <code>true</code> if concurrent threads can access same session
    */
@@ -827,8 +836,7 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Enables or disables sharing of session instances between multiple
-   * concurrent threads.
+   * Enables or disables sharing of session instances between multiple concurrent threads.
    *
    * @param allowedCachedSessionReuse
    *          <code>true</code> if concurrent threads can access same session
@@ -838,8 +846,7 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Initializes node id. Node id is read either from property, or from
-   * environment variables depending on OS.
+   * Initializes node id. Node id is read either from property, or from environment variables depending on OS.
    *
    * @return node id
    */
@@ -877,15 +884,13 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Returns value of system property, and logs information if access to
-   * properties is protected.
+   * Returns value of system property, and logs information if access to properties is protected.
    *
    * @param key
    *          property key
    * @param def
    *          default value for property
-   * @return value of the property or default value if property is not defined
-   *         or if access is protected
+   * @return value of the property or default value if property is not defined or if access is protected
    */
   public static String getPropertySecured(String key, String def) {
     try {
@@ -897,16 +902,14 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Returns value of attribute from attribute provider if it was supplied or
-   * from system property if it is not present or if there is no attribute
-   * provider
+   * Returns value of attribute from attribute provider if it was supplied or from system property if it is not present
+   * or if there is no attribute provider
    *
    * @param key
    *          key that identifies attribute or system property
    * @param defaultValue
    *          default value for key
-   * @return value of the attribute, or property, or default value if it was not
-   *         defined or if access is protected
+   * @return value of the attribute, or property, or default value if it was not defined or if access is protected
    */
   public String getAttribute(String key, String defaultValue) {
     String value = attributes.getProperty(key);
@@ -922,8 +925,7 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Sets attribute value. Used to add configuration items not supported by
-   * {@link SessionConfiguration}.
+   * Sets attribute value. Used to add configuration items not supported by {@link SessionConfiguration}.
    *
    * @param key
    *          the name of the attribute
@@ -950,65 +952,58 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Returns <code>true</code> if distribution/replication should be used even
-   * when web app is marked as non-distributable.
+   * Returns <code>true</code> if distribution/replication should be used even when web app is marked as
+   * non-distributable.
    *
-   * @return <code>true</code> if distribution/replication should be used even
-   *         when web app is marked as non-distributable.
+   * @return <code>true</code> if distribution/replication should be used even when web app is marked as
+   *         non-distributable.
    */
   public boolean isForceDistributable() {
     return forceDistributable;
   }
 
   /**
-   * Sets whether distribution/replication should be used even when web app is
-   * marked as non-distributable.
+   * Sets whether distribution/replication should be used even when web app is marked as non-distributable.
    *
    * @param forceDistributable
-   *          <code>true</code> if distribution/replication should be used even
-   *          when web app is marked as non-distributable.
+   *          <code>true</code> if distribution/replication should be used even when web app is marked as
+   *          non-distributable.
    */
   public void setForceDistributable(boolean forceDistributable) {
     this.forceDistributable = forceDistributable;
   }
 
   /**
-   * Returns <code>true</code> if commit of attributes should be done on all
-   * concurrent requests to session.
+   * Returns <code>true</code> if commit of attributes should be done on all concurrent requests to session.
    *
-   * @return <code>true</code> if commit should be done on all concurrent
-   *         requests
+   * @return <code>true</code> if commit should be done on all concurrent requests
    */
   public boolean isCommitOnAllConcurrent() {
     return commitOnAllConcurrent;
   }
 
   /**
-   * Controls if commit of attributes should be done on all concurrent requests
-   * to session.
+   * Controls if commit of attributes should be done on all concurrent requests to session.
    *
    * @param commitOnAllConcurrent
-   *          <code>true</code> if commit should be done on all concurrent
-   *          requests
+   *          <code>true</code> if commit should be done on all concurrent requests
    */
   public void setCommitOnAllConcurrent(boolean commitOnAllConcurrent) {
     this.commitOnAllConcurrent = commitOnAllConcurrent;
   }
 
   /**
-   * Returns <code>true</code> if session should be encrypted before storing in
-   * repository.
+   * Returns <code>true</code> if session should be encrypted before storing in repository.
    *
-   * @return <code>true</code> if session should be encrypted before storing in
-   *         repository
+   * @return <code>true</code> if session should be encrypted before storing in repository
    */
   public boolean isUsingEncryption() {
     return usingEncryption;
   }
 
   /**
-   * Sets whether the session data is stored in encrypted form in repository. If
-   * set to <code>true</code>, encryption key must be set also.
+   * Sets whether the session data is stored in encrypted form in repository. If set to <code>true</code>, encryption
+   * key must be set also.
    *
    * @param usingEncryption
    *          <code>true</code> if session data is stored in encrypted form
@@ -1018,8 +1013,7 @@ public class SessionConfiguration implements Serializable {
   }
 
   /**
-   * Returns encryption key to use. If encryption is disabled, returns
-   * <code>null</code>.
+   * Returns encryption key to use. If encryption is disabled, returns <code>null</code>.
    *
    * @return the encryption key
    */
@@ -1079,17 +1073,17 @@ public class SessionConfiguration implements Serializable {
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append("SessionConfiguration [namespace=").append(namespace).append(", node=").append(node)
-           .append(", sessionIdName=").append(sessionIdName).append(", maxInactiveInterval=")
-           .append(maxInactiveInterval).append(", distributable=").append(distributable).append(", sticky=")
-           .append(sticky).append(", allowedCachedSessionReuse=").append(allowedCachedSessionReuse)
-           .append(", interceptListeners=").append(interceptListeners).append(", forceDistributable=")
-           .append(forceDistributable).append(", loggingMdcActive=").append(loggingMdcActive)
-           .append(", usingEncryption=").append(usingEncryption).append(", loggingMdcKey=").append(loggingMdcKey)
-           .append(", providerConfiguration=").append(providerConfiguration).append(", repositoryFactory=")
-           .append(repositoryFactory).append(", sessionTracking=").append(sessionTracking).append(", encryptionKey=")
-           .append(encryptionKey).append(", nonCacheable=").append(nonCacheable).append(", replicationTrigger=")
-           .append(replicationTrigger).append(", attributes=").append(attributes).append(", commitOnAllConcurrent=")
-           .append(commitOnAllConcurrent).append(", timestamp=").append(timestampSufix).append("]");
+        .append(", sessionIdName=").append(sessionIdName).append(", maxInactiveInterval=").append(maxInactiveInterval)
+        .append(", distributable=").append(distributable).append(", sticky=").append(sticky)
+        .append(", allowedCachedSessionReuse=").append(allowedCachedSessionReuse).append(", interceptListeners=")
+        .append(interceptListeners).append(", forceDistributable=").append(forceDistributable)
+        .append(", loggingMdcActive=").append(loggingMdcActive).append(", usingEncryption=").append(usingEncryption)
+        .append(", loggingMdcKey=").append(loggingMdcKey).append(", providerConfiguration=")
+        .append(providerConfiguration).append(", repositoryFactory=").append(repositoryFactory)
+        .append(", sessionTracking=").append(sessionTracking).append(", encryptionKey=").append(encryptionKey)
+        .append(", nonCacheable=").append(nonCacheable).append(", replicationTrigger=").append(replicationTrigger)
+        .append(", attributes=").append(attributes).append(", commitOnAllConcurrent=").append(commitOnAllConcurrent)
+        .append(", timestamp=").append(timestampSufix).append("]");
     return builder.toString();
   }
 

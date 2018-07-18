@@ -16,6 +16,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class SessionFilter implements Filter {
    */
   @Override
   public void init(FilterConfig config) {
-    logger.warn("init");
+    logger.info("init");
     initForSession(config);
   }
 
@@ -81,21 +82,45 @@ public class SessionFilter implements Filter {
   @Override
   public void doFilter(ServletRequest originalRequest, ServletResponse originalResponse, FilterChain chain)
       throws IOException, ServletException {
+
+    SessionManager sessionManager = (SessionManager)servletContext.getAttribute(Attributes.SESSION_MANAGER);
+    if (sessionManager == null) {
+      initSessionManagement(servletContext);
+    }
     ServletRequest request = prepareRequest(originalRequest, originalResponse, servletContext);
     ServletResponse response = prepareResponse(request, originalResponse, servletContext);
-    SessionManager sessionManager = (SessionManager)servletContext.getAttribute(Attributes.SESSION_MANAGER);
 
     try {
+
+      logger.debug("Start of SessionFilter doFilter ");
       // Call next filter in chain
       chain.doFilter(request, response);
+
+      logger.debug("after the doFilter of SessionFilter doFilter ");
+
+    } catch (Exception e) {
+
+      logger.error("Error in sessionFiler catch", e);
+      HttpServletResponse resp = (HttpServletResponse)originalResponse;
+      if (resp != null) {
+        if (!resp.isCommitted()) {
+          resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+      } else {
+        // HttpSession replacer is normally only used with HttpServletResponse so should be not null
+      }
+
+      throw e;
     } finally {
+      logger.debug("inside finally of  SessionFilter doFilter ");
       try {
         commitRequest(request, originalRequest, servletContext);
       } catch (Exception e) {
-        logger.error("Error into commit doFilter", e);
+        logger.error("Error in sessionFilter finally catch", e);
         ext(sessionManager, e);
         throw e;
       }
+      logger.debug("after finally of  SessionFilter doFilter ");
     }
   }
 

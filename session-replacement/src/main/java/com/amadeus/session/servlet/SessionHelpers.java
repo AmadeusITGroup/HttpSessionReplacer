@@ -162,7 +162,7 @@ public final class SessionHelpers {
    *
    */
   public MethodHandle[] initSessionManagement(ServletContext servletContext, boolean reset) {
-    logger.warn("initSessionManagement start.");
+    logger.info("initSessionManagement start.");
     ResetManager resetManager = (ResetManager)servletContext.getAttribute(Attributes.ResetManager);
     if (resetManager == null) {
       SessionConfiguration conf = initConf(servletContext);
@@ -188,26 +188,31 @@ public final class SessionHelpers {
       SessionConfiguration conf = initConf(servletContext);
       logger.info("{}", conf);
       SessionRepository repository = repository(servletContext, conf);
-      SessionTracking tracking = getTracking(servletContext, conf);
+      if (repository.isConnected()) {
+        SessionTracking tracking = getTracking(servletContext, conf);
+        ExecutorFacade executors = new ExecutorFacade(conf);
 
-      ExecutorFacade executors = new ExecutorFacade(conf);
+        ClassLoader classLoader = classLoader(servletContext);
+        SessionManager sessionManagement = new SessionManager(executors, factory, repository, tracking, notifier, conf,
+            classLoader);
+        interceptListeners = conf.isInterceptListeners();
 
-      ClassLoader classLoader = classLoader(servletContext);
-      SessionManager sessionManagement = new SessionManager(executors, factory, repository, tracking, notifier, conf,
-          classLoader);
-      interceptListeners = conf.isInterceptListeners();
-
-      if (sessionManagement.isConnected()) {
-        servletContext.setAttribute(Attributes.SESSION_MANAGER, sessionManagement);
-        logger.warn("The connection to redis is ok.");
-        resetManager.connected();
+        if (sessionManagement.isConnected()) {
+          servletContext.setAttribute(Attributes.SESSION_MANAGER, sessionManagement);
+          logger.info("The connection to redis is ok.");
+          resetManager.connected();
+        } else {
+          logger.warn("The connection to redis is ko.");
+          resetManager.notConnected();
+          sessionManagement.reset();
+        }
       } else {
         logger.warn("The connection to redis is ko.");
         resetManager.notConnected();
       }
 
     }
-    logger.warn("initSessionManagement end.");
+    logger.info("initSessionManagement end.");
     return methods;
   }
 

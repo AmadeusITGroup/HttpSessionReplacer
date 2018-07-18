@@ -26,33 +26,42 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 
 /**
- * Support class that provides methods for launching and scheduling of tasks.
- * The implementation will use either managed thread factory when supported by
- * JEE container, or {@link Executors#defaultThreadFactory()} if the managed one
- * was not available.
+ * Support class that provides methods for launching and scheduling of tasks. The implementation will use either managed
+ * thread factory when supported by JEE container, or {@link Executors#defaultThreadFactory()} if the managed one was
+ * not available.
  * <p>
- * The implementation also provides metrics about number of thread in pool and
- * number of active threads.
+ * The implementation also provides metrics about number of thread in pool and number of active threads.
  * </p>
  */
 public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
   private static final Logger logger = LoggerFactory.getLogger(ExecutorFacade.class);
 
   private static final String THREAD_JNDI = "com.amadeus.session.thread.jndi";
+
   private static final String WORK_QUEUE_SIZE = "com.amadeus.session.thread.queue";
+
   private static final String METRIC_PREFIX = "com.amadeus.session";
 
   private static final int WAIT_FOR_SHUTDOWN = 10;
+
   private static final int CORE_THREADS_IN_POOL = 4;
+
   private static final int SCHEDULER_THREADS_IN_POOL = 2;
+
   private static final int THREAD_KEEPALIVE_TIME = 10;
+
   private static final int MAXIMUM_THREADS_IN_POOL = 40;
+
   private static final String MAXIMUM_WORK_QUEUE_SIZE = String.valueOf(100);
 
   private final ThreadPoolExecutor executor;
+
   private final ScheduledThreadPoolExecutor scheduledExecutor;
+
   private final ThreadFactory baseThreadFactory;
+
   private final String namespace;
+
   private final AtomicLong count;
 
   /**
@@ -85,8 +94,7 @@ public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
   }
 
   /**
-   * This method creates new thread from pool and add namespace to the thread
-   * name.
+   * This method creates new thread from pool and add namespace to the thread name.
    */
   @Override
   public Thread newThread(Runnable r) {
@@ -97,9 +105,8 @@ public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
   }
 
   /**
-   * Submits a Runnable task for execution and returns a Future representing
-   * that task. The Future's {@code get} method will return {@code null} upon
-   * <em>successful</em> completion.
+   * Submits a Runnable task for execution and returns a Future representing that task. The Future's {@code get} method
+   * will return {@code null} upon <em>successful</em> completion.
    *
    * @param task
    *          the task to submit
@@ -114,15 +121,12 @@ public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
   }
 
   /**
-   * Creates and executes a periodic action that becomes enabled first after the
-   * given initial delay, and subsequently with the given period; that is
-   * executions will commence after {@code initialDelay} then
-   * {@code initialDelay+period}, then {@code initialDelay + 2 * period}, and so
-   * on. If any execution of the task encounters an exception, subsequent
-   * executions are suppressed. Otherwise, the task will only terminate via
-   * cancellation or termination of the executor. If any execution of this task
-   * takes longer than its period, then subsequent executions may start late,
-   * but will not concurrently execute.
+   * Creates and executes a periodic action that becomes enabled first after the given initial delay, and subsequently
+   * with the given period; that is executions will commence after {@code initialDelay} then
+   * {@code initialDelay+period}, then {@code initialDelay + 2 * period}, and so on. If any execution of the task
+   * encounters an exception, subsequent executions are suppressed. Otherwise, the task will only terminate via
+   * cancellation or termination of the executor. If any execution of this task takes longer than its period, then
+   * subsequent executions may start late, but will not concurrently execute.
    *
    * @param task
    *          the task to execute
@@ -132,9 +136,8 @@ public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
    *          the period between successive executions
    * @param unit
    *          the time unit of the initialDelay and period parameters
-   * @return a ScheduledFuture representing pending completion of the task, and
-   *         whose {@code get()} method will throw an exception upon
-   *         cancellation
+   * @return a ScheduledFuture representing pending completion of the task, and whose {@code get()} method will throw an
+   *         exception upon cancellation
    * @throws RejectedExecutionException
    *           if the task cannot be scheduled for execution
    * @throws NullPointerException
@@ -164,8 +167,7 @@ public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
   }
 
   /**
-   * Registers monitoring for {@link ThreadPoolExecutor} using passed
-   * {@link MetricRegistry}.
+   * Registers monitoring for {@link ThreadPoolExecutor} using passed {@link MetricRegistry}.
    *
    * @param name
    *          the prefix for the metrics
@@ -203,8 +205,8 @@ public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
   }
 
   /**
-   * Helper class that is used to discard tasks for which there are no free
-   * threads. The implementation will simply log this occurrence.
+   * Helper class that is used to discard tasks for which there are no free threads. The implementation will simply log
+   * this occurrence.
    */
   static class DiscardAndLog implements RejectedExecutionHandler {
 
@@ -215,8 +217,7 @@ public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
   }
 
   /**
-   * The method will log uncaught exceptions that occurred during thread
-   * execution.
+   * The method will log uncaught exceptions that occurred during thread execution.
    */
   @Override
   public void uncaughtException(Thread t, Throwable e) {
@@ -231,12 +232,12 @@ public class ExecutorFacade implements UncaughtExceptionHandler, ThreadFactory {
    */
   public void shutdown() {
     logger.info("Shutting down the executor.");
-    executor.shutdown();
-    scheduledExecutor.shutdown();
+    executor.shutdownNow();
+    scheduledExecutor.shutdownNow();
     try {
       executor.awaitTermination(WAIT_FOR_SHUTDOWN, SECONDS);
       scheduledExecutor.awaitTermination(WAIT_FOR_SHUTDOWN, SECONDS);
-    } catch (InterruptedException e) { // NOSONAR Termination was interrupted  
+    } catch (InterruptedException e) { // NOSONAR Termination was interrupted
       logger.error("Task termination thread was interrupted.", e);
     }
   }
