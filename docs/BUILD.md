@@ -131,8 +131,8 @@ If release is successful, commit the version and commit and tag changes in git.
 ```sh
 mvn versions:commit
 git add *
-git commit -m "version 0.4.4"
-git tag -a v0.4.4 -m "version 0.4.4"
+git commit -m "version 0.4.4.1"
+git tag -a v0.4.4.1 -m "version 0.4.4.1"
 git push origin --tags
 ```
 
