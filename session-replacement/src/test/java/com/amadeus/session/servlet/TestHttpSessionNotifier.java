@@ -1,10 +1,13 @@
 package com.amadeus.session.servlet;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSessionActivationListener;
@@ -108,14 +111,25 @@ public class TestHttpSessionNotifier {
 
   @Test
   public void testSessionDestroyed() {
+    HttpSessionBindingListener bindingListener = mock(HttpSessionBindingListener.class);
+    String dummy = "dummy";
+    when(session.getAttribute("binding")).thenReturn(bindingListener);
+    when(session.getAttribute("attribute")).thenReturn(dummy);
+    when(session.getAttributeNamesWithValues()).thenReturn(Arrays.asList("binding", "attribute"));
     HttpSessionListener listener = mock(HttpSessionListener.class);
     descriptor.addHttpSessionListener(listener);
     notifier.sessionDestroyed(session, false);
+    verify(bindingListener).valueUnbound(any(HttpSessionBindingEvent.class));
     verify(listener).sessionDestroyed(any(HttpSessionEvent.class));
     HttpSessionListener listener2 = mock(HttpSessionListener.class);
+    HttpSessionBindingListener bindingListener2 = mock(HttpSessionBindingListener.class);
+    when(session.getAttribute("binding2")).thenReturn(bindingListener2);
+    when(session.getAttributeNamesWithValues()).thenReturn(Arrays.asList("binding", "attribute", "binding2"));
     descriptor.addHttpSessionListener(listener2);
     notifier.sessionDestroyed(session, false);
     verify(listener, times(2)).sessionDestroyed(any(HttpSessionEvent.class));
+    verify(bindingListener, times(2)).valueUnbound(any(HttpSessionBindingEvent.class));
+    verify(bindingListener2).valueUnbound(any(HttpSessionBindingEvent.class));
     verify(listener2).sessionDestroyed(any(HttpSessionEvent.class));
   }
 
