@@ -155,6 +155,10 @@ class HttpSessionNotifier implements SessionNotifier {
       // We notify all session attribute listeners that each attribute is removed
       for (String key : session.getAttributeNamesWithValues()) {
         HttpSessionBindingEvent event = new HttpSessionBindingEvent((HttpSession)session, key);
+        Object value = session.getAttribute(key);
+        if (value instanceof HttpSessionBindingListener) {
+          ((HttpSessionBindingListener)value).valueUnbound(event);
+        }
         for (HttpSessionAttributeListener listener : descriptor.getHttpSessionAttributeListeners()) {
           listener.attributeRemoved(event);
         }
