@@ -25,7 +25,7 @@ distribution archive was unpacked.
 Agent can be added as via `JAVA_OPTS` environment variable.
 
 ```sh
-export JAVA_OPTS=-javagent:SESSION_PATH/session-agent.jar
+export JAVA_OPTS=-javaagent:SESSION_PATH/session-agent.jar
 # on Windows: set JAVA_OPTS=-javagent:SESSION_PATH/session-agent.jar
 ```
 
