@@ -45,7 +45,6 @@ public class ArqITSessionExpire extends AbstractITSession {
 
   @Deployment(testable = false, name="never-expires")
   public static WebArchive startNeverExpires() {
-
     return Helpers.createWebApp("never-expires.war").addClass(SampleServlet.class)
         .setWebXML(new StringAsset(Descriptors.create(WebAppDescriptor.class).version("3.0")
             .getOrCreateContextParam().paramName(SessionConfiguration.DEFAULT_SESSION_TIMEOUT).paramValue("0").up().exportAsString()));

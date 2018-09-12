@@ -80,12 +80,12 @@ mvn verify -Predis-single, -Dredis.version=3.0
 mvn verify -Predis-single, -Dredis.image=readis:3.0
 ```
 
-By default tests use NOTIF expiration strategy, but this can be configured using
+By default tests use ZRANGE expiration strategy, but this can be configured using
 `it.com.amadeus.session.redis.expiration` system property. See expiration
 strategies for more information.
 
 ```sh
-mvn verify -Predis-single, -Dit.com.amadeus.session.redis.expiration=ZRANGE
+mvn verify -Predis-single, -Dit.com.amadeus.session.redis.expiration=NOTIF
 ```
 
 #### Redis Single Server Tests

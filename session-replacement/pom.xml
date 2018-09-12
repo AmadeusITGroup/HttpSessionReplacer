@@ -326,7 +326,7 @@
     <profile>
       <id>redis-sentinel</id>
       <properties>
-        <it.com.amadeus.session.redis.expiration>NOTIF</it.com.amadeus.session.redis.expiration>
+        <it.com.amadeus.session.redis.expiration>ZRANGE</it.com.amadeus.session.redis.expiration>
         <redis.sentinel.conf>--bind 0.0.0.0</redis.sentinel.conf>
       </properties>
       <build>

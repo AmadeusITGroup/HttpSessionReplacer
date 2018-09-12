@@ -33,13 +33,23 @@ public class TestRedisConfiguration {
     assertEquals("SINGLE", configuration.clusterMode);
     assertEquals("localhost", configuration.server);
     assertEquals("6379", configuration.port);
-    assertEquals(ExpirationStrategy.NOTIF, configuration.strategy);
+    assertEquals(ExpirationStrategy.ZRANGE, configuration.strategy);
     assertEquals(new Integer(2000), configuration.timeout);
   }
 
   @Test
   public void testParseConfiguration() {
-	  sc.setProviderConfiguration("pool=400,timeout=5000,host=www.example.com,expiration=ZRANGE");
+    sc.setProviderConfiguration("pool=400,timeout=5000,host=www.example.com,expiration=NOTIF");
+    RedisConfiguration configuration = new RedisConfiguration(sc);
+    assertEquals("400", configuration.poolSize);
+    assertEquals("www.example.com", configuration.server);
+    assertEquals(ExpirationStrategy.NOTIF, configuration.strategy);
+    assertEquals(new Integer(5000), configuration.timeout);
+  }
+
+  @Test
+  public void testParseConfigurationSortedSet() {
+    sc.setProviderConfiguration("pool=400,timeout=5000,host=www.example.com,expiration=ZRANGE");
     RedisConfiguration configuration = new RedisConfiguration(sc);
     assertEquals("400", configuration.poolSize);
     assertEquals("www.example.com", configuration.server);
