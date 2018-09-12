@@ -149,7 +149,7 @@ public class RedisConfiguration {
       poolSize = conf.getAttribute(REDIS_POOL_SIZE, DEFAULT_REDIS_POOL_SIZE);
     }
     if (strategy == null) {
-      String expirationStrategy = conf.getAttribute(REDIS_EXPIRATION_STRATEGY, "NOTIF");
+      String expirationStrategy = conf.getAttribute(REDIS_EXPIRATION_STRATEGY, "ZRANGE");
       try {
         strategy = ExpirationStrategy.valueOf(expirationStrategy);
       } catch (IllegalArgumentException e) {

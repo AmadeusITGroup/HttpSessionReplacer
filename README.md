@@ -531,7 +531,7 @@ system property or through agent arguments or through the following system prope
   initialization parameter, or using the pool configuration parameter.
 
 * `com.amadeus.session.redis.expiration`: Specifies the expiration strategy.
-  Can be `NOTIF` or `ZRANGE`. See below for explanation. Default is `NOTIF`.
+  Can be `NOTIF` or `ZRANGE`. See below for explanation. Default is `ZRANGE`.
 
 #### Session expiration
 
@@ -562,6 +562,8 @@ after the time instant when the session expires.
 This is a hardcoded value and is meant as a safety margin to complete all necessary processing.
 
 #### Notification expiration strategy
+
+__Doesn't work with Redis cluster__
 
 This strategy relies on the expired
 [keyspace notifications](http://redis.io/topics/notifications)
