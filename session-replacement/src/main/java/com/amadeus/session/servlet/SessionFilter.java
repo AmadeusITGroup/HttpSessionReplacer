@@ -91,13 +91,11 @@ public class SessionFilter implements Filter {
     ServletResponse response = prepareResponse(request, originalResponse, servletContext);
 
     try {
-
-      logger.debug("Start of SessionFilter doFilter ");
+      logger.debug("Start of SessionFilter doFilter");
       // Call next filter in chain
       chain.doFilter(request, response);
 
-      logger.debug("after the doFilter of SessionFilter doFilter ");
-
+      logger.debug("after the doFilter of SessionFilter doFilter");
     } catch (Exception e) {
 
       logger.error("Error in sessionFiler catch", e);
@@ -112,7 +110,7 @@ public class SessionFilter implements Filter {
 
       throw e;
     } finally {
-      logger.debug("inside finally of  SessionFilter doFilter ");
+      logger.debug("inside finally of SessionFilter doFilter");
       try {
         commitRequest(request, originalRequest, servletContext);
       } catch (Exception e) {
@@ -128,8 +126,8 @@ public class SessionFilter implements Filter {
     if (e instanceof JedisException || (e.getClass().getName().indexOf("jedis.exceptions") != -1)) {
 
       ResetManager resetManager = (ResetManager)servletContext.getAttribute(Attributes.ResetManager);
-      SessionManager sessionManagercurrent = (SessionManager)servletContext.getAttribute(Attributes.SESSION_MANAGER);
-      if (sessionManagercurrent == sessionManager) {
+      SessionManager sessionManagerCurrent = (SessionManager)servletContext.getAttribute(Attributes.SESSION_MANAGER);
+      if (sessionManagerCurrent == sessionManager) {
 
         ErrorTracker errorTracker = resetManager.getErrorTracker();
         errorTracker.addError(System.currentTimeMillis());
@@ -138,8 +136,8 @@ public class SessionFilter implements Filter {
           boolean lock = resetManager.tryLock();
           if (lock) {
             try {
-              if (sessionManagercurrent != null) {
-                sessionManagercurrent.reset();
+              if (sessionManagerCurrent != null) {
+                sessionManagerCurrent.reset();
               }
               initSessionManagementReset(servletContext, true);
             } finally {
@@ -149,7 +147,7 @@ public class SessionFilter implements Filter {
             logger.warn("already locked");
           }
         } else {
-          logger.warn("Error into redis but the limits is not reach:" + errorTracker.size());
+          logger.warn("Error occured while connecting to store, but the limit is not reach:" + errorTracker.size());
         }
       }
     }

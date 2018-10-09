@@ -80,12 +80,12 @@ mvn verify -Predis-single, -Dredis.version=3.0
 mvn verify -Predis-single, -Dredis.image=readis:3.0
 ```
 
-By default tests use NOTIF expiration strategy, but this can be configured using
+By default tests use ZRANGE expiration strategy, but this can be configured using
 `it.com.amadeus.session.redis.expiration` system property. See expiration
 strategies for more information.
 
 ```sh
-mvn verify -Predis-single, -Dit.com.amadeus.session.redis.expiration=ZRANGE
+mvn verify -Predis-single, -Dit.com.amadeus.session.redis.expiration=NOTIF
 ```
 
 #### Redis Single Server Tests
@@ -116,7 +116,7 @@ Verify that builds and test pass.
 Set new version for the release.
 
 ```sh
-mvn versions:set -DnewVersion=0.4.12
+mvn versions:set -DnewVersion=0.4.14
 ```
 
 Perform build with release profile to add sources and javadoc. Perform deploy to OSS Sonatype Nexus:
@@ -131,8 +131,8 @@ If release is successful, commit the version and commit and tag changes in git.
 ```sh
 mvn versions:commit
 git add *
-git commit -m "version 0.4.12"
-git tag -a v0.4.12 -m "version 0.4.12"
+git commit -m "version 0.4.14"
+git tag -a v0.4.14 -m "version 0.4.14"
 git push origin --tags
 ```
 

@@ -25,7 +25,7 @@ distribution archive was unpacked.
 Agent can be added as via `JAVA_OPTS` environment variable.
 
 ```sh
-export JAVA_OPTS=-javagent:SESSION_PATH/session-agent.jar
+export JAVA_OPTS=-javaagent:SESSION_PATH/session-agent.jar
 # on Windows: set JAVA_OPTS=-javagent:SESSION_PATH/session-agent.jar
 ```
 
@@ -216,7 +216,9 @@ Redis can be configured via `ServletContext` initialization parameters:
 </web-app>
 ```
 
-### Using NOTIF expiration strategy
+### Using NOTIF expiration strategy 
+
+__Doesn't work with redis CLUSTER__
 
 When using NOTIF expiration strategy, redis needs to be started with expiration events activated.
 That can be done either in command line:
@@ -256,9 +258,7 @@ one master goes down), other masters will be replying with CLUSTERDOWN error
 until all slots are covered (e.g. new master is elected). This will result in 
 full outage of the session storage until everything is fine. Fortunately, redis 
 cluster can be configured to give results even if there is no full coverage.
-When using NOTIF expiration strategy, all the related keys are stored on the 
-same Redis instance and we suggest to use this feature as it allows higher 
-availability.
+NOTIF expiration strategy doesn't work with cluster mode.
 
 ```
 # By default Redis Cluster nodes stop accepting queries if they detect there

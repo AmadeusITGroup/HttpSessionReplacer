@@ -37,8 +37,6 @@ import com.amadeus.session.SessionManager;
 class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
   private static Logger logger = LoggerFactory.getLogger(SortedSetSessionExpirationManagement.class.getName());
   static final String ALLSESSIONS_KEY = "com.amadeus.session:all-sessions-set:";
-  static final int SESSION_PERSISTENCE_SAFETY_MARGIN = (int)TimeUnit.MINUTES.toSeconds(5);
-  private static final long SESSION_PERSISTENCE_SAFETY_MARGIN_MILLIS = TimeUnit.MINUTES.toMillis(5);
   private static final Long ONE = Long.valueOf(1L);
   /**
    * 10 second cleanup interval
@@ -47,11 +45,14 @@ class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
 
   private final RedisFacade redis;
   private final RedisSessionRepository repository;
-  private final byte[] sessionToExpireKey;
+  final byte[] sessionToExpireKey;
   private final boolean sticky;
   private ScheduledFuture<?> cleanupFuture;
   private final String owner;
   private final byte[] ownerAsBytes;
+  private int sessionPersitenceSafetyMargin;
+  private long stickinessSessionFailoverSafetyMargin;
+  private int pollingInterval;
 
   /**
    * Creates instance of ZRANGE (sorted set) based expiration management
@@ -86,7 +87,7 @@ class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
     redis.zrem(sessionToExpireKey, sortedSetElem(session.getId()));
   }
 
-  private byte[] sortedSetElem(String id) {
+  byte[] sortedSetElem(String id) {
     if (!sticky) {
       return encode(id);
     }
@@ -111,22 +112,31 @@ class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
       // instant, set expire on
       // session and set expire on session expiration key
       redis.zadd(sessionToExpireKey, session.expiresAt(), sortedSetElem(session.getId()));
-      redis.expire(sessionKey, sessionExpireInSeconds + SESSION_PERSISTENCE_SAFETY_MARGIN);
+      redis.expire(sessionKey, sessionExpireInSeconds + sessionPersitenceSafetyMargin);
     }
   }
+  
+  
 
   @Override
   public void startExpiredSessionsTask(final SessionManager sessionManager) {
     Runnable task = new CleanupTask(sessionManager);
+    initPollingIntervals(sessionManager.getConfiguration().getMaxInactiveInterval());
+    logger.debug("Cleanup interval for sessions is {}, persitent margin is {}, stickiness failover margin is {}", pollingInterval, sessionPersitenceSafetyMargin, stickinessSessionFailoverSafetyMargin);
+    cleanupFuture = sessionManager.schedule("redis.expiration-cleanup", task, pollingInterval);
+  }
+
+  void initPollingIntervals(int maxInactiveInterval) {
     // Interval of polling is either 1/10th of the maximum inactive interval, or
     // every REGULAR_CLEANUP_INTERVAL (10) seconds, whichever is smaller
-    long interval = Math.min(sessionManager.getConfiguration().getMaxInactiveInterval() / 10 + 1, // NOSONAR
-        REGULAR_CLEANUP_INTERVAL);
-    if (interval <= 0) {
-      interval = REGULAR_CLEANUP_INTERVAL;
+    pollingInterval = Math.min(maxInactiveInterval / 10 + 1, REGULAR_CLEANUP_INTERVAL);
+    if (pollingInterval <= 0) {
+    	pollingInterval = REGULAR_CLEANUP_INTERVAL;
     }
-    logger.debug("Cleanup interval for sessions is {}", interval);
-    cleanupFuture = sessionManager.schedule("redis.expiration-cleanup", task, interval);
+    // Keep sessions for at least 5 minutes after expiration time
+    sessionPersitenceSafetyMargin = (int) TimeUnit.MINUTES.toSeconds(5); // NOSONAR
+    // In case of stick sessions, expire sessions from other nodes 3 minutes
+    stickinessSessionFailoverSafetyMargin = TimeUnit.MINUTES.toMillis(3); // NOSONAR
   }
 
   /**
@@ -145,9 +155,11 @@ class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
     @Override
     public void run() {
       long now = System.currentTimeMillis();
-      long start = sticky ? now - SESSION_PERSISTENCE_SAFETY_MARGIN_MILLIS : 0;
+      long start = sticky ? now - stickinessSessionFailoverSafetyMargin : 0;
       
-      logger.debug("Cleaning up sessions expiring at {}", now);
+      if (logger.isDebugEnabled()) {    	  
+    	  logger.debug("Cleaning up sessions expiring at {}, {}", now, sessionManager.getConfiguration().getNamespace());
+      }
       expireSessions(start, now, !sticky);
       if (sticky) {
         expireSessions(0, start, true);
@@ -172,7 +184,7 @@ class SortedSetSessionExpirationManagement implements RedisExpirationStrategy {
             if (ONE.equals(redis.zrem(sessionToExpireKey, session))) { // NOSONAR
               String sessionId = extractSessionId(session);
   
-              logger.debug("Starting cleanup of session '{}'", sessionId);
+              logger.debug("Starting cleanup of session '{}', forced={}", sessionId, forceExpire);
               sessionManager.delete(sessionId, true);
             }
           }

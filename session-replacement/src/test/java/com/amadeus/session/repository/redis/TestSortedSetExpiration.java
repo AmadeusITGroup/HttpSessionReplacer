@@ -58,6 +58,7 @@ public class TestSortedSetExpiration {
 
   @Test
   public void testSessionTouched() {
+    expiration.initPollingIntervals(300);
     expiration.sessionTouched(session);
     byte[] expectedKey = SafeEncoder.encode(SortedSetSessionExpirationManagement.ALLSESSIONS_KEY + "test");
     ArgumentCaptor<byte[]> captureExpireKey = ArgumentCaptor.forClass(byte[].class);

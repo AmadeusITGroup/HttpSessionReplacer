@@ -458,7 +458,7 @@ class NotificationExpirationManagement implements RedisExpirationStrategy {
             return;
           }
           if (redis.isRedisException(e) && e.getCause() instanceof InterruptedException) {
-            logger.warn("Interrupted subscribtion for expiration events.");
+            logger.warn("Interrupted subscription for expiration events.");
             return;
           }
           retryOnException(e);

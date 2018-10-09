@@ -200,7 +200,6 @@ public class TestSessionManager {
     verify(repository).getSessionData("1");
     verify(factory).build(sessionData);
     verify(session).doInvalidate(true);
-    assertEquals(1, metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "deleted")).getCount());
   }
 
   @Test
@@ -280,7 +279,6 @@ public class TestSessionManager {
     verify(repository).getSessionData("1");
     verify(factory).build(sessionData);
     verify(session).doInvalidate(true);
-    assertEquals(1, metrics.meter(MetricRegistry.name(SessionManager.SESSIONS_METRIC_PREFIX, "deleted")).getCount());
   }
 
   @Test

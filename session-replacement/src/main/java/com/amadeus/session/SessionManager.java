@@ -184,7 +184,7 @@ public class SessionManager implements Closeable {
    *          <code>true</code> if the session timestamp should be updated (usually at the start of request)
    * @return session or <code>null</code> if session is not in repository.
    */
-  private RepositoryBackedSession fetchSession(String sessionId, boolean updateTimestamp) {
+  public RepositoryBackedSession fetchSession(String sessionId, boolean updateTimestamp) {
     logger.debug("Fetching session from cache, sessionId: '{}'", sessionId);
 
     SessionData sessionData;
@@ -211,7 +211,6 @@ public class SessionManager implements Closeable {
       logger.debug("Session was in cache, but it was expired, sessionId: {}", sessionId);
 
       if (session.isValid()) {
-        markSessionDeletion(sessionId);
         session.doInvalidate(true);
       }
       return null;
@@ -355,7 +354,6 @@ public class SessionManager implements Closeable {
   public void delete(String sessionId, boolean expired) {
     RepositoryBackedSession session = fetchSession(sessionId, false);
     if (session != null) {
-      markSessionDeletion(sessionId);
       session.doInvalidate(expired);
     } else if (!expired) {
       logger.debug("Session not found in repository for sessionId: '{}'", sessionId);
@@ -614,6 +612,18 @@ public class SessionManager implements Closeable {
    *          the session whose id needs to change
    */
   public void switchSessionId(RepositoryBackedSession session) {
+    switchSessionId(session, null);
+  }
+
+  /**
+   * Changes session id of the passed session. Session id can change only once per request.
+   *
+   * @param session
+   *          the session whose id needs to change
+   * @param forceId
+   *          the new session id to use. If <code>null</code>, new id is generated. 
+   */
+  public void switchSessionId(RepositoryBackedSession session, String forceId) {
     SessionData sessionData = session.getSessionData();
     boolean switched = false;
     // As there may be multiple concurrent accesses to session
@@ -621,7 +631,7 @@ public class SessionManager implements Closeable {
     synchronized (sessionData) {
       // Only one session switch per request is allowed.
       if (!sessionData.isIdChanged()) {
-        String newId = tracking.newId();
+        String newId = forceId != null ? forceId : tracking.newId();
         logger.info("Switching session id {} to {}", sessionData.getId(), newId);
         sessionData.setNewSessionId(newId);
         putIdInLoggingMdc(newId);

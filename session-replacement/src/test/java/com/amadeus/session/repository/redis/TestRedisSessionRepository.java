@@ -168,7 +168,7 @@ public class TestRedisSessionRepository {
   @Test
   public void testGetAllKeys() {
     RedisFacade facade = mock(RedisFacade.class);
-    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.NOTIF, false)) {
+    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.ZRANGE, false)) {
       Set<byte[]> result = Collections.singleton(new byte[] { 65 });
       when(facade.hkeys(rsr.sessionKey("400"))).thenReturn(result);
       Set<String> s = rsr.getAllKeys(new SessionData("400", 100, 10));
@@ -181,7 +181,7 @@ public class TestRedisSessionRepository {
   @Test
   public void testPrepareRemove() {
     RedisFacade facade = mock(RedisFacade.class);
-    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.NOTIF, false)) {
+    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.ZRANGE, false)) {
       byte[] key = new byte[] { 35, 58, 105, 110, 118, 97, 108, 105, 100, 83, 101, 115, 115, 105, 111, 110 };
       byte[] value = RedisSessionRepository.BYTES_TRUE;
       Map<byte[], byte[]> result = new HashMap<>();
@@ -194,8 +194,10 @@ public class TestRedisSessionRepository {
   @Test
   public void testGetAttribute() {
     RedisFacade facade = mock(RedisFacade.class);
-    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.NOTIF, false)) {
+    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.ZRANGE, false)) {
       SessionManager sessionManager = mock(SessionManager.class);
+      SessionConfiguration conf = new SessionConfiguration();
+      when(sessionManager.getConfiguration()).thenReturn(conf);
       when(sessionManager.getMetrics()).thenReturn(new MetricRegistry());
       JdkSerializerDeserializer sd = new JdkSerializerDeserializer();
       sd.setSessionManager(sessionManager);
@@ -211,7 +213,7 @@ public class TestRedisSessionRepository {
   }
 
   @Test
-  public void testSwitchId() {
+  public void testSwitchIdNotif() {
     RedisFacade facade = mock(RedisFacade.class);
     try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.NOTIF, false)) {
       SessionData sessionData = mock(SessionData.class);
@@ -237,7 +239,7 @@ public class TestRedisSessionRepository {
   }
 
   @Test
-  public void testSwitchIdSticky() {
+  public void testSwitchIdStickyNotif() {
     RedisFacade facade = mock(RedisFacade.class);
     try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.NOTIF, true)) {
       SessionData sessionData = mock(SessionData.class);
@@ -261,6 +263,25 @@ public class TestRedisSessionRepository {
       verify(facade, times(2)).srem(expirekey.capture(), oldSessionKey.capture());
       assertEquals(encode(rsr.sessionKey("old-id")), encode(oldSessionKey.getAllValues().get(0)));
       assertEquals(encode(rsr.sessionKey("old-id")), encode(oldSessionKey.getAllValues().get(1)));
+    }
+  }
+
+  @Test
+  public void testSwitchIdStickyZRange() {
+    RedisFacade facade = mock(RedisFacade.class);
+    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.ZRANGE, true)) {
+      SessionData sessionData = mock(SessionData.class);
+      when(sessionData.getId()).thenReturn("new-id");
+      when(sessionData.getOldSessionId()).thenReturn("old-id");
+      rsr.sessionIdChange(sessionData);
+      ArgumentCaptor<byte[]> oldkey = ArgumentCaptor.forClass(byte[].class);
+      ArgumentCaptor<byte[]> newkey = ArgumentCaptor.forClass(byte[].class);
+      verify(facade, times(1)).rename(oldkey.capture(), newkey.capture());
+      assertEquals(encode(rsr.sessionKey("old-id")), encode(oldkey.getAllValues().get(0)));
+      assertEquals(encode(rsr.sessionKey("new-id")), encode(newkey.getAllValues().get(0)));
+      SortedSetSessionExpirationManagement em = (SortedSetSessionExpirationManagement)rsr.expirationManager;
+      verify(facade, times(1)).zrem(em.sessionToExpireKey, em.sortedSetElem("old-id"));
+      verify(facade, times(1)).zadd(em.sessionToExpireKey, sessionData.expiresAt(), em.sortedSetElem("new-id"));
     }
   }
 
@@ -314,7 +335,7 @@ public class TestRedisSessionRepository {
   @Test
   public void testRemoveSessionAttribute() {
     RedisFacade facade = mock(RedisFacade.class);
-    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.NOTIF, false)) {
+    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.ZRANGE, false)) {
       SessionData sessionData = mock(SessionData.class);
       when(sessionData.getId()).thenReturn("id");
       rsr.removeSessionAttribute(sessionData, "attr");
@@ -326,11 +347,13 @@ public class TestRedisSessionRepository {
   public void testSetSessionAttribute() {
     RedisFacade facade = mock(RedisFacade.class);
     SessionManager sm = mock(SessionManager.class);
+    SessionConfiguration conf = new SessionConfiguration();
+    when(sm.getConfiguration()).thenReturn(conf);
     when(sm.getMetrics()).thenReturn(new MetricRegistry());
     JdkSerializerDeserializer serializer = new JdkSerializerDeserializer();
     when(sm.getSerializerDeserializer()).thenReturn(serializer);
     serializer.setSessionManager(sm);
-    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.NOTIF, false)) {
+    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.ZRANGE, false)) {
       rsr.setSessionManager(sm);
       SessionData sessionData = mock(SessionData.class);
       when(sessionData.getId()).thenReturn("id");
@@ -348,7 +371,7 @@ public class TestRedisSessionRepository {
     when(sm.getSerializerDeserializer()).thenReturn(serializer);
     SessionConfiguration conf = new SessionConfiguration();
     when(sm.getConfiguration()).thenReturn(conf);
-    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.NOTIF, false)) {
+    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.ZRANGE, false)) {
       rsr.setSessionManager(sm);
       SessionData sessionData = mock(SessionData.class);
       when(sessionData.getId()).thenReturn("id");
@@ -362,7 +385,7 @@ public class TestRedisSessionRepository {
   @Test
   public void testGetSessionKey() {
     RedisFacade facade = mock(RedisFacade.class);
-    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.NOTIF, false)) {
+    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.ZRANGE, false)) {
       assertEquals("com.amadeus.session::myapp:{test}", encode(rsr.getSessionKey(encode("test"))));
     }
   }
@@ -382,6 +405,8 @@ public class TestRedisSessionRepository {
     RedisFacade facade = mock(RedisFacade.class);
     SessionManager sm = mock(SessionManager.class);
     MetricRegistry metrics = spy(new MetricRegistry());
+    SessionConfiguration conf = new SessionConfiguration();
+    when(sm.getConfiguration()).thenReturn(conf);
     when(sm.getMetrics()).thenReturn(metrics);
     metrics.meter("com.amadeus.session.myapp.redis.sample");
     try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.NOTIF, false)) {
@@ -394,9 +419,11 @@ public class TestRedisSessionRepository {
   public void testSetMetricsSticky() {
     RedisFacade facade = mock(RedisFacade.class);
     SessionManager sm = mock(SessionManager.class);
+    SessionConfiguration conf = new SessionConfiguration();
+    when(sm.getConfiguration()).thenReturn(conf);
     MetricRegistry metrics = spy(new MetricRegistry());
     when(sm.getMetrics()).thenReturn(metrics );
-    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.NOTIF, true)) {
+    try (RedisSessionRepository rsr = new RedisSessionRepository(facade, "myapp", "localhost", ExpirationStrategy.ZRANGE, true)) {
       rsr.setSessionManager(sm);
       verify(metrics).meter("com.amadeus.session.myapp.redis.failover");
     }
