@@ -91,13 +91,11 @@ public class SessionFilter implements Filter {
     ServletResponse response = prepareResponse(request, originalResponse, servletContext);
 
     try {
-
       logger.debug("Start of SessionFilter doFilter");
       // Call next filter in chain
       chain.doFilter(request, response);
 
       logger.debug("after the doFilter of SessionFilter doFilter");
-
     } catch (Exception e) {
 
       logger.error("Error in sessionFiler catch", e);

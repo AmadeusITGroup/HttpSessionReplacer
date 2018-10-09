@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amadeus.session.SerializerDeserializer;
+import com.amadeus.session.SessionConfiguration;
 import com.amadeus.session.SessionData;
 import com.amadeus.session.SessionManager;
 import com.amadeus.session.SessionRepository;
@@ -114,6 +115,7 @@ public class RedisSessionRepository implements SessionRepository {
 
   public RedisSessionRepository(RedisFacade redis, String namespace, String owner, ExpirationStrategy strategy,
       boolean sticky) {
+
     this.redis = redis;
     this.owner = owner;
     this.namespace = namespace;
@@ -198,7 +200,14 @@ public class RedisSessionRepository implements SessionRepository {
         }
       }
     }
-    return new SessionData(id, lastAccessed, intFrom(values.get(1)), creationTime, previousOwner);
+
+    int maxInactiveInterval = SessionConfiguration.DEFAULT_SESSION_TIMEOUT_VALUE_NUM;
+    byte[] maxInactiveIntervalByte = values.get(1);
+    if (maxInactiveIntervalByte != null && maxInactiveIntervalByte.length != 0) {
+      maxInactiveInterval = intFrom(maxInactiveIntervalByte);
+    }
+
+    return new SessionData(id, lastAccessed, maxInactiveInterval, creationTime, previousOwner);
   }
 
   /**

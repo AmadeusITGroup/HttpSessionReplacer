@@ -266,7 +266,7 @@ public class SessionManager implements Closeable {
       putIdInLoggingMdc(id.id);
       request.setRequestedSessionId(id.id, id.cookie);
       session = fetchSession(id.id, true);
-      if (session == null && !request.isRepositoryChecked()) {
+      if (!request.isRepositoryChecked()) {
         logger.info("Session with sessionId: '{}' but it was not in repository!", id);
         request.repositoryChecked();
       }
