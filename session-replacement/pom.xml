@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.amadeus</groupId>
     <artifactId>session</artifactId>
-    <version>0.4.15</version>
+    <version>0.4-SNAPSHOT</version>
   </parent>
   <name>session-replacement</name>
   <description>Implementation of session management for JEE HttpSessions and general use case. Includes implemenations of in-memory and redis session distribution.</description>

@@ -101,7 +101,6 @@ public class RandomIdNoLuhnProvider implements SessionIdProvider {
         out[index] = SESSION_ID_ALPHABET[val & MASK_6_BITS];
       } else {
         out[index] = SESSION_ID_ALPHABET_2[val & MASK_6_BITS];
-
       }
     }
     return out;
