@@ -3,6 +3,7 @@ package com.amadeus.session.servlet;
 import javax.servlet.ServletContext;
 
 import com.amadeus.session.RandomIdProvider;
+import com.amadeus.session.RandomIdNoLuhnProvider;
 import com.amadeus.session.RequestWithSession;
 import com.amadeus.session.SessionConfiguration;
 import com.amadeus.session.SessionIdProvider;
@@ -33,6 +34,9 @@ public abstract class BaseSessionTracking implements SessionTracking {
     appendTimestamp = configuration.isTimestampSufix();
     if ("uuid".equals(idProviderType)) {
       idProvider = new UuidProvider();
+    }
+    else if ("no-luhn".equals(idProviderType)) {
+      idProvider = new RandomIdNoLuhnProvider();
     }
     else {
       idProvider = new RandomIdProvider();

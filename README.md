@@ -155,8 +155,10 @@ what or to update all non-primitive wrappers
 
 #### Session id
 
-A session id is either an UUID generated using type 4 algorithm or a random
-sequence of bytes encoded in modified base64 algorithm.
+A session id is an UUID generated using type 4 algorithm, a random
+sequence of bytes encoded in modified base64 algorithm, or a random sequence
+of bytes encoded in modified base64 algorithm that doesn't allow substrigns that
+match Luhn checksum. 
 If a request is made for a session with an id that is expired,
 not valid or not present in the repository, the id is invalidated and a new one is generated.
 This prevents [simple session fixation attack scenario](https://en.wikipedia.org/wiki/Session_fixation).
@@ -176,9 +178,23 @@ hyphens are removed from UUID.
 
 The random session id is activated by setting servlet or system property
 `com.amadeus.session.id` to `random`.
-This may become default strategy before the final release.
+This is default strategy.
 
 Random session id length is specified in bytes using the servlet parameter or system property
+`com.amadeus.session.id.length`.
+The length of the id as a string will be 4 characters for
+each 3 bytes of the id (with padding up to a number that divides by 4).
+E.g for 1, 2 or 3 bytes length there will be 4 characters in the id string,
+for 4, 5 or 6 there will be 8, etc.
+
+##### Random session id without Luhn checksum matching substrings
+
+The random session id without substrings matching Lunh checksum is activated by 
+setting servlet or system property `com.amadeus.session.id` to `no-luhn`. This
+is useful when there is logic that conceals credit card information (credit 
+card numbers are sequences of numbers that match Luhn checksum).
+
+The session id length is specified in bytes using the servlet parameter or system property
 `com.amadeus.session.id.length`.
 The length of the id as a string will be 4 characters for
 each 3 bytes of the id (with padding up to a number that divides by 4).
