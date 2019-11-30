@@ -3,10 +3,16 @@ package com.amadeus.session.repository.redis;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Redis configuration is provided as a comma separated list with following
@@ -25,6 +31,8 @@ import redis.clients.jedis.JedisSentinelPool;
  * </ul>
  */
 public class JedisSessionRepositoryFactory extends AbstractRedisSessionRepositoryFactory {
+
+  static final Logger logger = LoggerFactory.getLogger(JedisSessionRepositoryFactory.class);
 
   @Override
   protected RedisFacade getRedisFacade(RedisConfiguration config) {
@@ -57,17 +65,43 @@ public class JedisSessionRepositoryFactory extends AbstractRedisSessionRepositor
   }
 
   private RedisFacade singleInstance(JedisPoolConfig poolConfig, RedisConfiguration config) {
+    logger.debug("Connecting to Single Instance Redis cache....");
     int port = Integer.parseInt(config.port);
     String[] serverAndPort = config.server.split(":");
     if (serverAndPort.length > 1) {
       port = Integer.parseInt(serverAndPort[1]);
     }
-    return new JedisPoolFacade(new JedisPool(poolConfig, config.server, port, config.timeout));
+
+    SSLSocketFactory sslSocketFactory = null;
+    SSLParameters sslParameters = null;
+    HostnameVerifier hostnameVerifier = null;
+
+    if (config.useSSL){
+        sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+        sslParameters = new SSLParameters();
+        sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
+        if(config.tls != null) {
+            sslParameters.setProtocols(config.tls);
+        } else {
+            //Enable all TLS (including weak TLSv1 and v1.1)
+            sslParameters.setProtocols(new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"});
+        }
+    }
+
+    logger.debug("with following - values poolConfig: " + poolConfig.toString() + ", " +
+          "config.server: " + config.server +
+          " port: " + port + ", " +
+          " config.timeout: " + config.timeout + ", " +
+          " config.password: " + config.password + ", " + //WARNING - Debug mode logs password.
+          " config.useSSL: " + config.useSSL);
+
+    return new JedisPoolFacade(new JedisPool(poolConfig, config.server, port, config.timeout, config.password, config.useSSL, sslSocketFactory, sslParameters, hostnameVerifier));
+
   }
 
   RedisFacade sentinelFacade(JedisPoolConfig poolConfig, RedisConfiguration config) {
     return new JedisPoolFacade(
-        new JedisSentinelPool(config.masterName, config.sentinels(), poolConfig, config.timeout));
+        new JedisSentinelPool(config.masterName, config.sentinels(), poolConfig, config.timeout, config.password));
   }
 
   /**

@@ -324,6 +324,77 @@
       </build>
     </profile>
     <profile>
+      <id>redis-single-secure</id>
+      <properties>
+        <it.com.amadeus.session.redis.expiration>NOTIF</it.com.amadeus.session.redis.expiration>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <extensions>true</extensions>
+            <configuration>
+              <verbose>true</verbose>
+              <useColor>true</useColor>
+              <images>
+                <image>
+                  <name>${redis.image}</name>
+                  <alias>redis</alias>
+                  <run>
+                    <cmd>redis-server --requirepass password --notify-keyspace-events Ex --bind 0.0.0.0</cmd>
+                    <ports>
+                      <!-- Port mappings: Redis internal port will be dynamically mapped
+                        and this (random) port will be assigned to the maven variable ${redis.port}. -->
+                      <port>6379:6379</port>
+                    </ports>
+                    <wait>
+                      <!-- Wait for this in logs -->
+                      <log>The server is now ready</log>
+                      <!-- ... but at max 10 seconds -->
+                      <time>10000</time>
+                    </wait>
+                    <log>
+                      <enabled>true</enabled>
+                      <date>default</date>
+                    </log>
+                  </run>
+                </image>
+              </images>
+              <verbose>true</verbose>
+            </configuration>
+            <executions>
+              <execution>
+                <id>start</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>start</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>stop</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>stop</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <systemPropertyVariables>
+                <!-- Pass redis conf to tests ... -->
+                <com.amadeus.session.repository.conf>mode=SINGLE,port=6379,host=localhost,password=password</com.amadeus.session.repository.conf>
+                <com.amadeus.session.redis.expiration>${it.com.amadeus.session.redis.expiration}</com.amadeus.session.redis.expiration>
+                <redis.integration.tests>true</redis.integration.tests>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>redis-sentinel</id>
       <properties>
         <it.com.amadeus.session.redis.expiration>ZRANGE</it.com.amadeus.session.redis.expiration>
