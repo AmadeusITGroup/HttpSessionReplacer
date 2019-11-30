@@ -78,7 +78,7 @@ public class RedisConfiguration {
 
 
   /**
-   * System or configuration property that specifies Whether to use SSL or not.
+   * System or configuration property for TLS.
    *
    */
   public static final String REDIS_TLS = "com.amadeus.session.redis.tls";
