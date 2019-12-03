@@ -141,7 +141,7 @@ public class RedisConfiguration {
 
   String password;
 
-  boolean useSSL = false;
+  Boolean useSSL;
 
   String tls[];
 
@@ -173,11 +173,11 @@ public class RedisConfiguration {
     if (password == null) {
       password = conf.getAttribute(REDIS_PASSWORD, null);
     }
-    if (useSSL == false) {
-      useSSL = stringToBool(conf.getAttribute(REDIS_SSL, "false"));
+    if (useSSL == null) {
+      useSSL = Boolean.parseBoolean(conf.getAttribute(REDIS_SSL, "false"));
     }
-    if (tls == null ){
-        tls = tlsStringToArray(conf.getAttribute(REDIS_TLS, "TLSv1, TLSv1.1, TLSv1.2"));
+    if (tls == null ) {
+        tls = tlsStringToArray(conf.getAttribute(REDIS_TLS, "[TLSv1, TLSv1.1, TLSv1.2]"));
     }
     if (masterName == null) {
       masterName = conf.getAttribute(REDIS_MASTER_NAME, DEFAULT_REDIS_MASTER_NAME);
@@ -250,10 +250,10 @@ public class RedisConfiguration {
     } else if (arg.startsWith(PASSWORD_PROPERTY)){
       password = arg.substring(PASSWORD_PROPERTY.length());
     } else if (arg.startsWith(SSL_PROPERTY)){
-      useSSL = stringToBool(arg.substring(SSL_PROPERTY.length()));
+      useSSL = Boolean.parseBoolean(arg.substring(SSL_PROPERTY.length()).trim());
     } else if (arg.startsWith(TLS_PROPERTY) ) {
-       tls = tlsStringToArray(arg.substring(TLS_PROPERTY.length()));
-    }else if (arg.startsWith(MASTER_NAME_PROPERTY)) {
+      tls = tlsStringToArray(arg.substring(TLS_PROPERTY.length()));
+    } else if (arg.startsWith(MASTER_NAME_PROPERTY)) {
       masterName = arg.substring(MASTER_NAME_PROPERTY.length());
     } else if (arg.startsWith(EXPIRATION_PROPERTY)) {
       try {
@@ -321,14 +321,6 @@ public class RedisConfiguration {
               .map(String::trim)
               .toArray(String[]::new);
   }
-
-  /**
-   * Utility method for converting ssl config to boolean
-   */
-  private boolean stringToBool(String str) {
-    return str.trim().equalsIgnoreCase("true") ? true : false;
-  }
-
 
 
   /**

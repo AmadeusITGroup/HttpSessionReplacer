@@ -1,8 +1,5 @@
 package com.amadeus.session.repository.redis;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.HostAndPort;
@@ -10,9 +7,10 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Redis configuration is provided as a comma separated list with following
@@ -74,13 +72,12 @@ public class JedisSessionRepositoryFactory extends AbstractRedisSessionRepositor
 
     SSLSocketFactory sslSocketFactory = null;
     SSLParameters sslParameters = null;
-    HostnameVerifier hostnameVerifier = null;
 
-    if (config.useSSL){
+    if (config.useSSL) {
         sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
         sslParameters = new SSLParameters();
         sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
-        if(config.tls != null) {
+        if (config.tls != null) {
             sslParameters.setProtocols(config.tls);
         } else {
             //Enable all TLS (including weak TLSv1 and v1.1)
@@ -88,14 +85,13 @@ public class JedisSessionRepositoryFactory extends AbstractRedisSessionRepositor
         }
     }
 
-    logger.debug("with following - values poolConfig: " + poolConfig.toString() + ", " +
-          "config.server: " + config.server +
-          " port: " + port + ", " +
-          " config.timeout: " + config.timeout + ", " +
-          " config.password: " + config.password + ", " + //WARNING - Debug mode logs password.
-          " config.useSSL: " + config.useSSL);
+    //WARNING - Debug mode logs password.
+    logger.debug("With following configuration. poolConfig: `{}`, server: {}, port: {}, timeout: {}, password: {}, useSSL: {}",
+            poolConfig.toString(), config.server, port, config.timeout, config.password, config.useSSL);
 
-    return new JedisPoolFacade(new JedisPool(poolConfig, config.server, port, config.timeout, config.password, config.useSSL, sslSocketFactory, sslParameters, hostnameVerifier));
+
+
+    return new JedisPoolFacade(new JedisPool(poolConfig, config.server, port, config.timeout, config.password, config.useSSL, sslSocketFactory, sslParameters, null));
 
   }
 
