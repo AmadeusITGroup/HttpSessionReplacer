@@ -174,10 +174,10 @@ public class RedisConfiguration {
       password = conf.getAttribute(REDIS_PASSWORD, null);
     }
     if (useSSL == null) {
-      useSSL = Boolean.parseBoolean(conf.getAttribute(REDIS_SSL, "false"));
+      useSSL = Boolean.parseBoolean(conf.getAttribute(REDIS_SSL, "false").trim());
     }
     if (tls == null ) {
-        tls = tlsStringToArray(conf.getAttribute(REDIS_TLS, "[TLSv1, TLSv1.1, TLSv1.2]"));
+      tls = tlsStringToArray(conf.getAttribute(REDIS_TLS, "[TLSv1, TLSv1.1, TLSv1.2]"));
     }
     if (masterName == null) {
       masterName = conf.getAttribute(REDIS_MASTER_NAME, DEFAULT_REDIS_MASTER_NAME);
