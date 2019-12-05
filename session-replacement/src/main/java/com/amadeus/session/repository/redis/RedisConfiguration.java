@@ -65,6 +65,26 @@ public class RedisConfiguration {
   public static final String REDIS_HOST = "com.amadeus.session.redis.host";
 
   /**
+   * System or configuration property that specifies the password
+   *
+   */
+  public static final String REDIS_PASSWORD = "com.amadeus.session.redis.password";
+
+  /**
+   * System or configuration property that specifies Whether to use SSL or not.
+   *
+   */
+  public static final String REDIS_SSL = "com.amadeus.session.redis.ssl";
+
+
+  /**
+   * System or configuration property for TLS.
+   *
+   */
+  public static final String REDIS_TLS = "com.amadeus.session.redis.tls";
+
+
+  /**
    * System or configuration property that specifies the size of the pool of redis connections.
    */
   public static final String REDIS_POOL_SIZE = "com.amadeus.session.redis.pool";
@@ -99,6 +119,12 @@ public class RedisConfiguration {
 
   static final String HOST_PROPERTY = "host=";
 
+  static final String PASSWORD_PROPERTY = "password=";
+
+  static final String SSL_PROPERTY = "ssl=";
+
+  static final String TLS_PROPERTY = "tls=";
+
   static final String REDIS_PORT_PROPERTY = "port=";
 
   static final String EXPIRATION_PROPERTY = "expiration=";
@@ -112,6 +138,12 @@ public class RedisConfiguration {
   String server;
 
   String port;
+
+  String password;
+
+  Boolean useSSL;
+
+  String tls[];
 
   String poolSize;
 
@@ -138,6 +170,15 @@ public class RedisConfiguration {
   public RedisConfiguration(SessionConfiguration conf) {
     readConfigurationString(conf.getProviderConfiguration());
     serverAddress(conf);
+    if (password == null) {
+      password = conf.getAttribute(REDIS_PASSWORD, null);
+    }
+    if (useSSL == null) {
+      useSSL = Boolean.parseBoolean(conf.getAttribute(REDIS_SSL, "false").trim());
+    }
+    if (tls == null ) {
+      tls = tlsStringToArray(conf.getAttribute(REDIS_TLS, "[TLSv1, TLSv1.1, TLSv1.2]"));
+    }
     if (masterName == null) {
       masterName = conf.getAttribute(REDIS_MASTER_NAME, DEFAULT_REDIS_MASTER_NAME);
     }
@@ -189,7 +230,8 @@ public class RedisConfiguration {
 
   private void readConfigurationString(String conf) {
     if (conf != null) {
-      String[] args = conf.split(",");
+      // Regex to separate comma outside square brackets.
+      String[] args = conf.split(",(?![^\\[]*[\\]])");
       for (String arg : args) {
         parseArgFromConfiguration(arg.trim());
       }
@@ -205,6 +247,12 @@ public class RedisConfiguration {
       clusterMode = arg.substring(CLUSTER_MODE_PROPERTY.length());
     } else if (arg.startsWith(HOST_PROPERTY)) {
       server = arg.substring(HOST_PROPERTY.length());
+    } else if (arg.startsWith(PASSWORD_PROPERTY)){
+      password = arg.substring(PASSWORD_PROPERTY.length());
+    } else if (arg.startsWith(SSL_PROPERTY)){
+      useSSL = Boolean.parseBoolean(arg.substring(SSL_PROPERTY.length()).trim());
+    } else if (arg.startsWith(TLS_PROPERTY) ) {
+      tls = tlsStringToArray(arg.substring(TLS_PROPERTY.length()));
     } else if (arg.startsWith(MASTER_NAME_PROPERTY)) {
       masterName = arg.substring(MASTER_NAME_PROPERTY.length());
     } else if (arg.startsWith(EXPIRATION_PROPERTY)) {
@@ -259,6 +307,21 @@ public class RedisConfiguration {
       }
     }
   }
+
+  /**
+   * Utility method for converting TLS string to array, which will be used in SSL Parameters configuration.
+   * Example String passed in. tls=[TLSv1, TLSv1.1, TLSv1.2]
+   * Trim spaces and remove square brackets.
+   */
+  private String[] tlsStringToArray(String tlsStr) {
+      return  Arrays
+              .stream(tlsStr
+              .replace("[", "").replace("]", "")
+              .split(","))
+              .map(String::trim)
+              .toArray(String[]::new);
+  }
+
 
   /**
    * Returns port to use either from server:port pair, or default port.

@@ -96,6 +96,11 @@ as Redis docker container that listens on dynamically assigned port.
 ```sh
 mvn verify -Predis-single
 ```
+or Redis (with password) Docker Container
+
+```sh
+mvn verify -Predis-single-secure
+```
 
 #### Redis Sentinel Tests
 

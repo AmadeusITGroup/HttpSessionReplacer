@@ -1,5 +1,6 @@
 package com.amadeus.session.repository.redis;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -55,6 +56,23 @@ public class TestRedisConfiguration {
     assertEquals("www.example.com", configuration.server);
     assertEquals(ExpirationStrategy.ZRANGE, configuration.strategy);
     assertEquals(new Integer(5000), configuration.timeout);
+  }
+
+  @Test
+  public void testParseConfigurationPasswordAndSSLConfig() {
+
+    /**
+     * Note:
+     * Password - Yes, passwords can contain "=" to in them.
+     * TLS - Using Square brackets for TLS config. Not sure if there is a better way of defining multiple TLS.
+     */
+    sc.setProviderConfiguration("timeout=5000,host=www.example.com,password=Pa$$word=,ssl=true,tls=[TLSv1, TLSv1.1, TLSv1.2]");
+    RedisConfiguration configuration = new RedisConfiguration(sc);
+    assertEquals(new Integer(5000), configuration.timeout);
+    assertEquals("www.example.com", configuration.server);
+    assertEquals("Pa$$word=", configuration.password);
+    assertEquals(true, configuration.useSSL);
+    assertArrayEquals(new String[]{"TLSv1","TLSv1.1", "TLSv1.2"}, configuration.tls);
   }
 
   @Test

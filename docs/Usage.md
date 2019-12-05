@@ -191,8 +191,18 @@ initialization parameter `com.amadeus.session.delegate.writer` to `true`.
 
 Redis configuration can be passed in arguments of the session agent:
 
+**In JAVA_OPTS**
 ```
--javagent:session-agent.jar=mode=SINGLE,expiration=ZRANGE,host=localhost
+-javagent:session-agent.jar=provider=redis,distributable=true
+-Dcom.amadeus.session.namespace=APPNAME
+-Dcom.amadeus.session.redis.mode=SINGLE
+-Dcom.amadeus.session.redis.port=6380
+-Dcom.amadeus.session.redis.ssl=true
+-Dcom.amadeus.session.redis.tls=[TLSv1, TLSv1.1, TLSv1.2]
+-Dcom.amadeus.session.redis.expiration=ZRANGE
+-Dcom.amadeus.session.sticky=false
+-Dcom.amadeus.session.redis.host=localhost
+-Dcom.amadeus.session.redis.password="password" 
 ```
 
 ### Session replacement servlet context configuration
@@ -239,6 +249,7 @@ For more details, see [redis keyspace notifications](http://redis.io/topics/noti
 
 When using single Redis instance or twemproxy, the only required configuration is host address
 of server and, when not using default port 6379, the Redis port. 
+Default ssl is false and password is optional.
 
 ### Redis Sentinel Configuration
 
