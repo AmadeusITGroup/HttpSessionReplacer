@@ -16,7 +16,7 @@
     <slf4j.version>1.7.25</slf4j.version>
     <version.arquillian>1.1.13.Final</version.arquillian>
     <version.arquillian_jacoco>1.0.0.Alpha9</version.arquillian_jacoco>
-    <version.jetty9>9.4.6.v20170531</version.jetty9>
+    <version.jetty9>9.4.34.v20201102</version.jetty9>
     <version.tomcat7>7.0.77</version.tomcat7>
     <version.wildfly>10.0.0.Final</version.wildfly>
     <sonar.exclusions>**/org/slf4j/impl/*.java</sonar.exclusions>
