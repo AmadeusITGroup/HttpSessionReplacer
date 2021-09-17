@@ -1,7 +1,5 @@
 # Building the project
 
-Project metrics are available at:
-[SonarQube](http://rndwww.nce.amadeus.net/sonar/dashboard/index?did=1&id=com.amadeus.proto%3Asession%3Ascsat-com.amadeus.session-master)
 
 The project uses maven build and builds simply using:
 
